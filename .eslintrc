@@ -1,0 +1,3 @@
+{
+    "extends": ["plugin:prettier/recommended"] // prettier에 따른다
+}
