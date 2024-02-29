@@ -1,5 +1,26 @@
-import { Redirect } from 'expo-router';
+import { useEffect } from 'react';
+import { Alert } from 'react-native';
+import * as Updates from 'expo-updates';
 
-export default function App() {
-    return <Redirect href={'main'} />;
-}
+const Page = () => {
+    // 앱 업데이트 체크
+    async function onFetchUpdateAsync() {
+        try {
+            const update = await Updates.checkForUpdateAsync();
+
+            if (update.isAvailable) {
+                Alert.alert('업데이트합니다.');
+                await Updates.fetchUpdateAsync();
+                await Updates.reloadAsync();
+            }
+        } catch (error) {
+            alert(`Error fetching latest Expo update: ${error}`);
+        }
+    }
+
+    useEffect(() => {
+        if (process.env.APP_ENV == 'production') onFetchUpdateAsync();
+    }, []);
+};
+
+export default Page;

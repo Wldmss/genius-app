@@ -4,7 +4,6 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import store from 'store/store';
 import { dispatchOne } from 'utils/DispatchUtils';
 import { useSelector } from 'react-redux';
-import * as NavigateUtils from 'utils/NavigateUtils';
 
 /** 다른 방법으로 로그인 (공통) */
 const OtherLogin = () => {
@@ -17,12 +16,12 @@ const OtherLogin = () => {
     const [type, setType] = useState({ pin: false, ldap: false, bio: false, bioRegister: false, changePin: false });
 
     const otherLogin = (id, modFlag) => {
-        if (modFlag) {
+        if (id != 'ldap') {
             let data = id == 'pin' ? pin : bio;
-            store.dispatch(dispatchOne(`SET_${id.toUpperCase()}`, { ...data, modFlag: true }));
+            store.dispatch(dispatchOne(`SET_${id.toUpperCase()}`, { ...data, modFlag: modFlag }));
         }
 
-        store.dispatch(NavigateUtils.routeDispatch(id));
+        store.dispatch(dispatchOne('SET_TAB', id));
     };
 
     const handleOpen = () => {
@@ -32,15 +31,15 @@ const OtherLogin = () => {
     useEffect(() => {
         setType({
             ...type,
-            pin: tab != 'pin' && users,
-            ldap: tab != 'ldap' && pin?.isRegistered, //&& !pin?.modFlag && !bio?.modFlag
+            pin: (tab != 'pin' && users) || (tab == 'pin' && pin?.isRegistered && pin?.modFlag),
+            ldap: tab != 'ldap' && pin?.isRegistered,
             bio: tab != 'bio' && users && bio?.isRegistered && pin?.isRegistered,
             bioRegister: tab != 'bio' && users && !bio?.isRegistered && pin?.isRegistered,
             changePin: tab == 'pin' && users && !pin?.modFlag,
         });
 
         setOpen(false);
-    }, []);
+    }, [tab, pin, bio]);
 
     return (
         <View style={styles.container}>

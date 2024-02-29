@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { Image, ImageBackground, StyleSheet, View } from 'react-native';
 import TopLogo from 'assets/login_top_title.svg';
 import { Slot } from 'expo-router';
@@ -72,7 +71,5 @@ const styles = StyleSheet.create({
         color: `#454545`,
     },
 });
-
-LoginLayout.propTypes = {};
 
 export default LoginLayout;

@@ -6,12 +6,12 @@ import { useSelector } from 'react-redux';
 import store from 'store/store';
 import { dispatchMultiple, dispatchOne } from 'utils/DispatchUtils';
 import * as StorageUtils from 'utils/StorageUtils';
-import * as NavigateUtils from 'utils/NavigateUtils';
 import LoginInfo from 'modal/LoginInfo';
 
 /** LDAP 로그인 */
 const LDAPLogin = () => {
     const pin = useSelector((state) => state.loginReducer.pin);
+    const users = useSelector((state) => state.loginReducer.users);
 
     const otpRef = useRef(null);
     const timeRef = useRef(0);
@@ -22,6 +22,7 @@ const LDAPLogin = () => {
         setValue({ ...value, [id]: input });
     };
 
+    // 로그인 하기
     const doLogin = () => {
         if (value.username == '') {
             Alert.alert('아이디를 입력해주세요.');
@@ -35,11 +36,9 @@ const LDAPLogin = () => {
         sendLDAP();
     };
 
+    // LDAP 인증
     const sendLDAP = () => {
         console.log(value);
-
-        setIsLogin(true);
-        sendOTP();
 
         // LDAP 로그인 TODO
         ldapLogin(value.username, value.password).then((res) => {
@@ -54,9 +53,11 @@ const LDAPLogin = () => {
 
     // OTP 전송 (TODO)
     const sendOTP = () => {
+        Alert.alert('인증번호가 전송되었습니다.');
         if (otpRef.current) otpRef.current.focus();
     };
 
+    // OTP 검증
     const checkOTP = () => {
         console.log(value.otp);
 
@@ -69,20 +70,24 @@ const LDAPLogin = () => {
         saveUserData();
     };
 
+    // 사용자 정보 저장
     const saveUserData = async () => {
-        await StorageUtils.setDeviceData('users', value.username);
+        let saveFlag = users == null;
+        if (!saveFlag && users !== value.username) {
+            if (confirm(`기본 로그인 정보를 "${value.username}" 으로 변경하시겠습니까?`)) {
+                saveFlag = true;
+            }
+        }
+
+        if (saveFlag) await StorageUtils.setDeviceData('users', value.username);
 
         let storeData = {
             SET_USERS: value.username,
         };
 
-        // if (!pin.isRegistered) {
-        //     storeData['SET_PIN'] = { ...pin, modFlag: true };
-        // }
-
         store.dispatch(dispatchMultiple(storeData));
         store.dispatch(dispatchOne('SET_TOKEN', {}));
-        store.dispatch(NavigateUtils.routeDispatch('web'));
+        store.dispatch(dispatchOne('SET_TAB', 'web'));
     };
 
     const showInfo = () => {

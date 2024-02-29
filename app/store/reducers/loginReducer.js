@@ -7,6 +7,7 @@ const initialState = {
     bioSupported: false,
     bioRecords: false,
     isLink: false,
+    exitFlag: false,
 };
 
 const loginReducer = (state = initialState, action) => {
@@ -50,6 +51,19 @@ const loginReducer = (state = initialState, action) => {
             return {
                 ...state,
                 isLink: action.payload,
+            };
+        case 'SET_EXIT':
+            return {
+                ...state,
+                exitFlag: action.payload,
+            };
+        case 'INIT_APP':
+            return {
+                ...state,
+                token: null,
+                tab: null,
+                isLink: false,
+                exitFlag: false,
             };
         default:
             return state;

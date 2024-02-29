@@ -5,10 +5,10 @@ import { useSelector } from 'react-redux';
 import store from 'store/store';
 import { dispatchOne } from 'utils/DispatchUtils';
 import * as StorageUtils from 'utils/StorageUtils';
-import * as NavigateUtils from 'utils/NavigateUtils';
 
 const PinLogin = () => {
     const pin = useSelector((state) => state.loginReducer.pin);
+    const users = useSelector((state) => state.loginReducer.users);
     const token = useSelector((state) => state.loginReducer.token);
 
     const pinLength = 6;
@@ -48,17 +48,15 @@ const PinLogin = () => {
                     return;
                 }
             } else {
-                if (registRef.current) {
-                    registRef.current = registRef.current + 1;
-                    return;
-                }
+                registRef.current = registRef.current + 1;
+                return;
             }
         }
     };
 
     // 일치 여부 확인
     const checkSame = (value1, value2) => {
-        return value1 == value2;
+        return Number(value1) == Number(value2);
     };
 
     // pin 설정
@@ -69,18 +67,14 @@ const PinLogin = () => {
         }
 
         const sameFlag = !pin?.modFlag || checkSame(value.enter, value.check);
-        if (!sameFlag) Alert.alert('PIN이 일치하지 않습니다.');
+        if (!sameFlag) {
+            Alert.alert('PIN이 일치하지 않습니다.');
+            return false;
+        }
 
         if (!pin?.modFlag) {
-            if (pin.value != null && Number(value.enter) == Number(pin.value)) {
-                // 로그인 성공
-                store.dispatch(dispatchOne('SET_TOKEN', {}));
-                setIsLogin(true);
-            } else {
-                enterRef.current.focus();
-                Alert.alert('PIN이 일치하지 않습니다. 다시 시도해주세요.');
-                setIsLogin(false);
-            }
+            // 로그인
+            loginPin();
         } else {
             // PIN 등록
             registPin();
@@ -89,19 +83,46 @@ const PinLogin = () => {
         registRef.current = 0;
     };
 
+    // PIN 로그인
+    const loginPin = () => {
+        if (pin.value != null && checkSame(value.enter, pin.value)) {
+            if (users == null) {
+                // pin 만 설정하고 LDAP 로그인을 안한 경우
+                store.dispatch(dispatchOne('SET_TAB', 'ldap'));
+            } else {
+                // LDAP 서버 인증 (TODO)
+                checkLdap();
+            }
+        } else {
+            enterRef.current.focus();
+            Alert.alert('PIN이 일치하지 않습니다. 다시 시도해주세요.');
+            setIsLogin(false);
+        }
+    };
+
+    // LDAP 인증
+    const checkLdap = () => {
+        store.dispatch(dispatchOne('SET_TOKEN', {}));
+        setIsLogin(true);
+    };
+
     // PIN 등록
     const registPin = async () => {
         try {
+            const tabValue = pin.isRegistered ? 'pin' : 'ldap'; // PIN 변경인 경우 PIN 로그인 으로
+
             await StorageUtils.setDeviceData('pin', value.enter);
-            store.dispatch(dispatchOne('SET_PIN', { ...pin, value: value.enter }));
+            store.dispatch(dispatchOne('SET_PIN', { ...pin, isRegistered: true, value: value.enter, modFlag: false }));
 
             Alert.alert('PIN이 설정되었습니다.');
-            store.dispatch(NavigateUtils.routeDispatch('ldap'));
+
+            store.dispatch(dispatchOne('SET_TAB', tabValue));
         } catch (err) {
             console.log(err);
         }
     };
 
+    // 로그인 trigger
     useEffect(() => {
         if (registRef.current > 0) handlePinButton();
     }, [registRef.current]);
@@ -109,9 +130,13 @@ const PinLogin = () => {
     useEffect(() => {
         if (isLogin) {
             const tabValue = token == null ? 'ldap' : 'web';
-            store.dispatch(NavigateUtils.routeDispatch(tabValue));
+            store.dispatch(dispatchOne('SET_TAB', tabValue));
         }
     }, [isLogin]);
+
+    useEffect(() => {
+        setValue({ ...value, enter: '', check: '' });
+    }, [pin]);
 
     return (
         <View style={styles.container} id="pin">

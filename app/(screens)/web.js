@@ -1,10 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, BackHandler, Alert, Platform, StatusBar } from 'react-native';
+import { StyleSheet, BackHandler, Alert, Platform } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useSelector } from 'react-redux';
 import store from 'store/store';
 import { dispatchOne } from 'utils/DispatchUtils';
-import * as NavigateUtils from 'utils/NavigateUtils';
 import * as ScreenOrientation from 'expo-screen-orientation';
 
 const Web = () => {
@@ -51,8 +50,7 @@ const Web = () => {
     // 전체 화면 (상태바 숨김)
     const enterFullscreen = () => {
         if (Platform.OS === 'android') {
-            // store.dispatch(dispatchOne('SET_STATUS_BAR', true));
-            StatusBar.setHidden(true);
+            store.dispatch({ type: 'HIDE_BAR' });
         }
 
         handleScreen(true);
@@ -61,8 +59,7 @@ const Web = () => {
     // 전체 화면 (상태바 숨김 해제)
     const exitFullscreen = () => {
         if (Platform.OS === 'android') {
-            StatusBar.setHidden(false);
-            // store.dispatch(dispatchOne('SET_STATUS_BAR', false));
+            store.dispatch({ type: 'SHOW_BAR' });
         }
 
         handleScreen();
@@ -81,10 +78,11 @@ const Web = () => {
             '로그아웃 하시겠습니까?',
             [
                 { text: '아니요', onPress: () => null, style: 'cancel' },
-                { text: '예', onPress: () => store.dispatch(dispatchOne('SET_TOKEN', null)) },
+                { text: '예', onPress: () => store.dispatch({ type: 'INIT_APP' }) },
             ],
             { cancelable: false }
         );
+        return true;
     };
 
     // Webview 뒤로가기 처리
@@ -92,14 +90,8 @@ const Web = () => {
         setBackButtonEnabled(true);
     };
 
-    // 앱 종료
-    const closeGenius = () => {
-        BackHandler.exitApp();
-    };
-
     useEffect(() => {
-        console.log(isLink);
-        if (isLink) BackHandler.exitApp();
+        console.log(isLink ? '@@@@@@ is link @@@@@' : 'XXXXX not link xXXXXX');
         // todo QR 로그인 후 뭔가 해야함
     }, [isLink]);
 
@@ -110,15 +102,7 @@ const Web = () => {
                 webViewRef.current.goBack();
                 return true;
             } else {
-                Alert.alert(
-                    '앱 종료',
-                    'GENIUS를 종료하시겠습니까?',
-                    [
-                        { text: '아니요', onPress: () => null, style: 'cancel' },
-                        { text: '예', onPress: () => closeGenius() },
-                    ],
-                    { cancelable: false }
-                );
+                store.dispatch(dispatchOne('SET_EXIT', true));
                 return true;
             }
         };
@@ -130,14 +114,9 @@ const Web = () => {
     }, [backButtonEnabled]);
 
     useEffect(() => {
-        if (token == null) {
-            store.dispatch(NavigateUtils.routeDispatch('main'));
-        }
-    }, [token]);
-
-    useEffect(() => {
-        if (tab == 'WEB') setBackButtonEnabled(false);
-    }, [tab]);
+        store.dispatch(dispatchOne('SET_LOADING', false));
+        setBackButtonEnabled(false);
+    }, []);
 
     return (
         <WebView

@@ -4,7 +4,6 @@ import * as Authentication from 'expo-local-authentication';
 import { commonInputStyles, commonTextStyles } from 'assets/styles';
 import store from 'store/store';
 import * as StorageUtils from 'utils/StorageUtils';
-import * as NavigateUtils from 'utils/NavigateUtils';
 import { useSelector } from 'react-redux';
 import { dispatchOne } from 'utils/DispatchUtils';
 
@@ -12,7 +11,6 @@ import { dispatchOne } from 'utils/DispatchUtils';
 const BioLogin = () => {
     const bioStore = useSelector((state) => state.loginReducer.bio);
     const bioRecords = useSelector((state) => state.loginReducer.bioRecords);
-    const tab = useSelector((state) => state.loginReducer.tab);
 
     const [bio, setBio] = useState(bioStore);
 
@@ -35,7 +33,7 @@ const BioLogin = () => {
             const success = await authenticate();
             if (success) {
                 store.dispatch(dispatchOne('SET_TOKEN', {}));
-                store.dispatch(NavigateUtils.routeDispatch('web'));
+                store.dispatch(dispatchOne('SET_TAB', 'web'));
             }
         } else {
             Alert.alert('생체 인증이 등록되어있지 않습니다.');
@@ -63,14 +61,12 @@ const BioLogin = () => {
     };
 
     useEffect(() => {
-        if (tab == 'bio') {
-            if (bio?.modFlag) {
-                registBio();
-            } else {
-                loginBio();
-            }
+        if (bio?.modFlag) {
+            registBio();
+        } else {
+            loginBio();
         }
-    }, [bio, tab]);
+    }, [bio]);
 
     return (
         <View style={styles.container}>

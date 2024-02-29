@@ -1,13 +1,24 @@
 const initialState = {
     statusBar: true,
+    loading: false,
 };
 
 const commonReducer = (state = initialState, action) => {
     switch (action.type) {
-        case 'SET_STATUS_BAR':
+        case 'SHOW_BAR':
             return {
                 ...state,
-                statusBar: action.payload,
+                statusBar: true,
+            };
+        case 'HIDE_BAR':
+            return {
+                ...state,
+                statusBar: false,
+            };
+        case 'SET_LOADING':
+            return {
+                ...state,
+                loading: action.payload,
             };
         default:
             return state;
