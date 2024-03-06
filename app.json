@@ -1,7 +1,7 @@
 {
     "expo": {
-        "name": "genius-app",
-        "slug": "genius-app",
+        "name": "kt-genius",
+        "slug": "kt-genius",
         "scheme": "genius",
         "version": "1.0.0",
         "orientation": "portrait",
@@ -17,30 +17,50 @@
             "supportsTablet": true,
             "requireFullScreen": true,
             "infoPlist": {
-                "NSFaceIDUsageDescription": "Allow $(PRODUCT_NAME) to use Face ID."
+                "NSFaceIDUsageDescription": "Allow $(PRODUCT_NAME) to use Face ID.",
+                "NSCameraUsageDescription": "Allow $(PRODUCT_NAME) to access camera.",
+                "NSMicrophoneUsageDescription": "Allow $(PRODUCT_NAME) to access your microphone"
             },
             "runtimeVersion": {
                 "policy": "appVersion"
             },
             "config": {
                 "usesNonExemptEncryption": false
-            }
+            },
+            "associatedDomains": ["applinks:genius.kt.com"]
         },
         "android": {
+            "googleServicesFile": "./google-services.json",
             "adaptiveIcon": {
                 "foregroundImage": "./assets/adaptive-icon.png",
                 "backgroundColor": "#ffffff"
             },
-            "permissions": ["CAMERA", "android.permission.USE_BIOMETRIC", "android.permission.USE_FINGERPRINT"],
+            "permissions": [
+                "CAMERA",
+                "android.permission.USE_BIOMETRIC",
+                "android.permission.USE_FINGERPRINT",
+                "android.permission.CAMERA",
+                "android.permission.RECORD_AUDIO"
+            ],
             "runtimeVersion": "1.0.0",
-            "package": "com.tmqps.geniusapp"
+            "package": "com.ktds.genius",
+            "intentFilters": [
+                {
+                    "action": "VIEW",
+                    "autoVerify": true,
+                    "category": ["BROWSABLE", "DEFAULT"]
+                }
+            ]
         },
         "web": {
             "favicon": "./assets/favicon.png"
         },
         "extra": {
             "eas": {
-                "projectId": "c44d0655-c80f-47b5-a910-7f26bab2d713"
+                "projectId": "bd698549-609f-476e-9339-4d0566f95b31"
+            },
+            "router": {
+                "origin": false
             }
         },
         "plugins": [
@@ -63,16 +83,39 @@
                 }
             ],
             [
-                "expo-updates",
+                "expo-camera",
                 {
-                    "username": "tmqps"
+                    "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
+                    "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
+                    "recordAudioAndroid": true
                 }
             ],
-            "expo-router"
+            [
+                "expo-barcode-scanner",
+                {
+                    "cameraPermission": "Allow $(PRODUCT_NAME) to access camera."
+                }
+            ],
+            [
+                "expo-updates",
+                {
+                    "username": "wldms"
+                }
+            ],
+            "expo-router",
+            [
+                "expo-build-properties",
+                {
+                    "android": {
+                        "usesCleartextTraffic": true
+                    },
+                    "ios": {}
+                }
+            ]
         ],
         "updates": {
             "url": "https://u.expo.dev/c44d0655-c80f-47b5-a910-7f26bab2d713"
         },
-        "owner": "tmqps"
+        "owner": "wldms"
     }
 }

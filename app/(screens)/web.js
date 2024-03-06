@@ -5,11 +5,14 @@ import { useSelector } from 'react-redux';
 import store from 'store/store';
 import { dispatchOne } from 'utils/DispatchUtils';
 import * as ScreenOrientation from 'expo-screen-orientation';
+import { router } from 'expo-router';
 
 const Web = () => {
     const isLink = useSelector((state) => state.loginReducer.isLink);
     const token = useSelector((state) => state.loginReducer.token);
     const tab = useSelector((state) => state.loginReducer.tab);
+    const camera = useSelector((state) => state.loginReducer.camera);
+    const params = useSelector((state) => state.loginReducer.params);
 
     const webViewRef = useRef(null);
 
@@ -29,6 +32,9 @@ const Web = () => {
                 break;
             case 'logout':
                 doLogout();
+                break;
+            case 'openCamera':
+                openCamera();
                 break;
             case 'test':
                 console.log('TEST');
@@ -85,12 +91,22 @@ const Web = () => {
         return true;
     };
 
+    // 카메라 열기
+    const openCamera = () => {
+        store.dispatch(dispatchOne('SET_CAMERA', true));
+        router.push('camera');
+    };
+
     // Webview 뒤로가기 처리
     const webViewLoaded = () => {
         setBackButtonEnabled(true);
     };
 
     useEffect(() => {
+        if (isLink) {
+            Alert.alert('is linked!!');
+            console.log(params);
+        }
         console.log(isLink ? '@@@@@@ is link @@@@@' : 'XXXXX not link xXXXXX');
         // todo QR 로그인 후 뭔가 해야함
     }, [isLink]);
@@ -100,18 +116,20 @@ const Web = () => {
         const backHandler = () => {
             if (backButtonEnabled) {
                 webViewRef.current.goBack();
-                return true;
+            } else if (camera) {
+                store.dispatch(dispatchOne('SET_CAMERA', false));
+                router.back();
             } else {
                 store.dispatch(dispatchOne('SET_EXIT', true));
-                return true;
             }
+            return true;
         };
         // Subscribe to back state event
         BackHandler.addEventListener('hardwareBackPress', backHandler);
 
         // Unsubscribe
         return () => BackHandler.removeEventListener('hardwareBackPress', backHandler);
-    }, [backButtonEnabled]);
+    }, [backButtonEnabled, camera]);
 
     useEffect(() => {
         store.dispatch(dispatchOne('SET_LOADING', false));
@@ -123,8 +141,8 @@ const Web = () => {
             ref={webViewRef}
             style={styles.webview}
             onLoad={webViewLoaded}
-            // source={{ uri: 'http://172.24.27.254:8080' }}
-            source={{ uri: 'https://naver.com' }}
+            source={{ uri: 'http://192.168.219.254:8080' }}
+            // source={{ uri: 'https://naver.com' }}
             onNavigationStateChange={onNavigationStateChange}
             onMessage={handleOnMessage}
             injectedJavaScript={`

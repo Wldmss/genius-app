@@ -20,6 +20,11 @@ const commonReducer = (state = initialState, action) => {
                 ...state,
                 loading: action.payload,
             };
+        case 'INIT_APP':
+            return {
+                ...state,
+                loading: false,
+            };
         default:
             return state;
     }

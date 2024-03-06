@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { commonInputStyles, commonTextStyles } from 'assets/styles';
-import { ldapLogin } from 'api/LoginApi';
+import { login } from 'api/LoginApi';
 import { useSelector } from 'react-redux';
 import store from 'store/store';
-import { dispatchMultiple, dispatchOne } from 'utils/DispatchUtils';
+import { dispatchLogin, dispatchMultiple, dispatchOne } from 'utils/DispatchUtils';
 import * as StorageUtils from 'utils/StorageUtils';
 import LoginInfo from 'modal/LoginInfo';
+import moment from 'moment';
 
 /** LDAP 로그인 */
 const LDAPLogin = () => {
@@ -17,6 +18,7 @@ const LDAPLogin = () => {
     const timeRef = useRef(0);
     const [value, setValue] = useState({ username: '', password: '', otp: '' });
     const [isLogin, setIsLogin] = useState(false);
+    const [token, setToken] = useState(null);
 
     const changeValue = (id, input) => {
         setValue({ ...value, [id]: input });
@@ -41,11 +43,12 @@ const LDAPLogin = () => {
         console.log(value);
 
         // LDAP 로그인 TODO
-        ldapLogin(value.username, value.password).then((res) => {
+        login(value.username, value.password).then((res) => {
             if (res.status) {
+                setToken(res.data ? res.data.token : null);
                 setIsLogin(true);
-                sendOTP();
             } else {
+                resetUsers();
                 Alert.alert('로그인에 실패했습니다.');
             }
         });
@@ -54,6 +57,7 @@ const LDAPLogin = () => {
     // OTP 전송 (TODO)
     const sendOTP = () => {
         Alert.alert('인증번호가 전송되었습니다.');
+        console.log('otp send!!');
         if (otpRef.current) otpRef.current.focus();
     };
 
@@ -67,31 +71,62 @@ const LDAPLogin = () => {
             return;
         }
 
-        saveUserData();
+        checkUsers();
+    };
+
+    // 사용자 정보 확인
+    const checkUsers = () => {
+        if (users != null && users !== value.username) {
+            Alert.alert(
+                'GENIUS',
+                `기본 로그인 정보를 "${value.username}" 으로 변경하시겠습니까?`,
+                [
+                    {
+                        text: '아니요',
+                        onPress: async () => {
+                            resetUsers();
+                            saveUserData();
+                        },
+                        style: 'cancel',
+                    },
+                    {
+                        text: '예',
+                        onPress: async () => {
+                            saveUserData(true);
+                        },
+                    },
+                ],
+                { cancelable: false }
+            );
+        } else {
+            saveUserData(users == null);
+        }
     };
 
     // 사용자 정보 저장
-    const saveUserData = async () => {
-        let saveFlag = users == null;
-        if (!saveFlag && users !== value.username) {
-            if (confirm(`기본 로그인 정보를 "${value.username}" 으로 변경하시겠습니까?`)) {
-                saveFlag = true;
-            }
+    const saveUserData = async (changeFlag) => {
+        if (changeFlag) {
+            await StorageUtils.setDeviceData('users', value.username);
         }
-
-        if (saveFlag) await StorageUtils.setDeviceData('users', value.username);
 
         let storeData = {
             SET_USERS: value.username,
+            SET_TOKEN: token,
         };
 
         store.dispatch(dispatchMultiple(storeData));
-        store.dispatch(dispatchOne('SET_TOKEN', {}));
+        store.dispatch(dispatchLogin(moment()));
         store.dispatch(dispatchOne('SET_TAB', 'web'));
     };
 
     const showInfo = () => {
         store.dispatch({ type: 'OPEN_MODAL', element: <LoginInfo />, title: '문의 및 연락처' });
+    };
+
+    // user 정보 reset
+    const resetUsers = async () => {
+        await StorageUtils.setDeviceData('users', null);
+        // store.dispatch(dispatchOne('SET_USERS', null));
     };
 
     useEffect(() => {

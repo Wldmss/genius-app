@@ -1,0 +1,10 @@
+[
+    {
+        "relation": ["delegate_permission/common.handle_all_urls"],
+        "target": {
+            "namespace": "android_app",
+            "package_name": "com.ktds.genius",
+            "sha256_cert_fingerprints": ["47:DF:C3:B5:2B:E6:B9:1C:C9:6A:7B:85:7C:E7:DA:C6:35:06:E5:B8:8F:61:EA:42:3A:77:FB:87:A9:6C:AE:C3"]
+        }
+    }
+]

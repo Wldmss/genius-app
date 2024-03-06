@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Alert } from 'react-native';
 import * as Updates from 'expo-updates';
+import { Redirect } from 'expo-router';
 
 const Page = () => {
     // 앱 업데이트 체크

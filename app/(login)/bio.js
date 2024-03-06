@@ -5,7 +5,8 @@ import { commonInputStyles, commonTextStyles } from 'assets/styles';
 import store from 'store/store';
 import * as StorageUtils from 'utils/StorageUtils';
 import { useSelector } from 'react-redux';
-import { dispatchOne } from 'utils/DispatchUtils';
+import { dispatchLogin, dispatchOne } from 'utils/DispatchUtils';
+import moment from 'moment';
 
 /** 생체 인증 로그인/등록 */
 const BioLogin = () => {
@@ -32,8 +33,7 @@ const BioLogin = () => {
         if (bioRecords && bio?.isRegistered) {
             const success = await authenticate();
             if (success) {
-                store.dispatch(dispatchOne('SET_TOKEN', {}));
-                store.dispatch(dispatchOne('SET_TAB', 'web'));
+                store.dispatch(dispatchLogin(moment()));
             }
         } else {
             Alert.alert('생체 인증이 등록되어있지 않습니다.');

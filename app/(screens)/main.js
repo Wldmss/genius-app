@@ -19,8 +19,7 @@ const Main = () => {
             await SecureStore.deleteItemAsync('bio');
             await SecureStore.deleteItemAsync('pin');
             await SecureStore.deleteItemAsync('users');
-
-            // await SecureStore.setItemAsync('genius_pin', '123456');
+            // await SecureStore.setItemAsync('users', '');
         } catch (err) {
             console.log(err);
         }
@@ -51,7 +50,7 @@ const Main = () => {
          * - 접속 시 PIN 로그인/생체 인증 > (자동 LDAP 인증) > 로그인
          * - 우선순위: 생체 인증 > PIN > LDAP
          * */
-        const tabValue = hasPin && hasBio && users != null ? 'bio' : 'pin';
+        const tabValue = hasBio ? 'bio' : 'pin';
 
         store.dispatch(
             dispatchMultiple({

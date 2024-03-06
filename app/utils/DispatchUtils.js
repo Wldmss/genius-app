@@ -9,3 +9,9 @@ export const dispatchMultiple = (value) => (dispatch) => {
 export const dispatchOne = (key, value) => (dispatch) => {
     dispatch({ type: key, payload: value });
 };
+
+// 로그인 dispatch
+export const dispatchLogin = (now) => (dispatch) => {
+    dispatch({ type: 'SET_LOGIN', payload: true });
+    dispatch({ type: 'SET_EXPIRE', payload: now });
+};

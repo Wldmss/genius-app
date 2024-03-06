@@ -3,22 +3,22 @@ import { StyleSheet, View, Text, TextInput, Pressable, Alert } from 'react-nativ
 import { commonInputStyles, commonTextStyles } from 'assets/styles';
 import { useSelector } from 'react-redux';
 import store from 'store/store';
-import { dispatchOne } from 'utils/DispatchUtils';
+import { dispatchLogin, dispatchOne } from 'utils/DispatchUtils';
 import * as StorageUtils from 'utils/StorageUtils';
+import moment from 'moment';
 
 const PinLogin = () => {
     const pin = useSelector((state) => state.loginReducer.pin);
-    const users = useSelector((state) => state.loginReducer.users);
-    const token = useSelector((state) => state.loginReducer.token);
 
     const pinLength = 6;
+    const originRef = useRef(null);
     const enterRef = useRef(null);
     const checkRef = useRef(null);
     const registRef = useRef(0);
 
-    const [value, setValue] = useState({ enter: '', check: '' });
+    const [isMod, setIsMod] = useState(false);
+    const [value, setValue] = useState({ enter: '', check: '', origin: '' });
     const [isSame, setIsSame] = useState(null);
-    const [isLogin, setIsLogin] = useState(false);
 
     const changePin = (id, input) => {
         // 숫자가 아닌 경우 return
@@ -30,7 +30,7 @@ const PinLogin = () => {
         setValue({ ...value, [id]: input });
 
         // pin 등록 시 일치여부 확인
-        if (pin?.modFlag) {
+        if (pin?.modFlag && id != 'origin') {
             const otherId = id == 'enter' ? 'check' : 'enter';
             let sameFlag = null;
             if (value[otherId].length == pinLength && input) {
@@ -38,6 +38,12 @@ const PinLogin = () => {
             }
 
             setIsSame(sameFlag);
+        }
+
+        // 현재 pin 입력 시 자동 설정
+        if (isMod && id == 'origin' && input.length == pinLength && enterRef.current) {
+            enterRef.current.focus();
+            return;
         }
 
         // pin 입력 시 자동 설정
@@ -56,19 +62,32 @@ const PinLogin = () => {
 
     // 일치 여부 확인
     const checkSame = (value1, value2) => {
-        return Number(value1) == Number(value2);
+        return String(value1).length == String(value2).length && Number(value1) == Number(value2);
     };
 
     // pin 설정
     const handlePinButton = () => {
-        if (value.enter.length != pinLength || (pin?.modFlag && value.check.length != pinLength)) {
+        if (value.enter.length != pinLength || (pin?.modFlag && value.check.length != pinLength) || (isMod && value.origin.length != pinLength)) {
             Alert.alert(`${pinLength}자리를 입력해주세요.`);
+            return false;
+        }
+
+        // pin 수정
+        if (isMod && !checkSame(pin?.value, value.origin)) {
+            Alert.alert('현재 PIN이 일치하지 않습니다.');
+            originRef.current.focus();
             return false;
         }
 
         const sameFlag = !pin?.modFlag || checkSame(value.enter, value.check);
         if (!sameFlag) {
             Alert.alert('PIN이 일치하지 않습니다.');
+            return false;
+        }
+
+        if (isMod && checkSame(value.enter, value.origin)) {
+            Alert.alert('PIN이 동일합니다. 다른 PIN으로 설정해주세요.');
+            enterRef.current.focus();
             return false;
         }
 
@@ -86,24 +105,11 @@ const PinLogin = () => {
     // PIN 로그인
     const loginPin = () => {
         if (pin.value != null && checkSame(value.enter, pin.value)) {
-            if (users == null) {
-                // pin 만 설정하고 LDAP 로그인을 안한 경우
-                store.dispatch(dispatchOne('SET_TAB', 'ldap'));
-            } else {
-                // LDAP 서버 인증 (TODO)
-                checkLdap();
-            }
+            store.dispatch(dispatchLogin(moment()));
         } else {
             enterRef.current.focus();
             Alert.alert('PIN이 일치하지 않습니다. 다시 시도해주세요.');
-            setIsLogin(false);
         }
-    };
-
-    // LDAP 인증
-    const checkLdap = () => {
-        store.dispatch(dispatchOne('SET_TOKEN', {}));
-        setIsLogin(true);
     };
 
     // PIN 등록
@@ -114,7 +120,7 @@ const PinLogin = () => {
             await StorageUtils.setDeviceData('pin', value.enter);
             store.dispatch(dispatchOne('SET_PIN', { ...pin, isRegistered: true, value: value.enter, modFlag: false }));
 
-            Alert.alert('PIN이 설정되었습니다.');
+            Alert.alert(`PIN이 ${isMod ? '변경' : '설정'}되었습니다.`);
 
             store.dispatch(dispatchOne('SET_TAB', tabValue));
         } catch (err) {
@@ -128,26 +134,34 @@ const PinLogin = () => {
     }, [registRef.current]);
 
     useEffect(() => {
-        if (isLogin) {
-            const tabValue = token == null ? 'ldap' : 'web';
-            store.dispatch(dispatchOne('SET_TAB', tabValue));
-        }
-    }, [isLogin]);
-
-    useEffect(() => {
         setValue({ ...value, enter: '', check: '' });
+        setIsMod(pin?.isRegistered && pin?.modFlag);
     }, [pin]);
 
     return (
         <View style={styles.container} id="pin">
             <View style={styles.inputBox}>
+                {isMod && (
+                    <TextInput
+                        id="origin"
+                        ref={originRef}
+                        value={value.origin}
+                        inputMode="numeric"
+                        maxLength={pinLength}
+                        placeholder="현재 PIN 입력"
+                        placeholderTextColor={`#a9a9a9`}
+                        secureTextEntry
+                        style={commonInputStyles.inputNumber}
+                        onChangeText={(input) => changePin('origin', input)}
+                    />
+                )}
                 <TextInput
                     id="enter"
                     ref={enterRef}
                     value={value.enter}
                     inputMode="numeric"
                     maxLength={pinLength}
-                    placeholder="PIN 입력"
+                    placeholder={`${isMod ? '새로운 ' : ''}PIN 입력`}
                     placeholderTextColor={`#a9a9a9`}
                     secureTextEntry
                     style={commonInputStyles.inputNumber}

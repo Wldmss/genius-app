@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, ImageBackground, StyleSheet, View } from 'react-native';
+import { Image, ImageBackground, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import TopLogo from 'assets/login_top_title.svg';
 import { Slot } from 'expo-router';
 import OtherLogin from 'components/OtherLogin';

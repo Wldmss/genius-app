@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "785867783883",
+    "project_id": "genius-mobile-35601",
+    "storage_bucket": "genius-mobile-35601.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:785867783883:android:8b149f122a8eabff0be54e",
+        "android_client_info": {
+          "package_name": "com.ktds.genius"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDL2sx9hEtcpxPZifI4ep1Yz-YUyRXDTz4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
