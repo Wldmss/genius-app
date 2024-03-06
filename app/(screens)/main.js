@@ -85,7 +85,7 @@ const Main = () => {
     };
 
     useEffect(() => {
-        // storeStorageData();
+        storeStorageData();
 
         if (doneBio) {
             getStorageData();

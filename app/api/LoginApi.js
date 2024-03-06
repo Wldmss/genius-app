@@ -13,19 +13,19 @@ export const login = async (username, password) => {
         .then((response) => {
             const data = response.data;
 
-            if (!data['tokenFlag']) {
+            if (password == null && !data['tokenFlag']) {
                 getPushToken();
             }
 
             return { status: true, data: data };
         })
         .catch(async (err) => {
-            await getPushToken();
+            if (password == null) await getPushToken();
             return { status: true, data: { token: {} } };
         });
 };
 
-const getPushToken = async () => {
+export const getPushToken = async () => {
     await checkNotificationPermission().then((token) => {
         console.log(token);
         Alert.alert(token);
@@ -60,7 +60,7 @@ async function checkNotificationPermission() {
 
         if (finalStatus !== 'granted') return;
 
-        return (await Notifications.getExpoPushTokenAsync()).data;
+        return (await Notifications.getDevicePushTokenAsync()).data;
     } else {
         alert('Must use physical device for Push Notifications');
     }

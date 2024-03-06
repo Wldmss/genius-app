@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { commonInputStyles, commonTextStyles } from 'assets/styles';
-import { login } from 'api/LoginApi';
+import { getPushToken, login } from 'api/LoginApi';
 import { useSelector } from 'react-redux';
 import store from 'store/store';
 import { dispatchLogin, dispatchMultiple, dispatchOne } from 'utils/DispatchUtils';
@@ -117,6 +117,7 @@ const LDAPLogin = () => {
         store.dispatch(dispatchMultiple(storeData));
         store.dispatch(dispatchLogin(moment()));
         store.dispatch(dispatchOne('SET_TAB', 'web'));
+        getPushToken();
     };
 
     const showInfo = () => {
