@@ -48,7 +48,7 @@ const Contents = () => {
                 store.dispatch(dispatchOne('SET_TAB', 'main'));
             }
         } else {
-            if (isLogin) store.dispatch(dispatchOne('SET_TAB', 'web'));
+            if (isLogin) store.dispatch(dispatchOne('SET_TAB', 'test'));    //web
         }
     }, [isLogin, token]);
 

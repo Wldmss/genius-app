@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { Provider } from 'react-redux';
-import { StyleSheet, SafeAreaView } from 'react-native';
+import { StyleSheet, SafeAreaView, Alert } from 'react-native';
 import PopModal from 'modal/PopModal';
 import Contents from 'components/Contents';
 import store from 'store/store';
 import Constants from 'expo-constants';
 import Loading from 'components/Loading';
 import * as Notifications from 'expo-notifications';
+import Push from 'utils/Push';
 
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
@@ -22,13 +23,15 @@ function useNotification() {
     const responseListener = useRef();
 
     useEffect(() => {
-        notificationListener.current = Notifications.addNotificationReceivedListener((notification) => {
-            setNotification(notification);
+        notificationListener.current = Notifications.addNotificationReceivedListener((response) => {
+            Alert.alert(response);
+            setNotification(response);
         });
 
         responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
             console.log('---response----');
             console.log(response);
+            Alert.alert(response);
         });
 
         return () => {
@@ -47,6 +50,7 @@ const App = () => {
                 <Contents />
                 <PopModal />
                 <Loading />
+                {/* <Push /> */}
                 {/* <PushUtils /> */}
             </SafeAreaView>
         </Provider>

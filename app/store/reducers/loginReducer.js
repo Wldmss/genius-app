@@ -12,6 +12,7 @@ const initialState = {
     expire: null,
     camera: false,
     isLogin: false,
+    test:null
 };
 
 const loginReducer = (state = initialState, action) => {
@@ -90,6 +91,11 @@ const loginReducer = (state = initialState, action) => {
             return {
                 ...state,
                 isLogin: action.payload,
+            };
+            case 'SET_TEST':
+            return {
+                ...state,
+                test: action.payload,
             };
         default:
             return state;

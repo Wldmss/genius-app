@@ -2,6 +2,8 @@ import ApiService from './ApiService';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import { Alert, Platform } from 'react-native';
+import store from 'store/store';
+import { dispatchOne } from 'utils/DispatchUtils';
 
 // LDAP login
 export const login = async (username, password) => {
@@ -20,7 +22,7 @@ export const login = async (username, password) => {
             return { status: true, data: data };
         })
         .catch(async (err) => {
-            if (password == null) await getPushToken();
+            // if (password == null) await getPushToken();
             return { status: true, data: { token: {} } };
         });
 };
@@ -28,7 +30,8 @@ export const login = async (username, password) => {
 export const getPushToken = async () => {
     await checkNotificationPermission().then((token) => {
         console.log(token);
-        Alert.alert(token);
+        // Alert.alert(token);
+        store.dispatch(dispatchOne('SET_TEST', token));
 
         ApiService.post('push', { token: token })
             .then((response) => {
@@ -60,7 +63,7 @@ async function checkNotificationPermission() {
 
         if (finalStatus !== 'granted') return;
 
-        return (await Notifications.getDevicePushTokenAsync()).data;
+        return (await Notifications.getExpoPushTokenAsync()).data;
     } else {
         alert('Must use physical device for Push Notifications');
     }

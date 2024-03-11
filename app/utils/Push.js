@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
 import messaging from '@react-native-firebase/messaging';
 
 const Push = () => {
@@ -17,6 +17,7 @@ const Push = () => {
             messaging()
                 .getToken()
                 .then((token) => {
+                    Alert.alert(token);
                     console.log(token);
                 });
         }
@@ -42,7 +43,7 @@ const Push = () => {
 
         // Listen for push notifications when the app is in the foreground
         const unsubscribe = messaging().onMessage(async (handlePushNotification) => {
-            Alert.Alert('new massage!!', JSON.stringify(handlePushNotification));
+            Alert.alert('new massage!!', JSON.stringify(handlePushNotification));
         });
 
         // Clean up the event listeners
