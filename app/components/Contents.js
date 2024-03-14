@@ -1,16 +1,17 @@
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Alert, AppState, BackHandler } from 'react-native';
-import { Stack, router } from 'expo-router';
 import store from 'store/store';
-import { dispatchOne } from 'utils/DispatchUtils';
-import { StatusBar } from 'expo-status-bar';
 import moment from 'moment';
+import { Stack, router } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { dispatchOne } from 'utils/DispatchUtils';
 import { login } from 'api/LoginApi';
 
+/** 페이지 router */
 const Contents = () => {
     const commonOptions = { headerShown: false };
-    const sessionTime = 10;
+    const sessionTime = 60;
 
     const statusBar = useSelector((state) => state.commonReducer.statusBar);
     const token = useSelector((state) => state.loginReducer.token);
@@ -19,6 +20,7 @@ const Contents = () => {
     const expire = useSelector((state) => state.loginReducer.expire);
     const isLogin = useSelector((state) => state.loginReducer.isLogin);
     const users = useSelector((state) => state.loginReducer.users);
+    const notification = useSelector((state) => state.commonReducer.notification);
 
     // 로그인
     useEffect(() => {
@@ -35,7 +37,7 @@ const Contents = () => {
                 }
 
                 // ldap 인증
-                login(users, null).then((res) => {
+                login(users, null, notification).then((res) => {
                     console.log(res);
                     if (res.status) {
                         if (res.data) store.dispatch(dispatchOne('SET_TOKEN', res.data.token));
@@ -48,7 +50,7 @@ const Contents = () => {
                 store.dispatch(dispatchOne('SET_TAB', 'main'));
             }
         } else {
-            if (isLogin) store.dispatch(dispatchOne('SET_TAB', 'test'));    //web
+            if (isLogin) store.dispatch(dispatchOne('SET_TAB', 'web')); //web
         }
     }, [isLogin, token]);
 
@@ -68,6 +70,7 @@ const Contents = () => {
     useEffect(() => {
         console.log('== tab change ==');
         console.log(tab);
+        console.log(token);
         if (tab == null) {
             store.dispatch(dispatchOne('SET_TAB', 'main'));
         } else {
@@ -114,10 +117,14 @@ const Contents = () => {
             resetFlag = diff > sessionTime;
         }
 
-        if (resetFlag) store.dispatch({ type: 'INIT_APP' });
+        console.log(resetFlag);
+        if (resetFlag) {
+            store.dispatch({ type: 'INIT_APP' });
+        }
     };
 
     useEffect(() => {
+        console.log(exitFlag);
         const appState = AppState.addEventListener('change', handleAppStateChange);
         return () => {
             appState.remove();

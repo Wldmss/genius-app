@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Text, Pressable, Alert } from 'react-native';
-import * as Authentication from 'expo-local-authentication';
+import { useSelector } from 'react-redux';
 import { commonInputStyles, commonTextStyles } from 'assets/styles';
 import store from 'store/store';
-import * as StorageUtils from 'utils/StorageUtils';
-import { useSelector } from 'react-redux';
-import { dispatchLogin, dispatchOne } from 'utils/DispatchUtils';
 import moment from 'moment';
+import * as Authentication from 'expo-local-authentication';
+import * as StorageUtils from 'utils/StorageUtils';
+import { dispatchLogin, dispatchOne } from 'utils/DispatchUtils';
 
 /** 생체 인증 로그인/등록 */
 const BioLogin = () => {

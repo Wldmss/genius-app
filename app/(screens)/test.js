@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import * as Clipboard from 'expo-clipboard';
 
 export default function Test() {
-    const test = useSelector((state) => state.loginReducer.test);
+    const test = useSelector((state) => state.commonReducer.test);
 
     const copy = async () => {
         await Clipboard.setStringAsync(test);

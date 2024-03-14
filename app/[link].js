@@ -3,6 +3,7 @@ import store from 'store/store';
 import { useLocalSearchParams } from 'expo-router';
 import { dispatchOne } from 'utils/DispatchUtils';
 
+/** 링크 접속 */
 export default function Link() {
     const { link, query } = useLocalSearchParams();
 

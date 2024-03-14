@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { Alert } from 'react-native';
 import * as Updates from 'expo-updates';
-import { Redirect } from 'expo-router';
 
+/** index */
 const Page = () => {
     // 앱 업데이트 체크
     async function onFetchUpdateAsync() {
@@ -20,7 +20,7 @@ const Page = () => {
     }
 
     useEffect(() => {
-        if (process.env.APP_ENV == 'production') onFetchUpdateAsync();
+        if (process.env.EXPO_PUBLIC_PROFILE == 'production') onFetchUpdateAsync();
     }, []);
 };
 

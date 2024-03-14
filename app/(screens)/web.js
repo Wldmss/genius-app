@@ -7,12 +7,11 @@ import { dispatchOne } from 'utils/DispatchUtils';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { router } from 'expo-router';
 
+/** web view */
 const Web = () => {
-    const isLink = useSelector((state) => state.loginReducer.isLink);
-    const token = useSelector((state) => state.loginReducer.token);
-    const tab = useSelector((state) => state.loginReducer.tab);
-    const camera = useSelector((state) => state.loginReducer.camera);
-    const params = useSelector((state) => state.loginReducer.params);
+    const isLink = useSelector((state) => state.commonReducer.isLink);
+    const camera = useSelector((state) => state.commonReducer.camera);
+    const params = useSelector((state) => state.commonReducer.params);
 
     const webViewRef = useRef(null);
 
@@ -84,7 +83,12 @@ const Web = () => {
             '로그아웃 하시겠습니까?',
             [
                 { text: '아니요', onPress: () => null, style: 'cancel' },
-                { text: '예', onPress: () => store.dispatch({ type: 'INIT_APP' }) },
+                {
+                    text: '예',
+                    onPress: () => {
+                        store.dispatch({ type: 'INIT_APP' });
+                    },
+                },
             ],
             { cancelable: false }
         );
@@ -141,8 +145,7 @@ const Web = () => {
             ref={webViewRef}
             style={styles.webview}
             onLoad={webViewLoaded}
-            source={{ uri: 'http://192.168.219.254:8080' }}
-            // source={{ uri: 'https://naver.com' }}
+            source={{ uri: process.env.EXPO_PUBLIC_WEB }}
             onNavigationStateChange={onNavigationStateChange}
             onMessage={handleOnMessage}
             injectedJavaScript={`

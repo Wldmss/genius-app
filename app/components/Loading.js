@@ -1,9 +1,9 @@
-import { Image, Modal, StyleSheet, Text, View } from 'react-native';
+import { Image, Modal, StyleSheet, View } from 'react-native';
 import { useSelector } from 'react-redux';
 
 const load_img = require('assets/genius_logo.png');
 
-// 로딩 화면
+/** 로딩 화면 */
 const Loading = () => {
     const loading = useSelector((state) => state.commonReducer.loading);
 

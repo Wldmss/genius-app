@@ -1,6 +1,11 @@
 const initialState = {
     statusBar: true,
     loading: false,
+    isLink: false,
+    params: null,
+    camera: false,
+    test: null,
+    notification: false,
 };
 
 const commonReducer = (state = initialState, action) => {
@@ -24,6 +29,33 @@ const commonReducer = (state = initialState, action) => {
             return {
                 ...state,
                 loading: false,
+                isLink: false,
+                camera: false,
+            };
+        case 'SET_LINK':
+            return {
+                ...state,
+                isLink: action.payload,
+            };
+        case 'SET_PARAMS':
+            return {
+                ...state,
+                params: action.payload,
+            };
+        case 'SET_CAMERA':
+            return {
+                ...state,
+                camera: action.payload,
+            };
+        case 'SET_NOTIFICATION':
+            return {
+                ...state,
+                notification: action.payload,
+            };
+        case 'SET_TEST':
+            return {
+                ...state,
+                test: action.payload,
             };
         default:
             return state;

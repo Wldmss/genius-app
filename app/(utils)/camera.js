@@ -12,6 +12,7 @@ const cancel_img = require('assets/cancel.png');
 const no_img = require('assets/no_image.png');
 const no_camera = require('assets/no_camera.png');
 
+/** QR 스캐너 */
 const ScanQR = () => {
     const router = useRouter();
     const [urlText, setUrlText] = useState('');
@@ -87,9 +88,7 @@ const ScanQR = () => {
 
     // 카메라 권한 설정
     const checkPermission = async () => {
-        // TODO 권한 다시 요청하는 부분
         const { status } = await Camera.requestCameraPermissionsAsync();
-        console.log(status);
         setPermission(status === 'granted');
     };
 

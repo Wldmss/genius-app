@@ -1,48 +1,16 @@
-import { useEffect, useRef, useState } from 'react';
 import { Provider } from 'react-redux';
-import { StyleSheet, SafeAreaView, Alert } from 'react-native';
-import PopModal from 'modal/PopModal';
-import Contents from 'components/Contents';
+import { StyleSheet, SafeAreaView } from 'react-native';
 import store from 'store/store';
+import Contents from 'components/Contents';
 import Constants from 'expo-constants';
+import PopModal from 'modal/PopModal';
 import Loading from 'components/Loading';
-import * as Notifications from 'expo-notifications';
-import Push from 'utils/Push';
+import { useNotification } from 'utils/Push';
 
-Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-        shouldShowAlert: true,
-        shouldPlaySound: false,
-        shouldSetBadge: false,
-    }),
-});
-
-function useNotification() {
-    const [notification, setNotification] = useState(false);
-    const notificationListener = useRef();
-    const responseListener = useRef();
-
-    useEffect(() => {
-        notificationListener.current = Notifications.addNotificationReceivedListener((response) => {
-            Alert.alert(response);
-            setNotification(response);
-        });
-
-        responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
-            console.log('---response----');
-            console.log(response);
-            Alert.alert(response);
-        });
-
-        return () => {
-            Notifications.removeNotificationSubscription(notificationListener.current);
-            Notifications.removeNotificationSubscription(responseListener.current);
-        };
-    }, []);
-}
-
+/** layout (main) */
 const App = () => {
     useNotification();
+    console.log('profile :: ', process.env.EXPO_PUBLIC_PROFILE);
 
     return (
         <Provider store={store}>
@@ -50,8 +18,6 @@ const App = () => {
                 <Contents />
                 <PopModal />
                 <Loading />
-                {/* <Push /> */}
-                {/* <PushUtils /> */}
             </SafeAreaView>
         </Provider>
     );

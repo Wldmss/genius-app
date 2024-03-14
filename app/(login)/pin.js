@@ -7,6 +7,7 @@ import { dispatchLogin, dispatchOne } from 'utils/DispatchUtils';
 import * as StorageUtils from 'utils/StorageUtils';
 import moment from 'moment';
 
+/** pin 로그인/등록/수정 */
 const PinLogin = () => {
     const pin = useSelector((state) => state.loginReducer.pin);
 

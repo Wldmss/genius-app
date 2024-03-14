@@ -1,9 +1,9 @@
-# 지니어스 모바일
+# App Info
 
 ## 환경 구성
 
--   node v16.20.1
-    -   https://nodejs.org/en/blog/release/v16.20.1
+-   node v20.11.1
+    -   https://nodejs.org/en/blog/release/v20.11.1
 -   expo-cli
 -   prettier, eslint 설정
     -   Prettier ESLint, Prettier - Code formatter 설치 (vsCode extensions)
@@ -52,9 +52,25 @@
 
 1.  원하는 명령어로 프로젝트 실행
 
-    -   npx expo start
-    -   npx expo start --tunnel : 모바일&PC가 다른 네트워크를 사용해야 하는 경우 ngrok을 통한 proxy 자동 설정
-    -   npm start
+    1. 기본 실행 명령어
+
+        - npx expo start
+        - npx expo start --tunnel : 모바일&PC가 다른 네트워크를 사용해야 하는 경우 ngrok을 통한 proxy 자동 설정
+
+    2. expo go 에서 실행하고 싶은 경우
+
+        - expo-dev-client 삭제
+        - npm start (or npx expo start)
+
+    3. development 실행 (권장)
+
+        - npm run prebuild (native 라이브러리 설치한 경우)
+        - npm run configure
+        - npm run build:dev
+        - expo.dev 에서 build 확인 및 .apk 파일 install
+        - npm run dev (--dev-client 로 실행)
+
+    4. 업데이트
 
 2.  device 설정
     -   web : webview 지원이 안됨
@@ -72,35 +88,47 @@
 ## 구조
 
 -   .vscode : vsCode용 prettier, eslint 설정 파일
--   jsconfig.json : vsCode 용 절대경로 설정 파일
+-   app.json : expo 프로젝트 설정 파일
 -   babel.config.js : react native 용 절대경로 설정 파일
+-   eas.json : eas 설정 파일
+-   google-services.json : FCM (android) 설정 파일
+-   jsconfig.json : vsCode 용 절대경로 설정 파일
 -   metro.config.js : svg 설정
--   src
-    -   api
-        -   Api.js : axios 설정
-        -   ApiService.js : api method 설정
-        -   LoginApi.js : 로그인 api
-    -   assets : 이미지, css 파일
+-   app
+    -   index
+    -   \_layout
+    -   [link] : 링크 접속 관련
+    -   (login) : 로그인 관련
+        -   \_layout
+        -   bio : 생체 인증
+        -   ldap : LDAP 로그인
+        -   pin : PIN 로그인
+    -   (screens)
+        -   \_layout
+        -   main : 메인
+        -   web : web view
+    -   (utils)
+        -   \_layout
+        -   camera : QR 스캔
     -   components
-        -   BioLogin.js
-        -   LDAPLogin.js
-        -   LoginLayout.js
-        -   OtherLogin.js
-        -   PinLogin.js
+        -   Contents : router 관련
+        -   Loading : loading 화면
+        -   OtherLogin : 다른 방법으로 로그인
     -   modal
-        -   PopModal.js : 모달 팝업창 (공통)
-        -   LoginInfo.js : LDAP 로그인 페이지 문의 및 연락처
-    -   navigation
-        -   Navigation.js : 네비게이션 설정
-    -   screens
-        -   Main.js : genius 메인 페이지
-        -   WebViewScreen.js : genius webview
+        -   PopModal : 모달 팝업창 (공통)
+        -   LoginInfo : LDAP 로그인 페이지 문의 및 연락처
+    -   api
+        -   Api : axios 설정
+        -   ApiService : api method 설정
+        -   LoginApi : 로그인 api
+    -   assets : 이미지, css 파일
     -   store
         -   store.js
         -   reducers
-            -   loginReducer.js : 로그인 관련
-            -   modalReducer.js : 모달 관련
+            -   commonReducer : 공통
+            -   loginReducer : 로그인 관련
+            -   modalReducer : 모달 관련
     -   utils
-        -   NavigationUtils.js : navigation 공통화
-        -   StorageUtils.js : async storage 공통화
-        -   Utils.js : 공통 메소드
+        -   DispatchUtil : dispatch 관련
+        -   Push : push 알림 설정
+        -   StorageUtils : async storage 관련

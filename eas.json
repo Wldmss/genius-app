@@ -5,18 +5,22 @@
   "build": {
     "base": {
       "node": "20.11.1",
-      "env": {},
+      "env": {
+        "EXPO_PUBLIC_VERSION": "1.0.0",
+        "EXPO_PUBLIC_PROJECT_ID": "bd698549-609f-476e-9339-4d0566f95b31",
+        "EXPO_PUBLIC_WEB": "http://192.168.219.254:8080"
+      },
       "android": {
         "image": "latest",
         "buildType": "apk",
         "env": {
-          "PLATFORM": "android"
+          "EXPO_PUBLIC_PLATFORM": "android"
         }
       },
       "ios": {
         "image": "latest",
         "env": {
-          "PLATFORM": "ios"
+          "EXPO_PUBLIC_PLATFORM": "ios"
         }
       },
       "channel": "base"
@@ -30,9 +34,9 @@
         "simulator": true
       },
       "env": {
-        "APP_ENV": "development",
-        "SERVER_URL": "http://localhost:8081",
-        "API_URL": "/api/v1"
+        "EXPO_PUBLIC_PROFILE": "development",
+        "EXPO_PUBLIC_SERVER_URL": "http://localhost:8081",
+        "EXPO_PUBLIC_API_URL": "/api/v1"
       }
     },
     "preview": {
@@ -40,18 +44,18 @@
       "channel": "preview",
       "distribution": "internal",
       "env": {
-        "APP_ENV": "preview",
-        "SERVER_URL": "http://localhost:8081",
-        "API_URL": "/api/v1"
+        "EXPO_PUBLIC_PROFILE": "preview",
+        "EXPO_PUBLIC_SERVER_URL": "http://localhost:8081",
+        "EXPO_PUBLIC_API_URL": "/api/v1"
       }
     },
     "production": {
       "extends": "base",
       "channel": "production",
       "env": {
-        "APP_ENV": "production",
-        "SERVER_URL": "http://localhost:8081",
-        "API_URL": "/api/v1"
+        "EXPO_PUBLIC_PROFILE": "production",
+        "EXPO_PUBLIC_SERVER_URL": "http://localhost:8081",
+        "EXPO_PUBLIC_API_URL": "/api/v1"
       }
     }
   },

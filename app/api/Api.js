@@ -1,9 +1,10 @@
 import axios from 'axios';
-import { SERVER_URL } from '@env';
 import { Alert } from 'react-native';
 
+const { EXPO_PUBLIC_SERVER_URL } = process.env;
+
 const Api = axios.create({
-    baseURL: `${SERVER_URL}/`,
+    baseURL: `${EXPO_PUBLIC_SERVER_URL}/`,
     timeout: 30000,
     headers: { 'Context-Type': 'application/json' },
     maxRedirects: 0,

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { commonInputStyles, commonTextStyles } from 'assets/styles';
-import { getPushToken, login } from 'api/LoginApi';
+import { checkPushToken, login } from 'api/LoginApi';
 import { useSelector } from 'react-redux';
 import store from 'store/store';
 import { dispatchLogin, dispatchMultiple, dispatchOne } from 'utils/DispatchUtils';
@@ -11,8 +11,8 @@ import moment from 'moment';
 
 /** LDAP 로그인 */
 const LDAPLogin = () => {
-    const pin = useSelector((state) => state.loginReducer.pin);
     const users = useSelector((state) => state.loginReducer.users);
+    const notification = useSelector((state) => state.commonReducer.notification);
 
     const otpRef = useRef(null);
     const timeRef = useRef(0);
@@ -43,7 +43,7 @@ const LDAPLogin = () => {
         console.log(value);
 
         // LDAP 로그인 TODO
-        login(value.username, value.password).then((res) => {
+        login(value.username, value.password, notification).then((res) => {
             if (res.status) {
                 setToken(res.data ? res.data.token : null);
                 setIsLogin(true);
@@ -117,7 +117,7 @@ const LDAPLogin = () => {
         store.dispatch(dispatchMultiple(storeData));
         store.dispatch(dispatchLogin(moment()));
         store.dispatch(dispatchOne('SET_TAB', 'web'));
-        getPushToken();
+        checkPushToken();
     };
 
     const showInfo = () => {

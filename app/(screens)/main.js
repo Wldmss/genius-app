@@ -3,7 +3,7 @@ import { Image, StyleSheet, View } from 'react-native';
 import store from 'store/store';
 import * as SecureStore from 'expo-secure-store';
 import * as Authentication from 'expo-local-authentication';
-import { dispatchMultiple, dispatchOne } from 'utils/DispatchUtils';
+import { dispatchMultiple } from 'utils/DispatchUtils';
 import * as StorageUtils from 'utils/StorageUtils';
 
 const genius_logo = require('assets/genius_logo.png');

@@ -2,6 +2,7 @@ import React from 'react';
 import { Alert } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 
+/** 사용 x */
 export const handleDownloadRequest = async (event, ref) => {
     const url = event.nativeEvent.url;
 

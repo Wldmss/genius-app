@@ -36,11 +36,14 @@
                 "backgroundColor": "#ffffff"
             },
             "permissions": [
-                "CAMERA",
+                "android.permission.CAMERA",
                 "android.permission.USE_BIOMETRIC",
                 "android.permission.USE_FINGERPRINT",
                 "android.permission.CAMERA",
-                "android.permission.RECORD_AUDIO"
+                "android.permission.RECORD_AUDIO",
+                "android.permission.INTERNET",
+                "android.permission.FOREGROUND_SERVICE",
+                "android.permission.SYSTEM_ALERT_WINDOW"
             ],
             "runtimeVersion": "1.0.0",
             "package": "com.ktds.genius",
@@ -109,12 +112,24 @@
                     "android": {
                         "usesCleartextTraffic": true
                     },
-                    "ios": {}
+                    "ios": {
+                        "useFrameworks": "static"
+                    }
+                }
+            ],
+            "@react-native-firebase/app",
+            "@react-native-firebase/messaging",
+            [
+                "expo-notifications",
+                {
+                    "icon": "./app/assets/app_logo.png",
+                    "color": "#ffffff",
+                    "sounds": []
                 }
             ]
         ],
         "updates": {
-            "url": "https://u.expo.dev/c44d0655-c80f-47b5-a910-7f26bab2d713"
+            "url": "https://u.expo.dev/bd698549-609f-476e-9339-4d0566f95b31"
         },
         "owner": "wldms"
     }

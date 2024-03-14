@@ -5,9 +5,9 @@ import modalReducer from 'store/reducers/modalReducer';
 import commonReducer from 'store/reducers/commonReducer';
 
 const rootReducer = combineReducers({
+    commonReducer,
     loginReducer,
     modalReducer,
-    commonReducer,
 });
 
 const store = createStore(rootReducer, applyMiddleware(thunk));

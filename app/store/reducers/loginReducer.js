@@ -6,13 +6,9 @@ const initialState = {
     tab: null,
     bioSupported: false,
     bioRecords: false,
-    isLink: false,
-    params: null,
     exitFlag: false,
     expire: null,
-    camera: false,
     isLogin: false,
-    test:null
 };
 
 const loginReducer = (state = initialState, action) => {
@@ -52,11 +48,6 @@ const loginReducer = (state = initialState, action) => {
                 ...state,
                 bioRecords: action.payload,
             };
-        case 'SET_LINK':
-            return {
-                ...state,
-                isLink: action.payload,
-            };
         case 'SET_EXIT':
             return {
                 ...state,
@@ -67,35 +58,19 @@ const loginReducer = (state = initialState, action) => {
                 ...state,
                 token: null,
                 tab: null,
-                isLink: false,
                 exitFlag: false,
+                isLogin: false,
                 expire: null,
-                camera: false,
             };
         case 'SET_EXPIRE':
             return {
                 ...state,
                 expire: action.payload,
             };
-        case 'SET_CAMERA':
-            return {
-                ...state,
-                camera: action.payload,
-            };
-        case 'SET_PARAMS':
-            return {
-                ...state,
-                params: action.payload,
-            };
         case 'SET_LOGIN':
             return {
                 ...state,
                 isLogin: action.payload,
-            };
-            case 'SET_TEST':
-            return {
-                ...state,
-                test: action.payload,
             };
         default:
             return state;
