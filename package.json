@@ -3,8 +3,8 @@
     "version": "1.0.0",
     "main": "expo-router/entry",
     "scripts": {
-        "start": "set EXPO_PUBLIC_PROFILE=preview && npx expo start --clear",
-        "dev": "set EXPO_PUBLIC_PROFILE=development && expo start --dev-client --reset-cache",
+        "start": "set EXPO_PUBLIC_PROFILE=preview && npx expo start --tunnel --clear",
+        "dev": "set EXPO_PUBLIC_PROFILE=development && expo start --dev-client --reset-cache --tunnel",
         "android": "expo run:android",
         "ios": "expo run:ios",
         "web": "expo start --web",
@@ -27,7 +27,6 @@
         "expo-camera": "~14.0.5",
         "expo-clipboard": "~5.0.1",
         "expo-constants": "~15.4.5",
-        "expo-dev-client": "~3.3.9",
         "expo-device": "~5.9.3",
         "expo-file-system": "~16.0.5",
         "expo-image-picker": "~14.7.1",
