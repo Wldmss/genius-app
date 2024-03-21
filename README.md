@@ -59,7 +59,7 @@
 
     2. expo go 에서 실행하고 싶은 경우
 
-        - expo-dev-client 삭제
+        - expo-dev-client 삭제 ( "expo-dev-client": "~3.3.10",)
         - npm start (or npx expo start)
 
     3. development 실행 (권장)
