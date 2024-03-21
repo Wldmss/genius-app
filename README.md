@@ -70,7 +70,11 @@
         - expo.dev 에서 build 확인 및 .apk 파일 install
         - npm run dev (--dev-client 로 실행)
 
-    4. 업데이트
+    4. eas build 전에 프로젝트 오류 검사
+
+        - npx -y expo-doctor
+
+    5. 업데이트
 
 2.  device 설정
     -   web : webview 지원이 안됨

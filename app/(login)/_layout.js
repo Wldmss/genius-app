@@ -1,11 +1,11 @@
 import React from 'react';
-import { Image, ImageBackground, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
-import TopLogo from 'assets/login_top_title.svg';
+import { ImageBackground, StyleSheet, View } from 'react-native';
 import { Slot } from 'expo-router';
 import OtherLogin from 'components/OtherLogin';
 
-const genius_logo = require('assets/genius_logo.png');
-const genius_background = require('assets/genius_login_full_mobile.png');
+import TopLogo from 'assets/images/login-top.svg';
+const genius_background = require('assets/images/login-bg.png');
+import { GeniusLogo } from 'utils/ImageUtils';
 
 /** 로그인 페이지 (공통) */
 const LoginLayout = () => {
@@ -14,7 +14,7 @@ const LoginLayout = () => {
             <ImageBackground source={genius_background} style={styles.loginBackground}>
                 <TopLogo style={styles.title} />
                 <View style={styles.enterBox}>
-                    <Image source={genius_logo} style={styles.logo} resizeMode="contain" />
+                    <GeniusLogo style={styles.logo} />
                     <View style={styles.loginContainer}>
                         <Slot />
                     </View>
@@ -29,19 +29,23 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
+    loginBackground: {
+        flex: 1,
+        justifyContent: `center`,
+        alignItems: `center`,
+    },
     title: {
         marginBottom: 10,
         width: 230,
     },
     enterBox: {
         position: `relative`,
-        maxWidth: 300,
+        maxWidth: 330,
         shadowColor: '#ddd',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.6,
         shadowRadius: 16,
         borderRadius: 15,
-        justifyContent: `center`,
         alignItems: `center`,
         backgroundColor: `#fff`,
         color: `#666`,
@@ -50,16 +54,8 @@ const styles = StyleSheet.create({
         paddingVertical: 30,
         paddingHorizontal: 30,
     },
-    loginBackground: {
-        flex: 1,
-        justifyContent: `center`,
-        alignItems: `center`,
-        width: `100%`,
-        height: `100%`,
-    },
     logo: {
         height: 30,
-        width: 250,
     },
     loginContainer: {
         gap: 20,

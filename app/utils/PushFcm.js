@@ -49,7 +49,7 @@ export default function PushFcm() {
 
         // Listen for push notifications when the app is in the foreground
         messaging().onMessage(async (handlePushNotification) => {
-            // Alert.alert('new massage!!', JSON.stringify(handlePushNotification));
+            Alert.alert('new massage!!', JSON.stringify(handlePushNotification));
         });
 
         // Clean up the event listeners

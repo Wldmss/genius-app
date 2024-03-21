@@ -1,6 +1,7 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useSelector } from 'react-redux';
 import * as Clipboard from 'expo-clipboard';
+import { FontText } from 'utils/TextUtils';
 
 export default function Test() {
     const test = useSelector((state) => state.commonReducer.test);
@@ -11,9 +12,9 @@ export default function Test() {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.text} onPress={copy}>
+            <FontText style={styles.text} onPress={copy}>
                 {test}
-            </Text>
+            </FontText>
         </View>
     );
 }

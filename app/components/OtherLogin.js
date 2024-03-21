@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { commonInputStyles } from 'assets/styles';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
 import store from 'store/store';
 import { dispatchOne } from 'utils/DispatchUtils';
 import { useSelector } from 'react-redux';
+import { FontTextG } from 'utils/TextUtils';
+
+import BioIcon from 'assets/icons/icon-bio.svg';
+import PinIcon from 'assets/icons/icon-pin.svg';
+import IdIcon from 'assets/icons/icon-id.svg';
 
 /** 다른 방법으로 로그인 (공통) */
 const OtherLogin = () => {
@@ -12,7 +16,6 @@ const OtherLogin = () => {
     const tab = useSelector((state) => state.loginReducer.tab);
     const users = useSelector((state) => state.loginReducer.users);
 
-    const [open, setOpen] = useState(false);
     const [type, setType] = useState({ pin: false, ldap: false, bio: false, bioRegister: false, changePin: false });
 
     const otherLogin = (id, modFlag) => {
@@ -24,72 +27,105 @@ const OtherLogin = () => {
         store.dispatch(dispatchOne('SET_TAB', id));
     };
 
-    const handleOpen = () => {
-        setOpen(!open);
-    };
-
     useEffect(() => {
         setType({
             ...type,
             pin: (tab != 'pin' && users) || (tab == 'pin' && pin?.isRegistered && pin?.modFlag),
-            ldap: tab != 'ldap' && pin?.isRegistered,
+            ldap: tab != 'ldap' && pin?.isRegistered, // 다른 사번으로 로그인 차단 요청
             bio: tab != 'bio' && users && bio?.isRegistered && pin?.isRegistered,
             bioRegister: tab != 'bio' && users && !bio?.isRegistered && pin?.isRegistered,
             changePin: tab == 'pin' && users && !pin?.modFlag,
         });
-
-        setOpen(false);
     }, [tab, pin, bio]);
 
     return (
         <View style={styles.container}>
             {(type.pin || type.ldap || type.bio || type.bioRegister || type.changePin) && (
-                <Text style={styles.otherText} onPress={handleOpen}>{`다른 방법으로 로그인 ${open ? '∧' : '∨'}`}</Text>
+                <View style={styles.otherContainer}>
+                    <FontTextG style={styles.otherTitle}>다른 방법으로 로그인</FontTextG>
+                    <View style={styles.otherLoginBox}>
+                        {type.pin && (
+                            <Pressable style={styles.otherBox} onPress={() => otherLogin('pin')}>
+                                <View style={styles.iconBox}>
+                                    <PinIcon />
+                                </View>
+                                <FontTextG style={styles.otherText}>PIN</FontTextG>
+                            </Pressable>
+                        )}
+                        {type.ldap && (
+                            <Pressable style={styles.otherBox} onPress={() => otherLogin('ldap')}>
+                                <View style={styles.iconBox}>
+                                    <IdIcon />
+                                </View>
+                                <FontTextG style={styles.otherText}>아이디/비밀번호</FontTextG>
+                            </Pressable>
+                        )}
+                        {type.bio && (
+                            <Pressable style={styles.otherBox} onPress={() => otherLogin('bio')}>
+                                <View style={styles.iconBox}>
+                                    <BioIcon />
+                                </View>
+                                <FontTextG style={styles.otherText}>생체 인증</FontTextG>
+                            </Pressable>
+                        )}
+                        {type.bioRegister && (
+                            <Pressable style={styles.otherBox} onPress={() => otherLogin('bio', true)}>
+                                <View style={styles.iconBox}>
+                                    <BioIcon />
+                                </View>
+                                <FontTextG style={styles.otherText}>생체 인증 등록</FontTextG>
+                            </Pressable>
+                        )}
+                        {type.changePin && (
+                            <Pressable style={styles.otherBox} onPress={() => otherLogin('pin', true)}>
+                                <View style={styles.iconBox}>
+                                    <PinIcon />
+                                </View>
+                                <FontTextG style={styles.otherText}>PIN 변경</FontTextG>
+                            </Pressable>
+                        )}
+                    </View>
+                </View>
             )}
-            <View style={[styles.otherLoginBox, !open ? styles.none : '']}>
-                {type.pin && (
-                    <Pressable style={commonInputStyles.button} onPress={() => otherLogin('pin')}>
-                        <Text>PIN</Text>
-                    </Pressable>
-                )}
-                {type.ldap && (
-                    <Pressable style={commonInputStyles.button} onPress={() => otherLogin('ldap')}>
-                        <Text>아이디/비밀번호</Text>
-                    </Pressable>
-                )}
-                {type.bio && (
-                    <Pressable style={commonInputStyles.button} onPress={() => otherLogin('bio')}>
-                        <Text>생체 인증</Text>
-                    </Pressable>
-                )}
-                {type.bioRegister && (
-                    <Pressable style={commonInputStyles.button} onPress={() => otherLogin('bio', true)}>
-                        <Text>생체 인증 등록</Text>
-                    </Pressable>
-                )}
-                {type.changePin && (
-                    <Pressable style={commonInputStyles.button} onPress={() => otherLogin('pin', true)}>
-                        <Text>PIN 변경</Text>
-                    </Pressable>
-                )}
-            </View>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-        gap: 5,
+        marginTop: 10,
+    },
+    otherContainer: {
+        gap: 10,
+        alignItems: `center`,
     },
     otherLoginBox: {
-        gap: 5,
+        gap: 10,
+        flexDirection: `row`,
+    },
+    otherTitle: {
+        fontSize: 12,
     },
     otherText: {
-        color: `#454545`,
-        width: 250,
+        fontSize: 11,
     },
     none: {
         display: `none`,
+    },
+    otherBox: {
+        alignItems: `center`,
+        width: 83,
+        gap: 5,
+    },
+    iconBox: {
+        borderWidth: 1,
+        borderColor: `#E6E7E8`,
+        borderRadius: 50,
+        backgroundColor: `#FFFFFF`,
+        justifyContent: `center`,
+        alignItems: `center`,
+        width: 48,
+        height: 48,
     },
 });
 

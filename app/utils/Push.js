@@ -1,18 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
+import * as TaskManager from 'expo-task-manager';
 import * as Device from 'expo-device';
 import { dispatchOne } from 'utils/DispatchUtils';
 import store from 'store/store';
 
-Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-        shouldShowAlert: true,
-        shouldPlaySound: true,
-        shouldSetBadge: true,
-    }),
-});
+const TASK_NAME = 'BACKGROUND_NOTIFICATION_TASK';
 
+// push 권한 확인
 async function checkNotificationPermission() {
     if (Platform.OS === 'android') {
         await Notifications.setNotificationChannelAsync('default', {
@@ -38,7 +34,7 @@ async function checkNotificationPermission() {
     return null;
 }
 
-async function sendPushNotification(token) {
+export async function sendPushNotification(token) {
     const message = {
         to: token,
         sound: 'default',
@@ -46,6 +42,8 @@ async function sendPushNotification(token) {
         body: 'And here is the body!',
         data: { someData: 'goes here' },
     };
+
+    console.log(message);
 
     await fetch('https://exp.host/--/api/v2/push/send', {
         method: 'POST',
@@ -61,26 +59,24 @@ async function sendPushNotification(token) {
 /** push 알림 설정 (expo-notification) */
 export function useNotification() {
     const [notification, setNotification] = useState(false);
-    const notificationListener = useRef();
-    const responseListener = useRef();
 
     useEffect(() => {
         checkNotificationPermission();
 
-        notificationListener.current = Notifications.addNotificationReceivedListener((response) => {
+        const received1 = Notifications.addNotificationReceivedListener((response) => {
             Alert.alert('add!!');
             console.log('add!!');
             setNotification(response);
         });
 
-        responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
+        const received2 = Notifications.addNotificationResponseReceivedListener((response) => {
             Alert.alert('response!!');
             console.log('response!!');
         });
 
         return () => {
-            Notifications.removeNotificationSubscription(notificationListener.current);
-            Notifications.removeNotificationSubscription(responseListener.current);
+            received1.remove();
+            received2.remove();
         };
     }, []);
 }

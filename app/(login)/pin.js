@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, View, Text, TextInput, Pressable, Alert } from 'react-native';
+import { StyleSheet, View, TextInput, Pressable, Alert } from 'react-native';
 import { commonInputStyles, commonTextStyles } from 'assets/styles';
 import { useSelector } from 'react-redux';
 import store from 'store/store';
 import { dispatchLogin, dispatchOne } from 'utils/DispatchUtils';
 import * as StorageUtils from 'utils/StorageUtils';
 import moment from 'moment';
+import { FontText } from 'utils/TextUtils';
 
 /** pin 로그인/등록/수정 */
 const PinLogin = () => {
@@ -34,8 +35,10 @@ const PinLogin = () => {
         if (pin?.modFlag && id != 'origin') {
             const otherId = id == 'enter' ? 'check' : 'enter';
             let sameFlag = null;
-            if (value[otherId].length == pinLength && input) {
+            if (value[otherId].length == pinLength && input.length == pinLength && input) {
                 sameFlag = checkSame(value[otherId], input);
+            } else {
+                sameFlag = null;
             }
 
             setIsSame(sameFlag);
@@ -152,7 +155,7 @@ const PinLogin = () => {
                         placeholder="현재 PIN 입력"
                         placeholderTextColor={`#a9a9a9`}
                         secureTextEntry
-                        style={commonInputStyles.inputNumber}
+                        style={[commonTextStyles.fonts, commonInputStyles.inputNumber, value.origin.length > 0 ? styles.spacing : '']}
                         onChangeText={(input) => changePin('origin', input)}
                     />
                 )}
@@ -165,7 +168,7 @@ const PinLogin = () => {
                     placeholder={`${isMod ? '새로운 ' : ''}PIN 입력`}
                     placeholderTextColor={`#a9a9a9`}
                     secureTextEntry
-                    style={commonInputStyles.inputNumber}
+                    style={[commonTextStyles.fonts, commonInputStyles.inputNumber, value.enter.length > 0 ? styles.spacing : '']}
                     onChangeText={(input) => changePin('enter', input)}
                 />
                 {pin?.modFlag && (
@@ -179,17 +182,19 @@ const PinLogin = () => {
                             placeholder="PIN 입력 확인"
                             placeholderTextColor={`#a9a9a9`}
                             secureTextEntry
-                            style={commonInputStyles.inputNumber}
+                            style={[commonTextStyles.fonts, commonInputStyles.inputNumber, value.check.length > 0 ? styles.spacing : '']}
                             onChangeText={(input) => changePin('check', input)}
                         />
-                        <Text style={isSame != null ? (isSame ? commonTextStyles.success : commonTextStyles.warning) : ''}>
-                            {isSame != null ? (isSame ? `일치합니다.` : `일치하지 않습니다.`) : ''}
-                        </Text>
+                        {isSame != null && (
+                            <FontText style={isSame != null ? (isSame ? commonTextStyles.success : commonTextStyles.warning) : ''}>
+                                {isSame != null ? (isSame ? `일치합니다` : `일치하지 않습니다`) : ''}
+                            </FontText>
+                        )}
                     </>
                 )}
             </View>
             <Pressable style={commonInputStyles.buttonRed} onPress={handlePinButton}>
-                <Text style={commonTextStyles.white}>{pin?.modFlag ? 'PIN 설정' : '로그인 하기'}</Text>
+                <FontText style={commonTextStyles.white}>{pin?.modFlag ? 'PIN 설정' : '로그인'}</FontText>
             </Pressable>
         </View>
     );
@@ -197,10 +202,13 @@ const PinLogin = () => {
 
 const styles = StyleSheet.create({
     container: {
-        gap: 20,
+        gap: 15,
     },
     inputBox: {
         gap: 12,
+    },
+    spacing: {
+        letterSpacing: 5,
     },
 });
 

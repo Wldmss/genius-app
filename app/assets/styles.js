@@ -7,7 +7,12 @@ export const commonStyles = StyleSheet.create({
     hidden: {
         opacity: 0,
     },
+    geniusLogo: {
+        width: 200,
+    },
 });
+
+const inputWidth = 260;
 
 export const commonInputStyles = StyleSheet.create({
     inputText: {
@@ -16,11 +21,11 @@ export const commonInputStyles = StyleSheet.create({
         paddingVertical: 5,
         height: 36,
         lineHeight: 22,
-        width: 250,
+        width: inputWidth,
         margin: `auto`,
         borderRadius: 4,
         backgroundColor: `#E8F0FE`,
-        fontSize: 12,
+        fontSize: 13,
     },
     inputNumber: {
         borderWidth: 0,
@@ -28,13 +33,12 @@ export const commonInputStyles = StyleSheet.create({
         paddingVertical: 5,
         height: 36,
         lineHeight: 22,
-        width: 250,
+        width: inputWidth,
         margin: `auto`,
         borderRadius: 4,
         backgroundColor: `#E8F0FE`,
-        fontSize: 12,
+        fontSize: 13,
         textAlign: `center`,
-        letterSpacing: 10,
     },
     buttonRed: {
         alignItems: `center`,
@@ -44,10 +48,23 @@ export const commonInputStyles = StyleSheet.create({
         paddingVertical: 5,
         height: 40,
         lineHeight: 38,
-        width: 250,
+        width: inputWidth,
         margin: `auto`,
         borderRadius: 6,
         backgroundColor: `#FE2E36`,
+    },
+    buttonGray: {
+        alignItems: `center`,
+        justifyContent: `center`,
+        borderWidth: 0,
+        paddingHorizontal: 15,
+        paddingVertical: 5,
+        height: 40,
+        lineHeight: 38,
+        width: inputWidth,
+        margin: `auto`,
+        borderRadius: 6,
+        backgroundColor: `#5A5A5A`,
     },
     buttonWhite: {
         alignItems: `center`,
@@ -58,7 +75,7 @@ export const commonInputStyles = StyleSheet.create({
         paddingVertical: 5,
         height: 40,
         lineHeight: 38,
-        width: 250,
+        width: inputWidth,
         margin: `auto`,
         borderRadius: 6,
     },
@@ -71,28 +88,38 @@ export const commonInputStyles = StyleSheet.create({
         paddingVertical: 5,
         height: 35,
         lineHeight: 30,
-        width: 250,
+        width: inputWidth,
         margin: `auto`,
         borderRadius: 6,
     },
     cancel: {
-        width: 20,
-        height: 20,
+        width: 17,
+        height: 17,
     },
 });
 
 export const commonTextStyles = StyleSheet.create({
+    fonts: {
+        fontFamily: 'NotoSans',
+        lineHeight: 23,
+    },
     white: {
         color: `#fff`,
         fontSize: 15,
     },
     warning: {
-        color: `#bb2124`,
+        color: `#FF4F55`,
     },
     success: {
-        color: `#22bb33`,
+        color: `#00A896`,
     },
     center: {
         textAlign: `center`,
+    },
+    bold: {
+        fontWeight: `600`,
+    },
+    gray: {
+        color: `#666666`,
     },
 });

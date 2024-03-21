@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text, Pressable, Alert } from 'react-native';
+import { StyleSheet, View, Pressable, Alert } from 'react-native';
 import { useSelector } from 'react-redux';
 import { commonInputStyles, commonTextStyles } from 'assets/styles';
 import store from 'store/store';
@@ -7,6 +7,7 @@ import moment from 'moment';
 import * as Authentication from 'expo-local-authentication';
 import * as StorageUtils from 'utils/StorageUtils';
 import { dispatchLogin, dispatchOne } from 'utils/DispatchUtils';
+import { FontText } from 'utils/TextUtils';
 
 /** 생체 인증 로그인/등록 */
 const BioLogin = () => {
@@ -24,13 +25,14 @@ const BioLogin = () => {
 
             return success;
         } catch (error) {
+            Alert.alert('다시 시도해주세요.');
             console.error('생체 인증 오류 :', error);
         }
     };
 
     // 생체 인증 로그인
     const loginBio = async () => {
-        if (bioRecords && bio?.isRegistered) {
+        if (bioRecords && (bio?.isRegistered || bio?.modFlag)) {
             const success = await authenticate();
             if (success) {
                 store.dispatch(dispatchLogin(moment()));
@@ -55,26 +57,29 @@ const BioLogin = () => {
                     },
                 },
             ]);
-        } else {
-            Alert.alert('다시 시도해주세요.');
         }
     };
 
-    useEffect(() => {
+    // 등록/로그인 확인
+    const tryBio = () => {
         if (bio?.modFlag) {
             registBio();
         } else {
             loginBio();
         }
+    };
+
+    useEffect(() => {
+        tryBio();
     }, [bio]);
 
     return (
-        <View style={styles.container}>
+        <View>
             <View style={styles.inputBox}>
-                <Text style={commonTextStyles.center}>{`생체 인증 ${bio?.modFlag ? '등록' : '로그인'}`}</Text>
-                <Text style={styles.infoText}>지문 또는 Face ID를 입력해주세요.</Text>
-                <Pressable style={commonInputStyles.buttonWhite} onPress={loginBio}>
-                    <Text>다시 시도</Text>
+                <FontText style={commonTextStyles.center}>{`생체 인증 ${bio?.modFlag ? '등록' : '로그인'}`}</FontText>
+                <FontText style={styles.infoText}>지문 또는 Face ID를 입력해주세요</FontText>
+                <Pressable style={commonInputStyles.buttonWhite} onPress={tryBio}>
+                    <FontText>다시 시도</FontText>
                 </Pressable>
             </View>
         </View>
@@ -82,16 +87,14 @@ const BioLogin = () => {
 };
 
 const styles = StyleSheet.create({
-    container: {
-        gap: 20,
-    },
+    container: {},
     inputBox: {
-        gap: 20,
+        gap: 5,
         margin: `0 auto`,
     },
     infoText: {
         textAlign: `center`,
-        marginBottom: 50,
+        marginBottom: 10,
     },
 });
 

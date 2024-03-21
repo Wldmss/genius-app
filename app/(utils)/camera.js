@@ -1,16 +1,17 @@
 import { useEffect, useState } from 'react';
-import { Alert, Image, Linking, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, Linking, Modal, Pressable, StyleSheet, View } from 'react-native';
 import { Camera, CameraType } from 'expo-camera';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
+import { FontText } from 'utils/TextUtils';
 
-const arrow_img = require('assets/right-arrow.png');
-const qr_scan_img = require('assets/qr_scan.png');
-const album_img = require('assets/album.png');
-const cancel_img = require('assets/cancel.png');
-const no_img = require('assets/no_image.png');
-const no_camera = require('assets/no_camera.png');
+const arrow_img = require('assets/images/close.png');
+const qr_scan_img = require('assets/images/close.png');
+const album_img = require('assets/images/close.png');
+const cancel_img = require('assets/images/close.png');
+const no_img = require('assets/images/close.png');
+const no_camera = require('assets/images/close.png');
 
 /** QR 스캐너 */
 const ScanQR = () => {
@@ -107,7 +108,7 @@ const ScanQR = () => {
                 <Pressable onPress={backToWeb}>
                     <Image source={arrow_img} style={styles.scanImg} resizeMode="contain" />
                 </Pressable>
-                <Text style={styles.scanText}>코드스캔</Text>
+                <FontText style={styles.scanText}>코드스캔</FontText>
             </View>
             <View style={styles.imageContainer}>
                 {type == 'scan' ? (
@@ -135,25 +136,25 @@ const ScanQR = () => {
             <View style={styles.buttonContainer}>
                 <Pressable style={styles.button} onPress={() => setType('scan')}>
                     <Image source={qr_scan_img} style={styles.tabImg} resizeMode="contain" />
-                    <Text style={type == 'scan' ? styles.boldText : ''}>코드스캔</Text>
+                    <FontText style={type == 'scan' ? styles.boldText : ''}>코드스캔</FontText>
                 </Pressable>
                 <Pressable style={styles.button} onPress={pickImage}>
                     <Image source={album_img} style={styles.tabImg} resizeMode="contain" />
-                    <Text style={type == 'library' ? styles.boldText : ''}>앨범</Text>
+                    <FontText style={type == 'library' ? styles.boldText : ''}>앨범</FontText>
                 </Pressable>
             </View>
             <Modal visible={scan} transparent={true}>
                 <Pressable style={styles.modal} onPress={(event) => resetScan(event)}>
                     <Pressable style={styles.modalContent} onPress={(e) => e.stopPropagation()}>
                         <View style={styles.modalUrlContainer}>
-                            <Text style={styles.modalUrlText}>{urlText}</Text>
+                            <FontText style={styles.modalUrlText}>{urlText}</FontText>
                             <Pressable onPress={resetScan} style={styles.modalCancelContainer}>
                                 <Image source={cancel_img} style={styles.modalCancel}></Image>
                             </Pressable>
                         </View>
                         <View style={styles.modalBtnContainer}>
                             <Pressable style={styles.modalBtn} onPress={(e) => goToLink(e)}>
-                                <Text style={styles.modalBtnText}>이동</Text>
+                                <FontText style={styles.modalBtnText}>이동</FontText>
                             </Pressable>
                         </View>
                     </Pressable>

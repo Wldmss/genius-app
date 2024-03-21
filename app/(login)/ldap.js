@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { commonInputStyles, commonTextStyles } from 'assets/styles';
 import { checkPushToken, login } from 'api/LoginApi';
 import { useSelector } from 'react-redux';
@@ -8,6 +8,7 @@ import { dispatchLogin, dispatchMultiple, dispatchOne } from 'utils/DispatchUtil
 import * as StorageUtils from 'utils/StorageUtils';
 import LoginInfo from 'modal/LoginInfo';
 import moment from 'moment';
+import { FontText } from 'utils/TextUtils';
 
 /** LDAP 로그인 */
 const LDAPLogin = () => {
@@ -143,7 +144,7 @@ const LDAPLogin = () => {
                         value={value.username}
                         placeholder="아이디를 입력하세요."
                         placeholderTextColor={`#a9a9a9`}
-                        style={commonInputStyles.inputText}
+                        style={[commonTextStyles.fonts, commonInputStyles.inputText]}
                         onChangeText={(input) => changeValue('username', input)}
                     />
                     <TextInput
@@ -152,39 +153,43 @@ const LDAPLogin = () => {
                         placeholder="비밀번호를 입력하세요."
                         placeholderTextColor={`#a9a9a9`}
                         secureTextEntry
-                        style={commonInputStyles.inputText}
+                        style={[commonTextStyles.fonts, commonInputStyles.inputText]}
                         onChangeText={(input) => changeValue('password', input)}
                     />
                 </View>
-                <Pressable style={commonInputStyles.buttonRed} onPress={doLogin}>
-                    <Text style={commonTextStyles.white}>로그인</Text>
+                <Pressable style={[isLogin ? commonInputStyles.buttonGray : commonInputStyles.buttonRed]} onPress={doLogin}>
+                    <FontText style={commonTextStyles.white}>로그인</FontText>
                 </Pressable>
             </View>
 
             {isLogin && (
                 <View style={styles.inputBox}>
-                    <View style={styles.inputBox}>
+                    <View style={styles.otpBox}>
                         <TextInput
                             id="otp"
                             ref={otpRef}
                             value={value.otp}
                             placeholder="인증번호를 입력하세요."
                             placeholderTextColor={`#a9a9a9`}
-                            style={commonInputStyles.inputText}
+                            style={[commonTextStyles.fonts, commonInputStyles.inputText]}
                             onChangeText={(input) => changeValue('otp', input)}
                         />
-                        <Text>{`남은시간 : ${timeRef.current}초`}</Text>
+                        <View style={styles.restTime}>
+                            <FontText>남은시간 :</FontText>
+                            <FontText style={commonTextStyles.bold}>{timeRef.current}</FontText>
+                            <FontText>초</FontText>
+                        </View>
                     </View>
                     <Pressable style={commonInputStyles.buttonRed} onPress={checkOTP}>
-                        <Text style={commonTextStyles.white}>인증번호 확인</Text>
+                        <FontText style={commonTextStyles.white}>인증번호 확인</FontText>
                     </Pressable>
                 </View>
             )}
 
             <View style={styles.infoBox}>
-                <Text style={styles.desc}>{`로그인 아이디, 비밀번호는\nKATE/KTalk 아이디(사번), 비밀번호와\n동일합니다.`}</Text>
+                <FontText style={styles.desc}>{`* 로그인 아이디, 비밀번호는\nKATE/KTalk 아이디(사번), 비밀번호와 동일합니다.`}</FontText>
                 <Pressable style={styles.infoButton} onPress={showInfo}>
-                    <Text style={styles.infoText}>문의 및 연락처</Text>
+                    <FontText style={styles.infoText}>문의 및 연락처</FontText>
                 </Pressable>
             </View>
         </View>
@@ -197,8 +202,13 @@ const styles = StyleSheet.create({
     },
     loginBox: {
         gap: 20,
+        alignItems: `center`,
     },
     inputBox: {
+        gap: 12,
+        alignItems: `center`,
+    },
+    otpBox: {
         gap: 12,
     },
     infoBox: {
@@ -206,14 +216,15 @@ const styles = StyleSheet.create({
         alignItems: `center`,
     },
     desc: {
-        fontSize: 12,
+        fontSize: 11,
         textAlign: `center`,
+        color: `#666666`,
     },
     infoButton: {
         borderWidth: 1,
         borderColor: `#ccc`,
         paddingHorizontal: 15,
-        paddingVertical: 5,
+        paddingVertical: 4,
         height: 30,
         lineHeight: 22,
         borderRadius: 4,
@@ -222,6 +233,10 @@ const styles = StyleSheet.create({
         textAlign: `center`,
         color: `#222`,
         fontSize: 12,
+    },
+    restTime: {
+        flexDirection: `row`,
+        gap: 3,
     },
 });
 

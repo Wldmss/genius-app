@@ -13,30 +13,29 @@ export const login = async (username, password, notification) => {
     return ApiService.post('login', { username: encryptUsername, password: encryptPassword })
         .then((response) => {
             const data = response.data;
-            checkPushToken(data['token'], notification);
+            checkPushToken(notification);
 
             return { status: true, data: data };
         })
         .catch(async (err) => {
-            await checkPushToken(null, notification);
+            await checkPushToken(notification);
             return { status: true, data: { token: {} } };
         });
 };
 
 // push 토큰 값 확인
-export const checkPushToken = async (serverToken, notification) => {
+export const checkPushToken = async (notification) => {
     await getPushToken(notification).then((token) => {
+        console.log('---token===');
         console.log(token);
         store.dispatch(dispatchOne('SET_TEST', token));
-        if (token != serverToken) {
-            // token이 잘못 된 경우 삭제하는 로직을 백단에 추가해야 함 (todo)
-            ApiService.post('push', { token: token })
-                .then((response) => {
-                    const data = response.data;
-                    console.log(data);
-                })
-                .catch((err) => {});
-        }
+
+        ApiService.post('push', { token: token })
+            .then((response) => {
+                const data = response.data;
+                console.log(data);
+            })
+            .catch((err) => {});
     });
 };
 

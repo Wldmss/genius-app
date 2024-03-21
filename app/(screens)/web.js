@@ -16,6 +16,7 @@ const Web = () => {
     const webViewRef = useRef(null);
 
     const [backButtonEnabled, setBackButtonEnabled] = useState(false);
+    let timeout = null;
 
     // webview 통신
     const handleOnMessage = (event) => {
@@ -101,9 +102,17 @@ const Web = () => {
         router.push('camera');
     };
 
-    // Webview 뒤로가기 처리
+    // webview load
     const webViewLoaded = () => {
+        clearTimeout(timeout);
+        store.dispatch(dispatchOne('SET_LOADING', false));
         setBackButtonEnabled(true);
+    };
+
+    // webview error
+    const handleError = () => {
+        store.dispatch(dispatchOne('SET_LOADING', false));
+        store.dispatch(dispatchOne('SET_TAB', 'error'));
     };
 
     useEffect(() => {
@@ -136,8 +145,13 @@ const Web = () => {
     }, [backButtonEnabled, camera]);
 
     useEffect(() => {
-        store.dispatch(dispatchOne('SET_LOADING', false));
         setBackButtonEnabled(false);
+
+        timeout = setTimeout(() => {
+            handleError();
+        }, 10000);
+
+        return () => clearTimeout(timeout);
     }, []);
 
     return (
@@ -145,7 +159,9 @@ const Web = () => {
             ref={webViewRef}
             style={styles.webview}
             onLoad={webViewLoaded}
-            source={{ uri: process.env.EXPO_PUBLIC_WEB }}
+            onError={handleError}
+            source={{ uri: `https://naver.com` }}
+            // source={{ uri: process.env.EXPO_PUBLIC_WEB }}
             onNavigationStateChange={onNavigationStateChange}
             onMessage={handleOnMessage}
             injectedJavaScript={`

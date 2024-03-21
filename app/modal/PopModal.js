@@ -1,8 +1,11 @@
 import React from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Modal, Pressable, StyleSheet, View } from 'react-native';
 import { useSelector } from 'react-redux';
 import store from '../store/store';
 import { commonInputStyles, commonStyles } from 'assets/styles';
+import { FontText } from 'utils/TextUtils';
+
+const close_btn = require('assets/images/close.png');
 
 /** 팝업 모달 (공통) */
 const PopModal = () => {
@@ -21,9 +24,9 @@ const PopModal = () => {
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
                         <View style={styles.headContent}>
-                            <Text>{title}</Text>
-                            <Pressable style={[commonInputStyles.cancel, hideClose ? commonStyles.hidden : '']} onPress={setModalClose}>
-                                <Text style={styles.cancelText}>X</Text>
+                            <FontText style={styles.title}>{title}</FontText>
+                            <Pressable style={[hideClose ? commonStyles.hidden : '']} onPress={setModalClose}>
+                                <Image source={close_btn} style={commonInputStyles.cancel} resizeMode="contain" />
                             </Pressable>
                         </View>
                         {element}
@@ -54,10 +57,8 @@ const styles = StyleSheet.create({
         justifyContent: `space-between`,
         flexDirection: `row`,
     },
-    cancelText: {
-        fontSize: 18,
-        alignItems: `center`,
-        justifyContent: `center`,
+    title: {
+        fontSize: 15,
     },
 });
 

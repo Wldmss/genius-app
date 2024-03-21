@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Image, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import store from 'store/store';
 import * as SecureStore from 'expo-secure-store';
 import * as Authentication from 'expo-local-authentication';
 import { dispatchMultiple } from 'utils/DispatchUtils';
 import * as StorageUtils from 'utils/StorageUtils';
-
-const genius_logo = require('assets/genius_logo.png');
 
 /** genius main */
 const Main = () => {
@@ -96,11 +94,7 @@ const Main = () => {
         }
     }, []);
 
-    return (
-        <View style={styles.container}>
-            <Image source={genius_logo} resizeMode="contain" />
-        </View>
-    );
+    return <View style={styles.container}></View>;
 };
 
 const styles = StyleSheet.create({

@@ -79,7 +79,7 @@ const Contents = () => {
 
                 let timeout = setTimeout(() => {
                     router.push(tab);
-                }, 500);
+                }, 300);
 
                 return () => {
                     clearTimeout(timeout);

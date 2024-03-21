@@ -1,7 +1,6 @@
-import { Image, Modal, StyleSheet, View } from 'react-native';
+import { Modal, StyleSheet, View } from 'react-native';
 import { useSelector } from 'react-redux';
-
-const load_img = require('assets/genius_logo.png');
+import { GeniusLogo } from 'utils/ImageUtils';
 
 /** 로딩 화면 */
 const Loading = () => {
@@ -10,7 +9,7 @@ const Loading = () => {
     return (
         <Modal visible={loading} transparent={true} animationType="fade">
             <View style={styles.modalContainer}>
-                <Image source={load_img} resizeMode="contain" />
+                <GeniusLogo />
             </View>
         </Modal>
     );

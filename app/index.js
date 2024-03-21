@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Alert } from 'react-native';
 import * as Updates from 'expo-updates';
+import { Redirect } from 'expo-router';
 
 /** index */
 const Page = () => {
