@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         elevation: 5, // 안드로이드에서 그림자를 만듭니다.
         gap: 10,
-        width: 285,
+        width: 320,
     },
     headContent: {
         display: `flex`,

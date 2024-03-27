@@ -13,6 +13,7 @@ import IdIcon from 'assets/icons/icon-id.svg';
 const OtherLogin = () => {
     const pin = useSelector((state) => state.loginReducer.pin);
     const bio = useSelector((state) => state.loginReducer.bio);
+    const bioSupported = useSelector((state) => state.loginReducer.bioSupported);
     const tab = useSelector((state) => state.loginReducer.tab);
     const users = useSelector((state) => state.loginReducer.users);
 
@@ -31,9 +32,9 @@ const OtherLogin = () => {
         setType({
             ...type,
             pin: (tab != 'pin' && users) || (tab == 'pin' && pin?.isRegistered && pin?.modFlag),
-            ldap: tab != 'ldap' && pin?.isRegistered, // 다른 사번으로 로그인 차단 요청
-            bio: tab != 'bio' && users && bio?.isRegistered && pin?.isRegistered,
-            bioRegister: tab != 'bio' && users && !bio?.isRegistered && pin?.isRegistered,
+            ldap: false, //tab != 'ldap' && pin?.isRegistered, // 다른 사번으로 로그인 차단 요청
+            bio: bioSupported && tab != 'bio' && users && bio?.isRegistered && pin?.isRegistered,
+            bioRegister: bioSupported && tab != 'bio' && users && !bio?.isRegistered && pin?.isRegistered,
             changePin: tab == 'pin' && users && !pin?.modFlag,
         });
     }, [tab, pin, bio]);

@@ -1,49 +1,63 @@
 import ApiService from './ApiService';
-import * as Notifications from 'expo-notifications';
 import store from 'store/store';
 import { dispatchOne } from 'utils/DispatchUtils';
 import CryptoJS from 'react-native-crypto-js';
+import { getPushToken } from 'utils/Push';
+import { getMessagingToken } from 'utils/PushFcm';
+import { Alert } from 'react-native';
+
+const { EXPO_PUSH_KEY } = process.env;
 
 // LDAP login
-export const login = async (username, password, notification) => {
-    const key = 'genius';
-    const encryptUsername = CryptoJS.AES.encrypt(JSON.stringify(username), key).toString();
-    const encryptPassword = password ? CryptoJS.AES.encrypt(JSON.stringify(password), key).toString() : null;
+export const login = async (username, password) => {
+    // const encryptUsername = CryptoJS.AES.encrypt(JSON.stringify(username), EXPO_PUSH_KEY).toString();
+    // const encryptPassword = password ? CryptoJS.AES.encrypt(JSON.stringify(password), EXPO_PUSH_KEY).toString() : null;
 
-    return ApiService.post('login', { username: encryptUsername, password: encryptPassword })
-        .then((response) => {
-            const data = response.data;
-            checkPushToken(notification);
-
-            return { status: true, data: data };
+    return ApiService.post('login', { username: username, password: password })
+        .then(({ status, data }) => {
+            console.log(status);
+            return { status: status == 200, data: data };
         })
         .catch(async (err) => {
-            await checkPushToken(notification);
-            return { status: true, data: { token: {} } };
+            console.log(err);
+            return { status: false };
+        });
+};
+
+// pin/bio 로그인 검증
+export const checkLogin = async () => {
+    return ApiService.get('login/check')
+        .then(({ status, data }) => {
+            console.log(status);
+            store.dispatch(dispatchOne('SET_TOKEN', data['token']));
+            checkPushToken();
+
+            return { status: status == 200, data: data };
+        })
+        .catch(async (err) => {
+            console.log(err);
+            return { status: false };
         });
 };
 
 // push 토큰 값 확인
-export const checkPushToken = async (notification) => {
-    await getPushToken(notification).then((token) => {
-        console.log('---token===');
-        console.log(token);
-        store.dispatch(dispatchOne('SET_TEST', token));
+export const checkPushToken = async () => {
+    // await getPushToken().then((deviceToken) => {
+    //     console.log('---deviceToken---');
+    //     console.log(deviceToken);
+    //     // store.dispatch(dispatchOne('SET_TEST', deviceToken));
 
-        ApiService.post('push', { token: token })
-            .then((response) => {
-                const data = response.data;
-                console.log(data);
-            })
-            .catch((err) => {});
+    //     // const encryptPushToken = CryptoJS.AES.encrypt(JSON.stringify(deviceToken), EXPO_PUSH_KEY).toString();
+    //     ApiService.post('push', { deviceToken: deviceToken });
+    // });
+
+    await getMessagingToken().then((deviceToken) => {
+        console.log('---deviceToken---');
+        console.log(deviceToken);
+        Alert.alert(deviceToken);
+        store.dispatch(dispatchOne('SET_TEST', deviceToken));
+
+        // const encryptPushToken = CryptoJS.AES.encrypt(JSON.stringify(deviceToken), EXPO_PUSH_KEY).toString();
+        ApiService.post('push', { deviceToken: deviceToken });
     });
 };
-
-// push 토큰 발급
-async function getPushToken(notification) {
-    if (notification) {
-        return (await Notifications.getDevicePushTokenAsync()).data;
-    }
-
-    return null;
-}

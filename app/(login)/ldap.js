@@ -10,10 +10,11 @@ import LoginInfo from 'modal/LoginInfo';
 import moment from 'moment';
 import { FontText } from 'utils/TextUtils';
 
+const { EXPO_PUBLIC_NAME } = process.env;
+
 /** LDAP 로그인 */
 const LDAPLogin = () => {
     const users = useSelector((state) => state.loginReducer.users);
-    const notification = useSelector((state) => state.commonReducer.notification);
 
     const otpRef = useRef(null);
     const timeRef = useRef(0);
@@ -43,10 +44,10 @@ const LDAPLogin = () => {
     const sendLDAP = () => {
         console.log(value);
 
-        // LDAP 로그인 TODO
-        login(value.username, value.password, notification).then((res) => {
-            if (res.status) {
-                setToken(res.data ? res.data.token : null);
+        // LDAP 로그인
+        login(value.username, value.password).then(({ status, data }) => {
+            if (status) {
+                setToken(data ? data.token : null);
                 setIsLogin(true);
             } else {
                 resetUsers();
@@ -72,14 +73,15 @@ const LDAPLogin = () => {
             return;
         }
 
-        checkUsers();
+        saveUserData(true);
+        // checkUsers();
     };
 
     // 사용자 정보 확인
     const checkUsers = () => {
         if (users != null && users !== value.username) {
             Alert.alert(
-                'GENIUS',
+                EXPO_PUBLIC_NAME,
                 `기본 로그인 정보를 "${value.username}" 으로 변경하시겠습니까?`,
                 [
                     {
@@ -106,12 +108,13 @@ const LDAPLogin = () => {
 
     // 사용자 정보 저장
     const saveUserData = async (changeFlag) => {
+        console.log(token);
         if (changeFlag) {
-            await StorageUtils.setDeviceData('users', value.username);
+            await StorageUtils.setDeviceData('users', token);
         }
 
         let storeData = {
-            SET_USERS: value.username,
+            SET_USERS: token,
             SET_TOKEN: token,
         };
 
@@ -128,7 +131,6 @@ const LDAPLogin = () => {
     // user 정보 reset
     const resetUsers = async () => {
         await StorageUtils.setDeviceData('users', null);
-        // store.dispatch(dispatchOne('SET_USERS', null));
     };
 
     useEffect(() => {

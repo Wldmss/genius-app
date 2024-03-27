@@ -3,10 +3,14 @@ import { Alert } from 'react-native';
 
 const { EXPO_PUBLIC_SERVER_URL } = process.env;
 
+export const apiStore = (_store) => {
+    store = _store;
+};
+
 const Api = axios.create({
     baseURL: `${EXPO_PUBLIC_SERVER_URL}/`,
     timeout: 30000,
-    headers: { 'Context-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     maxRedirects: 0,
 });
 
@@ -16,12 +20,17 @@ Api.defaults.headers.post['Content-Type'] = 'application/json';
 // 요청 intercept
 Api.interceptors.request.use(
     function (config) {
-        let token = '';
-        if (config.url) {
-            config.headers['Authorization'] = '';
+        const token = store.getState().loginReducer.users;
+        console.log('------token-------');
+        console.log(token);
+        console.log(config.url);
+
+        if (config.url && token) {
+            config.headers['Authorization'] = `${token}`; // Bearer
         } else {
-            config.headers['Authorization'] = `Bearer ${token}`;
+            config.headers['Authorization'] = '';
         }
+
         return config;
     },
     function (err) {

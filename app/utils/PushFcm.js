@@ -1,37 +1,59 @@
 import { useEffect } from 'react';
-import { Alert } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import messaging from '@react-native-firebase/messaging';
-import store from 'store/store';
 import { dispatchOne } from './DispatchUtils';
+import { FontText } from './TextUtils';
+import { checkPermission } from './Push';
+
+export const pushFcmStore = (_store) => {
+    store = _store;
+};
+
+// push 토큰 발급
+export async function getMessagingToken() {
+    const notification = store.getState().commonReducer.notification;
+
+    if (notification) {
+        return await messaging().getToken();
+    }
+
+    return null;
+}
+
+// push 권한 확인
+const requestUserPermission = async () => {
+    const authStatus = await messaging().requestPermission();
+    const enabled = authStatus === messaging.AuthorizationStatus.AUTHORIZED || authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+    console.log('Authorization status:', enabled);
+    store.dispatch(dispatchOne('SET_NOTIFICATION', enabled));
+};
+
+// foreground push snack
+const handleForegroundPush = () => {
+    const notification = remoteMessage.notification;
+    store.dispatch(
+        dispatchOne(
+            'SET_SNACK',
+            <View style={styles.snack}>
+                <FontText style={styles.title}>{notification.title}</FontText>
+                <FontText style={styles.body}>{notification.body}</FontText>
+            </View>
+        )
+    );
+};
 
 /** FCM push 알림 설정 */
-export default function PushFcm() {
-    const requestUserPermission = async () => {
-        const authStatus = await messaging().requestPermission();
-        const enabled = authStatus === messaging.AuthorizationStatus.AUTHORIZED || authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-
-        if (enabled) {
-            console.log('Authorization status:', authStatus);
-        }
-    };
-
+export function useFirebase() {
     useEffect(() => {
-        if (requestUserPermission()) {
-            messaging()
-                .getToken()
-                .then((token) => {
-                    // Alert.alert('fcm token :: ', token);
-                    store.dispatch(dispatchOne('SET_TEST', token));
-                    console.log(token);
-                });
-        }
+        // requestUserPermission();
+        checkPermission();
 
         // Check if the app was opened from a notification (when the app was completely quit)
         messaging()
             .getInitialNotification()
             .then(async (remoteMessage) => {
                 if (remoteMessage) {
-                    Alert.alert('Notification caused app to open from quit state:', JSON.stringify(remoteMessage.notification));
                     console.log('Notification caused app to open from quit state:', remoteMessage.notification);
                 }
             });
@@ -43,16 +65,25 @@ export default function PushFcm() {
 
         // Handle push notifications when the app is in the background
         messaging().setBackgroundMessageHandler(async (remoteMessage) => {
-            Alert.alert('Message handled in the background!', JSON.stringify(remoteMessage));
             console.log('Message handled in the background!', remoteMessage);
         });
 
         // Listen for push notifications when the app is in the foreground
-        messaging().onMessage(async (handlePushNotification) => {
-            Alert.alert('new massage!!', JSON.stringify(handlePushNotification));
+        const unsubscribe = messaging().onMessage(async (remoteMessage) => {
+            // Alert.alert('new massage!!', JSON.stringify(remoteMessage));
+            console.log('new massage!!', JSON.stringify(remoteMessage));
+            // handleForegroundPush();
         });
 
         // Clean up the event listeners
-        // return unsubscribe();
+        return unsubscribe;
     }, []);
 }
+
+const styles = StyleSheet.create({
+    snack: {},
+    title: {
+        color: `#fff`,
+    },
+    body: { color: `#fff`, fontSize: 12 },
+});

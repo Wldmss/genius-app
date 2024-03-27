@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, SafeAreaView } from 'react-native';
+import { StyleSheet, SafeAreaView, Alert } from 'react-native';
 import { Provider } from 'react-redux';
 import store from 'store/store';
 
@@ -7,24 +7,22 @@ import { loadAsync } from 'expo-font';
 import { Try } from 'expo-router/build/views/Try';
 import { ErrorBoundary } from 'utils/ErrorBoundary';
 
-import Contents from 'components/Contents';
 import Constants from 'expo-constants';
 
-import { useNotification } from 'utils/Push';
-import * as Notifications from 'expo-notifications';
+import { pushStore, useNotification } from 'utils/Push';
+import { pushFcmStore, useFirebase } from 'utils/PushFcm';
 
 import PopModal from 'modal/PopModal';
 import Loading from 'components/Loading';
 import Splash from '(screens)/splash';
-// import PushFcm from 'utils/PushFcm';
+import Snackbar from 'utils/Snackbar';
 
-Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-        shouldShowAlert: true,
-        shouldPlaySound: true,
-        shouldSetBadge: true,
-    }),
-});
+import Contents from 'components/Contents';
+import { apiStore } from 'api/Api';
+
+import * as Updates from 'expo-updates';
+
+const { EXPO_PUBLIC_NAME, EXPO_PUBLIC_PROFILE } = process.env;
 
 const splashTime = 2000;
 
@@ -33,8 +31,14 @@ const App = () => {
     const [fontsLoaded, setFontsLoaded] = useState(false);
     const [splashLoaded, setSplashLoaded] = useState(false);
 
-    useNotification();
-    console.log('profile :: ', process.env.EXPO_PUBLIC_PROFILE);
+    // useNotification();
+    useFirebase();
+
+    pushStore(store);
+    pushFcmStore(store);
+    apiStore(store);
+
+    console.log('profile :: ', EXPO_PUBLIC_PROFILE);
 
     // font load
     const loadFonts = async () => {
@@ -49,13 +53,46 @@ const App = () => {
     const prepare = async () => {
         try {
             loadFonts();
-            await new Promise((resolve) => setTimeout(resolve, splashTime));
+            if (EXPO_PUBLIC_PROFILE == 'production') {
+                await onFetchUpdateAsync();
+            } else {
+                await new Promise((resolve) => setTimeout(resolve, splashTime));
+            }
         } catch (e) {
             console.warn(e);
         } finally {
             setSplashLoaded(true);
         }
     };
+
+    // 앱 업데이트 체크
+    async function onFetchUpdateAsync() {
+        try {
+            const update = await Updates.checkForUpdateAsync();
+            // Alert.alert(JSON.stringify(update));
+
+            if (update.isAvailable) {
+                Alert.alert(EXPO_PUBLIC_NAME, '업데이트 하시겠습니까?', [
+                    { text: '아니요', onPress: () => null, style: 'cancel' },
+                    {
+                        text: '예',
+                        onPress: async () => {
+                            try {
+                                await Updates.fetchUpdateAsync();
+                                await Updates.reloadAsync();
+                            } finally {
+                                Alert.alert(`업데이트가 완료되었습니다.`);
+                            }
+                        },
+                    },
+                ]);
+
+                return true;
+            }
+        } catch (error) {
+            Alert.alert(`${error}`);
+        }
+    }
 
     useEffect(() => {
         prepare();
@@ -72,7 +109,7 @@ const App = () => {
                             <Contents />
                             <PopModal />
                             <Loading />
-                            {/* <PushFcm /> */}
+                            <Snackbar />
                         </SafeAreaView>
                     )
                 )}

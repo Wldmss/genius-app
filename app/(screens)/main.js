@@ -25,9 +25,9 @@ const Main = () => {
 
     // async store data
     const getStorageData = async () => {
-        let bioData = await StorageUtils.getDeviceData('bio');
-        let pinData = await StorageUtils.getDeviceData('pin');
-        let users = await StorageUtils.getDeviceData('users');
+        let bioData = await StorageUtils.getDeviceData('bio'); // 생체 인증 등록 여부 ('true'/'false')
+        let pinData = await StorageUtils.getDeviceData('pin'); // 설정 pin
+        let users = await StorageUtils.getDeviceData('users'); // jwt token
 
         let bio = { isRegistered: false, modFlag: false };
         let pin = { isRegistered: false, value: '', modFlag: true };
@@ -63,7 +63,7 @@ const Main = () => {
     // bio check
     const checkBioSupported = async () => {
         let bioValue = {
-            SET_BIO_SUPPORTED: false,
+            SET_BIO_SUPPORTED: null,
             SET_BIO_RECORDS: false,
         };
 
@@ -72,7 +72,7 @@ const Main = () => {
 
         if (isSupported) {
             const biometryType = await Authentication.supportedAuthenticationTypesAsync();
-            bioValue.SET_BIO_SUPPORTED = biometryType.includes(1) || biometryType.includes(2);
+            bioValue.SET_BIO_SUPPORTED = biometryType.includes(2) ? 2 : biometryType.includes(1) ? 1 : null;
         }
 
         // 단말 생체인증 등록 여부 확인

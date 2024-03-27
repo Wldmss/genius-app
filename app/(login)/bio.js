@@ -9,10 +9,13 @@ import * as StorageUtils from 'utils/StorageUtils';
 import { dispatchLogin, dispatchOne } from 'utils/DispatchUtils';
 import { FontText } from 'utils/TextUtils';
 
+const { EXPO_PUBLIC_NAME } = process.env;
+
 /** 생체 인증 로그인/등록 */
 const BioLogin = () => {
     const bioStore = useSelector((state) => state.loginReducer.bio);
     const bioRecords = useSelector((state) => state.loginReducer.bioRecords);
+    const bioSupported = useSelector((state) => state.loginReducer.bioSupported);
 
     const [bio, setBio] = useState(bioStore);
 
@@ -20,7 +23,8 @@ const BioLogin = () => {
     const authenticate = async (isRegister) => {
         try {
             const { success } = await Authentication.authenticateAsync({
-                promptMessage: `${isRegister ? 'GENIUS 등록' : 'GENIUS 로그인'}`,
+                promptMessage: `${EXPO_PUBLIC_NAME} ${isRegister ? `등록` : `로그인`}`,
+                authenticationType: bioSupported,
             });
 
             return success;
@@ -46,7 +50,7 @@ const BioLogin = () => {
     const registBio = async () => {
         const success = await authenticate(true);
         if (success) {
-            Alert.alert('GENIUS', '생체 인증이 등록되었습니다.', [
+            Alert.alert(EXPO_PUBLIC_NAME, '생체 인증이 등록되었습니다.', [
                 {
                     text: '확인',
                     onPress: async () => {

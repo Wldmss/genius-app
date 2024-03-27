@@ -6,6 +6,7 @@ const initialState = {
     camera: false,
     test: null,
     notification: false,
+    snack: null,
 };
 
 const commonReducer = (state = initialState, action) => {
@@ -56,6 +57,12 @@ const commonReducer = (state = initialState, action) => {
             return {
                 ...state,
                 test: action.payload,
+            };
+
+        case 'SET_SNACK':
+            return {
+                ...state,
+                snack: action.payload,
             };
         default:
             return state;

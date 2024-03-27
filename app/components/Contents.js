@@ -6,7 +6,9 @@ import moment from 'moment';
 import { Stack, router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { dispatchOne } from 'utils/DispatchUtils';
-import { login } from 'api/LoginApi';
+import { checkLogin } from 'api/LoginApi';
+
+const { EXPO_PUBLIC_NAME } = process.env;
 
 /** 페이지 router */
 const Contents = () => {
@@ -20,7 +22,6 @@ const Contents = () => {
     const expire = useSelector((state) => state.loginReducer.expire);
     const isLogin = useSelector((state) => state.loginReducer.isLogin);
     const users = useSelector((state) => state.loginReducer.users);
-    const notification = useSelector((state) => state.commonReducer.notification);
 
     // 로그인
     useEffect(() => {
@@ -37,26 +38,21 @@ const Contents = () => {
                 }
 
                 // ldap 인증
-                login(users, null, notification).then((res) => {
-                    console.log(res);
-                    if (res.status) {
-                        if (res.data) store.dispatch(dispatchOne('SET_TOKEN', res.data.token));
-                    } else {
-                        noUsers();
-                    }
+                checkLogin().then(({ status }) => {
+                    if (!status) noUsers();
                 });
             } else {
                 // 최초 접속, 로그아웃
                 store.dispatch(dispatchOne('SET_TAB', 'main'));
             }
         } else {
-            if (isLogin) store.dispatch(dispatchOne('SET_TAB', 'web')); //web
+            if (isLogin) store.dispatch(dispatchOne('SET_TAB', 'test')); // web
         }
     }, [isLogin, token]);
 
     // 로그인 정보 불일치
     const noUsers = (noUserFlag) => {
-        Alert.alert('GENIUS', `로그인 정보가 ${noUserFlag ? '없습니다.' : '일치하지 않습니다.'}\nLDAP 로그인 페이지로 이동합니다.`, [
+        Alert.alert(EXPO_PUBLIC_NAME, `로그인 정보가 ${noUserFlag ? '없습니다.' : '일치하지 않습니다.'}\nLDAP 로그인 페이지로 이동합니다.`, [
             {
                 text: '확인',
                 onPress: async () => {
@@ -136,26 +132,21 @@ const Contents = () => {
         console.log('== exit flag ==');
         console.log(exitFlag);
         if (exitFlag) {
-            Alert.alert(
-                '앱 종료',
-                'GENIUS를 종료하시겠습니까?',
-                [
-                    {
-                        text: '아니요',
-                        onPress: () => {
-                            store.dispatch(dispatchOne('SET_EXIT', false));
-                        },
-                        style: 'cancel',
+            Alert.alert('앱 종료', `${EXPO_PUBLIC_NAME}를 종료하시겠습니까?`, [
+                {
+                    text: '아니요',
+                    onPress: () => {
+                        store.dispatch(dispatchOne('SET_EXIT', false));
                     },
-                    {
-                        text: '예',
-                        onPress: () => {
-                            BackHandler.exitApp();
-                        },
+                    style: 'cancel',
+                },
+                {
+                    text: '예',
+                    onPress: () => {
+                        BackHandler.exitApp();
                     },
-                ],
-                { cancelable: false }
-            );
+                },
+            ]);
         }
     }, [exitFlag]);
 

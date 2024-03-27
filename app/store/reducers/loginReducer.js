@@ -1,10 +1,10 @@
 const initialState = {
-    token: null,
+    token: null, // jwt token (로그인 시 세팅)
     pin: null,
     bio: null,
-    users: null,
+    users: null, // storage jwt token
     tab: null,
-    bioSupported: false,
+    bioSupported: null,
     bioRecords: false,
     exitFlag: false,
     expire: null,

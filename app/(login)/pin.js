@@ -42,6 +42,11 @@ const PinLogin = () => {
             }
 
             setIsSame(sameFlag);
+
+            if (sameFlag && id == 'check') {
+                registRef.current = registRef.current + 1;
+                return;
+            }
         }
 
         // 현재 pin 입력 시 자동 설정
@@ -95,6 +100,14 @@ const PinLogin = () => {
             return false;
         }
 
+        if (pin?.modFlag && confirmPin()) {
+            Alert.alert('안전한 PIN을 설정해주세요.');
+            setValue({ ...value, enter: '', check: '' });
+            setIsSame(null);
+            enterRef.current.focus();
+            return false;
+        }
+
         if (!pin?.modFlag) {
             // 로그인
             loginPin();
@@ -130,6 +143,26 @@ const PinLogin = () => {
         } catch (err) {
             console.log(err);
         }
+    };
+
+    // PIN 검사
+    const confirmPin = () => {
+        const checkPin = value.enter;
+
+        // 연속된 숫자 확인
+        let isSequential = true;
+        for (let i = 0; i < checkPin.length - 1; i++) {
+            const currentDigit = parseInt(checkPin[i]);
+            const nextDigit = parseInt(checkPin[i + 1]);
+            if (nextDigit !== currentDigit + 1) {
+                isSequential = false; // 연속된 숫자가 아님
+            }
+        }
+
+        // 동일한 숫자 확인
+        const passPattern = /^(?!(\d)\1{5}$)\d{6}$/;
+
+        return isSequential || !passPattern.test(checkPin);
     };
 
     // 로그인 trigger

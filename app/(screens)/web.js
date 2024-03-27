@@ -12,6 +12,7 @@ const Web = () => {
     const isLink = useSelector((state) => state.commonReducer.isLink);
     const camera = useSelector((state) => state.commonReducer.camera);
     const params = useSelector((state) => state.commonReducer.params);
+    const token = useSelector((state) => state.loginReducer.token);
 
     const webViewRef = useRef(null);
 
@@ -79,20 +80,15 @@ const Web = () => {
 
     // 로그 아웃
     const doLogout = () => {
-        Alert.alert(
-            '로그아웃',
-            '로그아웃 하시겠습니까?',
-            [
-                { text: '아니요', onPress: () => null, style: 'cancel' },
-                {
-                    text: '예',
-                    onPress: () => {
-                        store.dispatch({ type: 'INIT_APP' });
-                    },
+        Alert.alert('로그아웃', '로그아웃 하시겠습니까?', [
+            { text: '아니요', onPress: () => null, style: 'cancel' },
+            {
+                text: '예',
+                onPress: () => {
+                    store.dispatch({ type: 'INIT_APP' });
                 },
-            ],
-            { cancelable: false }
-        );
+            },
+        ]);
         return true;
     };
 
@@ -160,8 +156,13 @@ const Web = () => {
             style={styles.webview}
             onLoad={webViewLoaded}
             onError={handleError}
-            source={{ uri: `https://naver.com` }}
-            // source={{ uri: process.env.EXPO_PUBLIC_WEB }}
+            source={{
+                uri: 'https://naver.com',
+                // uri: process.env.EXPO_PUBLIC_WEB,
+                // headers: {
+                //     Authorization: `Bearer ${token}`,
+                // },
+            }}
             onNavigationStateChange={onNavigationStateChange}
             onMessage={handleOnMessage}
             injectedJavaScript={`

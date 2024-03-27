@@ -43,7 +43,7 @@ const LoginInfo = () => {
                 </View>
                 <FontText style={styles.text}>{`KT AIVLE스쿨 문의처 : 담당 에이블 매니저`}</FontText>
             </View>
-            <Pressable style={commonInputStyles.buttonRed} onPress={setModalClose}>
+            <Pressable style={[commonInputStyles.buttonRed, styles.button]} onPress={setModalClose}>
                 <FontText style={commonTextStyles.white}>확인</FontText>
             </Pressable>
         </View>
@@ -52,11 +52,11 @@ const LoginInfo = () => {
 
 const styles = StyleSheet.create({
     container: {
-        gap: 15,
+        gap: 7,
     },
     boldText: {
         fontSize: 12,
-        fontWeight: `bold`,
+        fontWeight: 600,
         color: `#666`,
     },
     numberInfo: {
@@ -65,6 +65,8 @@ const styles = StyleSheet.create({
     text: {
         fontSize: 11,
         color: `#666`,
+        lineHeight: 18,
+        // 줄 넘어가는 부분 채우기 해야함 TODO
     },
     underline: {
         textDecorationLine: `underline`,
@@ -73,12 +75,15 @@ const styles = StyleSheet.create({
         marginTop: 20,
     },
     textContainer: {
-        gap: 5,
+        // gap: 5,
     },
     Line: {
         borderWidth: 0.5,
         borderColor: `#666`,
         width: `100%`,
+    },
+    button: {
+        width: `auto`,
     },
 });
 

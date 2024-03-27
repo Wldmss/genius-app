@@ -6,6 +6,9 @@
         "version": "1.0.0",
         "orientation": "portrait",
         "icon": "./app/assets/icons/app-icon.png",
+        "notification": {
+            "icon": "./app/assets/icons/app-icon.png"
+        },
         "userInterfaceStyle": "light",
         "assetBundlePatterns": ["**/*"],
         "ios": {
