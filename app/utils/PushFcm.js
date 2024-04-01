@@ -43,11 +43,22 @@ const handleForegroundPush = () => {
     );
 };
 
+// 기기별로 특정 토픽을 구독하는 함수
+async function subscribeToTopic(topic) {
+    await messaging().subscribeToTopic(topic);
+}
+
+// 기기별로 특정 토픽을 구독 해제하는 함수
+async function unsubscribeFromTopic(topic) {
+    await messaging().unsubscribeFromTopic(topic);
+}
+
 /** FCM push 알림 설정 */
 export function useFirebase() {
     useEffect(() => {
         // requestUserPermission();
         checkPermission();
+        subscribeToTopic('snack');
 
         // Check if the app was opened from a notification (when the app was completely quit)
         messaging()
