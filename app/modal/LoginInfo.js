@@ -14,14 +14,20 @@ const LoginInfo = () => {
         Linking.openURL(`tel:${number}`);
     };
 
+    const wordBreak = (text) => {
+        return text.replace(/ /g, '\u00A0');
+    };
+
     return (
         <View style={styles.container}>
             <View style={styles.textContainer}>
                 <FontText style={styles.boldText}>{`로그인 문의`}</FontText>
-                <FontText style={styles.text}>{`- 아이디를 모르는 경우, 조직의 인사담당자에게 문의 하시기 바랍니다.`}</FontText>
-                <FontText style={styles.text}>{`- 비밀번호를 분실한 경우, idms.kt.com 에서 비밀번호 변경 또는 초기화 하시기 바랍니다.`}</FontText>
+                <FontText style={styles.text}>{wordBreak(`- 아이디를 모르는 경우, 조직의 인사담당자에게 문의 하시기 바랍니다.`)}</FontText>
                 <FontText style={styles.text}>
-                    {`* 사외망 등의 사유로 idms.kt.com 접속이 불가할 경우 조직의 인사담당자 또는 아래 연락처로 문의 하시기 바랍니다.`}
+                    {wordBreak(`- 비밀번호를 분실한 경우, idms.kt.com 에서 비밀번호 변경 또는 초기화 하시기 바랍니다.`)}
+                </FontText>
+                <FontText style={styles.text}>
+                    {wordBreak(`* 사외망 등의 사유로 idms.kt.com 접속이 불가할 경우 조직의 인사담당자 또는 아래 연락처로 문의 하시기 바랍니다.`)}
                 </FontText>
 
                 <View style={[styles.numberInfo, styles.marginText]}>
@@ -66,7 +72,6 @@ const styles = StyleSheet.create({
         fontSize: 11,
         color: `#666`,
         lineHeight: 18,
-        // 줄 넘어가는 부분 채우기 해야함 TODO
     },
     underline: {
         textDecorationLine: `underline`,
@@ -84,6 +89,7 @@ const styles = StyleSheet.create({
     },
     button: {
         width: `auto`,
+        marginTop: 10,
     },
 });
 

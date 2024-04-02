@@ -4,6 +4,8 @@ import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import { dispatchOne } from 'utils/DispatchUtils';
 
+/** expo-notification 관련 코드 (사용 x) */
+
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
         shouldShowAlert: true,
@@ -68,10 +70,17 @@ export function useNotification() {
 }
 
 // push 권한 확인
-async function checkNotificationPermission() {
+export async function checkNotificationPermission() {
     if (Platform.OS === 'android') {
+        // Notifications.deleteNotificationChannelAsync('expo_notifications_fallback_notification_channel');
         await Notifications.setNotificationChannelAsync('default', {
-            name: 'default',
+            name: '알림',
+            importance: Notifications.AndroidImportance.MAX,
+            vibrationPattern: [0, 250, 250, 250],
+            lightColor: '#FF231F7C',
+        });
+        await Notifications.setNotificationChannelAsync('genius', {
+            name: '공지',
             importance: Notifications.AndroidImportance.MAX,
             vibrationPattern: [0, 250, 250, 250],
             lightColor: '#FF231F7C',
@@ -84,7 +93,7 @@ async function checkNotificationPermission() {
 }
 
 // 권한 설정
-export async function checkPermission() {
+async function checkPermission() {
     if (Device.isDevice) {
         const { status: existingStatus } = await Notifications.getPermissionsAsync();
         let finalStatus = existingStatus;

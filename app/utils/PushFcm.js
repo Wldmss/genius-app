@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import messaging from '@react-native-firebase/messaging';
 import { dispatchOne } from './DispatchUtils';
 import { FontText } from './TextUtils';
-import { checkPermission } from './Push';
+import { checkNotificationPermission } from './Push';
 
 export const pushFcmStore = (_store) => {
     store = _store;
@@ -20,7 +20,7 @@ export async function getMessagingToken() {
     return null;
 }
 
-// push 권한 확인
+// push 권한 확인 - 안됨
 const requestUserPermission = async () => {
     const authStatus = await messaging().requestPermission();
     const enabled = authStatus === messaging.AuthorizationStatus.AUTHORIZED || authStatus === messaging.AuthorizationStatus.PROVISIONAL;
@@ -57,7 +57,7 @@ async function unsubscribeFromTopic(topic) {
 export function useFirebase() {
     useEffect(() => {
         // requestUserPermission();
-        checkPermission();
+        checkNotificationPermission();
         subscribeToTopic('snack');
 
         // Check if the app was opened from a notification (when the app was completely quit)
@@ -84,6 +84,13 @@ export function useFirebase() {
             // Alert.alert('new massage!!', JSON.stringify(remoteMessage));
             console.log('new massage!!', JSON.stringify(remoteMessage));
             // handleForegroundPush();
+
+            // if (Platform.OS === 'ios') {
+            //     PushNotificationIOS.presentLocalNotification({
+            //         alertTitle: remoteMessage.notification.title,
+            //         alertBody: remoteMessage.notification.body,
+            //     });
+            // }
         });
 
         // Clean up the event listeners

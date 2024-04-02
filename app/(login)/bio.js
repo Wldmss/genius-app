@@ -24,7 +24,7 @@ const BioLogin = () => {
         try {
             const { success } = await Authentication.authenticateAsync({
                 promptMessage: `${EXPO_PUBLIC_NAME} ${isRegister ? `등록` : `로그인`}`,
-                authenticationType: bioSupported,
+                AuthenticationType: bioSupported,
             });
 
             return success;

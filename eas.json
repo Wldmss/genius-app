@@ -1,65 +1,67 @@
 {
-  "cli": {
-    "version": ">= 7.3.0"
-  },
-  "build": {
-    "base": {
-      "node": "20.11.1",
-      "env": {
-        "EXPO_PUBLIC_NAME": "지니어스",
-        "EXPO_PUBLIC_VERSION": "1.0.0",
-        "EXPO_PUBLIC_WEB": "https://naver.com"
-      },
-      "android": {
-        "image": "latest",
-        "buildType": "apk",
-        "env": {
-          "EXPO_PUBLIC_PLATFORM": "android"
+    "cli": {
+        "version": ">= 7.3.0"
+    },
+    "build": {
+        "base": {
+            "node": "20.11.1",
+            "env": {
+                "EXPO_PUBLIC_NAME": "지니어스",
+                "EXPO_PUBLIC_VERSION": "1.0.0",
+                "EXPO_PUBLIC_WEB": "https://naver.com",
+                "EXPO_PUBLIC_TEST_SERVER_URL": "http://192.168.55.254:8080",
+                "EXPO_PUBLIC_TEST_API_URL": "/api/v1/"
+            },
+            "android": {
+                "image": "latest",
+                "buildType": "apk",
+                "env": {
+                    "EXPO_PUBLIC_PLATFORM": "android"
+                }
+            },
+            "ios": {
+                "image": "latest",
+                "env": {
+                    "EXPO_PUBLIC_PLATFORM": "ios"
+                }
+            },
+            "channel": "base"
+        },
+        "development": {
+            "extends": "base",
+            "channel": "development",
+            "developmentClient": true,
+            "distribution": "internal",
+            "ios": {
+                "simulator": true
+            },
+            "env": {
+                "EXPO_PUBLIC_PROFILE": "development",
+                "EXPO_PUBLIC_SERVER_URL": "https://ktedu.kt.com",
+                "EXPO_PUBLIC_API_URL": "/"
+            }
+        },
+        "preview": {
+            "extends": "base",
+            "channel": "preview",
+            "distribution": "internal",
+            "env": {
+                "EXPO_PUBLIC_PROFILE": "preview",
+                "EXPO_PUBLIC_SERVER_URL": "https://ktedu.kt.com",
+                "EXPO_PUBLIC_API_URL": "/"
+            }
+        },
+        "production": {
+            "extends": "base",
+            "channel": "production",
+            "env": {
+                "EXPO_PUBLIC_PROFILE": "production",
+                "EXPO_PUBLIC_SERVER_URL": "https://ktedu.kt.com",
+                "EXPO_PUBLIC_API_URL": "/"
+            }
         }
-      },
-      "ios": {
-        "image": "latest",
-        "env": {
-          "EXPO_PUBLIC_PLATFORM": "ios"
-        }
-      },
-      "channel": "base"
     },
-    "development": {
-      "extends": "base",
-      "channel": "development",
-      "developmentClient": true,
-      "distribution": "internal",
-      "ios": {
-        "simulator": true
-      },
-      "env": {
-        "EXPO_PUBLIC_PROFILE": "development",
-        "EXPO_PUBLIC_SERVER_URL": "http://192.168.55.254:8080",
-        "EXPO_PUBLIC_API_URL": "/api/v1"
-      }
-    },
-    "preview": {
-      "extends": "base",
-      "channel": "preview",
-      "distribution": "internal",
-      "env": {
-        "EXPO_PUBLIC_PROFILE": "preview",
-        "EXPO_PUBLIC_SERVER_URL": "http://192.168.55.254:8080",
-        "EXPO_PUBLIC_API_URL": "/api/v1"
-      }
-    },
-    "production": {
-      "extends": "base",
-      "channel": "production",
-      "env": {
-        "EXPO_PUBLIC_PROFILE": "production",
-        "EXPO_PUBLIC_SERVER_URL": "http://192.168.55.254:8080",
-        "EXPO_PUBLIC_API_URL": "/api/v1"
-      }
+    "submit": {
+        "production": {}
     }
-  },
-  "submit": {
-    "production": {}
-  }
 }

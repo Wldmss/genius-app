@@ -31,14 +31,14 @@ const App = () => {
     const [fontsLoaded, setFontsLoaded] = useState(false);
     const [splashLoaded, setSplashLoaded] = useState(false);
 
+    console.log('profile :: ', EXPO_PUBLIC_PROFILE);
+
     // useNotification();
     useFirebase();
 
     pushStore(store);
     pushFcmStore(store);
     apiStore(store);
-
-    console.log('profile :: ', EXPO_PUBLIC_PROFILE);
 
     // font load
     const loadFonts = async () => {

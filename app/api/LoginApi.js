@@ -1,19 +1,20 @@
-import ApiService from './ApiService';
+import { Alert } from 'react-native';
 import store from 'store/store';
 import { dispatchOne } from 'utils/DispatchUtils';
 import CryptoJS from 'react-native-crypto-js';
 import { getPushToken } from 'utils/Push';
 import { getMessagingToken } from 'utils/PushFcm';
-import { Alert } from 'react-native';
+import Api from './Api';
 
-const { EXPO_PUSH_KEY } = process.env;
+const { EXPO_PUSH_KEY, EXPO_PUBLIC_PROFILE } = process.env;
 
 // LDAP login
 export const login = async (username, password) => {
     // const encryptUsername = CryptoJS.AES.encrypt(JSON.stringify(username), EXPO_PUSH_KEY).toString();
     // const encryptPassword = password ? CryptoJS.AES.encrypt(JSON.stringify(password), EXPO_PUSH_KEY).toString() : null;
 
-    return ApiService.post('login', { username: username, password: password })
+    return Api.test
+        .post('login', { username: username, password: password })
         .then(({ status, data }) => {
             console.log(status);
             return { status: status == 200, data: data };
@@ -24,9 +25,24 @@ export const login = async (username, password) => {
         });
 };
 
+// test
+export const loginTest = async (userid, pwd, url) => {
+    return Api.mobile
+        .post('examLoginProcAjax.do', { userid: userid, pwd: pwd, url: url })
+        .then((response) => {
+            const data = response.data;
+            console.log(data);
+            console.log(response.config.url);
+        })
+        .catch(async (err) => {
+            console.log(err);
+        });
+};
+
 // pin/bio 로그인 검증
 export const checkLogin = async () => {
-    return ApiService.get('login/check')
+    return Api.test
+        .get('login/check')
         .then(({ status, data }) => {
             console.log(status);
             store.dispatch(dispatchOne('SET_TOKEN', data['token']));
@@ -46,18 +62,17 @@ export const checkPushToken = async () => {
     //     console.log('---deviceToken---');
     //     console.log(deviceToken);
     //     // store.dispatch(dispatchOne('SET_TEST', deviceToken));
-
     //     // const encryptPushToken = CryptoJS.AES.encrypt(JSON.stringify(deviceToken), EXPO_PUSH_KEY).toString();
-    //     ApiService.post('push', { deviceToken: deviceToken });
+    //     Api.test.post('push', { deviceToken: deviceToken });
     // });
 
-    await getMessagingToken().then((deviceToken) => {
-        console.log('---deviceToken---');
-        console.log(deviceToken);
-        Alert.alert(deviceToken);
-        store.dispatch(dispatchOne('SET_TEST', deviceToken));
-
-        // const encryptPushToken = CryptoJS.AES.encrypt(JSON.stringify(deviceToken), EXPO_PUSH_KEY).toString();
-        ApiService.post('push', { deviceToken: deviceToken });
-    });
+    if (EXPO_PUBLIC_PROFILE !== 'preview') {
+        await getMessagingToken().then((deviceToken) => {
+            console.log('---deviceToken---');
+            console.log(deviceToken);
+            store.dispatch(dispatchOne('SET_TEST', deviceToken));
+            // const encryptPushToken = CryptoJS.AES.encrypt(JSON.stringify(deviceToken), EXPO_PUSH_KEY).toString();
+            Api.test.post('push', { deviceToken: deviceToken });
+        });
+    }
 };
