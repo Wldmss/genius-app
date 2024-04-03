@@ -1,9 +1,10 @@
 import { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import messaging from '@react-native-firebase/messaging';
+import * as Notifications from 'expo-notifications';
+import * as Device from 'expo-device';
 import { dispatchOne } from './DispatchUtils';
 import { FontText } from './TextUtils';
-import { checkNotificationPermission } from './Push';
 
 export const pushFcmStore = (_store) => {
     store = _store;
@@ -28,6 +29,47 @@ const requestUserPermission = async () => {
     console.log('Authorization status:', enabled);
     store.dispatch(dispatchOne('SET_NOTIFICATION', enabled));
 };
+
+// push 권한 확인 (expo-notification)
+export async function checkNotificationPermission() {
+    // 채널 설정 (알림 카테고리)
+    if (Platform.OS === 'android') {
+        // Notifications.deleteNotificationChannelAsync('expo_notifications_fallback_notification_channel');    // 채널 삭제 (channelId)
+
+        await Notifications.setNotificationChannelAsync('default', {
+            name: '알림',
+            importance: Notifications.AndroidImportance.MAX,
+            vibrationPattern: [0, 250, 250, 250],
+            lightColor: `#ffffff`,
+            // lightColor: '#FF231F7C',
+        });
+
+        await Notifications.setNotificationChannelAsync('genius', {
+            name: '공지',
+            importance: Notifications.AndroidImportance.MAX,
+            vibrationPattern: [0, 250, 250, 250],
+            lightColor: `#000000`,
+            // lightColor: '#FF231F7C',
+        });
+    }
+
+    checkPermission();
+}
+
+// 권한 설정 (expo-notification)
+async function checkPermission() {
+    if (Device.isDevice) {
+        const { status: existingStatus } = await Notifications.getPermissionsAsync();
+        let finalStatus = existingStatus;
+
+        if (existingStatus !== 'granted') {
+            const { status } = await Notifications.requestPermissionsAsync();
+            finalStatus = status;
+        }
+
+        store.dispatch(dispatchOne('SET_NOTIFICATION', finalStatus == 'granted'));
+    }
+}
 
 // foreground push snack
 const handleForegroundPush = () => {
@@ -56,8 +98,10 @@ async function unsubscribeFromTopic(topic) {
 /** FCM push 알림 설정 */
 export function useFirebase() {
     useEffect(() => {
-        // requestUserPermission();
+        // 알림 권한 확인
         checkNotificationPermission();
+
+        // 알림 topic 구독
         subscribeToTopic('snack');
 
         // Check if the app was opened from a notification (when the app was completely quit)

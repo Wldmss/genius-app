@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, View, TextInput, Pressable, Alert } from 'react-native';
+import { StyleSheet, View, TextInput, Pressable, Alert, Keyboard } from 'react-native';
 import { commonInputStyles, commonTextStyles } from 'assets/styles';
 import { useSelector } from 'react-redux';
 import store from 'store/store';
@@ -44,7 +44,7 @@ const PinLogin = () => {
             setIsSame(sameFlag);
 
             if (sameFlag && id == 'check') {
-                registRef.current = registRef.current + 1;
+                Keyboard.dismiss();
                 return;
             }
         }

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Alert, AppState, BackHandler } from 'react-native';
 import store from 'store/store';
@@ -21,18 +21,21 @@ const Contents = () => {
     const exitFlag = useSelector((state) => state.loginReducer.exitFlag);
     const expire = useSelector((state) => state.loginReducer.expire);
     const isLogin = useSelector((state) => state.loginReducer.isLogin);
-    const users = useSelector((state) => state.loginReducer.users);
+    const jwt = useSelector((state) => state.loginReducer.jwt);
+
+    const [exitPressed, setExitPressed] = useState(false);
+    let timeout = null;
 
     // 로그인
     useEffect(() => {
         console.log('----------login----------');
         console.log(isLogin);
         console.log(token);
-        console.log(users);
+        console.log(jwt);
 
         if (token == null) {
             if (isLogin) {
-                if (users == null) {
+                if (jwt == null) {
                     noUsers(true);
                     return;
                 }
@@ -46,7 +49,7 @@ const Contents = () => {
                 store.dispatch(dispatchOne('SET_TAB', 'main'));
             }
         } else {
-            if (isLogin) store.dispatch(dispatchOne('SET_TAB', 'test')); // web
+            if (isLogin) store.dispatch(dispatchOne('SET_TAB', 'web'));
         }
     }, [isLogin, token]);
 
@@ -91,8 +94,23 @@ const Contents = () => {
         // Handle back event
         const backHandler = () => {
             if (tab != 'web') {
-                store.dispatch(dispatchOne('SET_EXIT', true));
+                if (exitPressed) {
+                    store.dispatch(dispatchOne('SET_EXIT', true));
+                    clearTimeout(timeout);
+                } else {
+                    store.dispatch(dispatchOne('SET_SNACK', '버튼을 한 번 더 누르면 종료됩니다.'));
+                    setExitPressed(true);
+
+                    timeout = setTimeout(() => {
+                        setExitPressed(false);
+                    }, 2000);
+
+                    return () => clearTimeout(timeout);
+                }
+            } else {
+                clearTimeout(timeout);
             }
+
             return true;
         };
         // Subscribe to back state event
@@ -100,7 +118,7 @@ const Contents = () => {
 
         // Unsubscribe
         return () => BackHandler.removeEventListener('hardwareBackPress', backHandler);
-    }, [tab]);
+    }, [tab, exitPressed]);
 
     // 앱 상태 관리
     const handleAppStateChange = (nextAppState) => {
@@ -113,14 +131,12 @@ const Contents = () => {
             resetFlag = diff > sessionTime;
         }
 
-        console.log(resetFlag);
         if (resetFlag) {
             store.dispatch({ type: 'INIT_APP' });
         }
     };
 
     useEffect(() => {
-        console.log(exitFlag);
         const appState = AppState.addEventListener('change', handleAppStateChange);
         return () => {
             appState.remove();
@@ -132,23 +148,30 @@ const Contents = () => {
         console.log('== exit flag ==');
         console.log(exitFlag);
         if (exitFlag) {
-            Alert.alert('앱 종료', `${EXPO_PUBLIC_NAME}를 종료하시겠습니까?`, [
-                {
-                    text: '아니요',
-                    onPress: () => {
-                        store.dispatch(dispatchOne('SET_EXIT', false));
-                    },
-                    style: 'cancel',
-                },
-                {
-                    text: '예',
-                    onPress: () => {
-                        BackHandler.exitApp();
-                    },
-                },
-            ]);
+            setExitPressed(false);
+            BackHandler.exitApp();
+            // exitAlert();
         }
     }, [exitFlag]);
+
+    // 앱 종료 alert
+    const exitAlert = () => {
+        Alert.alert('앱 종료', `${EXPO_PUBLIC_NAME}를 종료하시겠습니까?`, [
+            {
+                text: '아니요',
+                onPress: () => {
+                    store.dispatch(dispatchOne('SET_EXIT', false));
+                },
+                style: 'cancel',
+            },
+            {
+                text: '예',
+                onPress: () => {
+                    BackHandler.exitApp();
+                },
+            },
+        ]);
+    };
 
     return (
         <>

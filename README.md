@@ -114,6 +114,8 @@
     -   (utils)
         -   \_layout
         -   camera : QR 스캔
+        -   error : 오류 페이지
+        -   splash : splash 페이지
     -   components
         -   Contents : router 관련
         -   Loading : loading 화면
@@ -123,7 +125,7 @@
         -   LoginInfo : LDAP 로그인 페이지 문의 및 연락처
     -   api
         -   Api : axios 설정
-        -   ApiService : api method 설정
+        -   ApiService : api method 설정 (사용x)
         -   LoginApi : 로그인 api
     -   assets : 이미지, css 파일
     -   store
@@ -134,5 +136,10 @@
             -   modalReducer : 모달 관련
     -   utils
         -   DispatchUtil : dispatch 관련
-        -   Push : push 알림 설정
+        -   ErrorBoundary : error 처리
+        -   ImageUtils : 이미지 관련
+        -   Push : push 알림 설정 (expo-notification) (사용 x)
+        -   PushFcm : push 알림 설정 (firebase-messaging)
+        -   Snackbar : snack bar 설정
         -   StorageUtils : async storage 관련
+        -   TextUtils : text 관련

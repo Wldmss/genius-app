@@ -2,6 +2,7 @@ import Api from './Api';
 
 const { EXPO_PUBLIC_API_URL } = process.env;
 
+/** api 서비스 (사용 x) */
 class ApiService {
     get(url, params, config) {
         config = config || {};

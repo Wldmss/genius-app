@@ -17,7 +17,7 @@ export const login = async (username, password) => {
         .post('login', { username: username, password: password })
         .then(({ status, data }) => {
             console.log(status);
-            return { status: status == 200, data: data };
+            return { status: status == 200, token: data ? data.token : null };
         })
         .catch(async (err) => {
             console.log(err);
@@ -65,14 +65,11 @@ export const checkPushToken = async () => {
     //     // const encryptPushToken = CryptoJS.AES.encrypt(JSON.stringify(deviceToken), EXPO_PUSH_KEY).toString();
     //     Api.test.post('push', { deviceToken: deviceToken });
     // });
-
-    if (EXPO_PUBLIC_PROFILE !== 'preview') {
-        await getMessagingToken().then((deviceToken) => {
-            console.log('---deviceToken---');
-            console.log(deviceToken);
-            store.dispatch(dispatchOne('SET_TEST', deviceToken));
-            // const encryptPushToken = CryptoJS.AES.encrypt(JSON.stringify(deviceToken), EXPO_PUSH_KEY).toString();
-            Api.test.post('push', { deviceToken: deviceToken });
-        });
-    }
+    await getMessagingToken().then((deviceToken) => {
+        console.log('---deviceToken---');
+        console.log(deviceToken);
+        store.dispatch(dispatchOne('SET_TEST', deviceToken));
+        // const encryptPushToken = CryptoJS.AES.encrypt(JSON.stringify(deviceToken), EXPO_PUSH_KEY).toString();
+        Api.test.post('push', { deviceToken: deviceToken });
+    });
 };

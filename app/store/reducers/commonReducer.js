@@ -1,12 +1,12 @@
 const initialState = {
-    statusBar: true,
-    loading: false,
-    isLink: false,
-    params: null,
-    camera: false,
-    test: null,
-    notification: false,
-    snack: null,
+    statusBar: true, // 상태바 노출 여부
+    loading: false, // 로딩 화면
+    isLink: false, // 링크 접속 여부
+    params: null, // 링크 파라미터
+    camera: false, // 카메라 열기 여부
+    notification: false, // 알림 허용 여부
+    snack: null, // snack bar 값
+    test: null, // 테스트 값
 };
 
 const commonReducer = (state = initialState, action) => {

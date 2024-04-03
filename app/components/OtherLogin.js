@@ -15,7 +15,7 @@ const OtherLogin = () => {
     const bio = useSelector((state) => state.loginReducer.bio);
     const bioSupported = useSelector((state) => state.loginReducer.bioSupported);
     const tab = useSelector((state) => state.loginReducer.tab);
-    const users = useSelector((state) => state.loginReducer.users);
+    const jwt = useSelector((state) => state.loginReducer.jwt);
 
     const [type, setType] = useState({ pin: false, ldap: false, bio: false, bioRegister: false, changePin: false });
 
@@ -31,11 +31,11 @@ const OtherLogin = () => {
     useEffect(() => {
         setType({
             ...type,
-            pin: (tab != 'pin' && users) || (tab == 'pin' && pin?.isRegistered && pin?.modFlag),
+            pin: (tab != 'pin' && jwt) || (tab == 'pin' && pin?.isRegistered && pin?.modFlag),
             ldap: false, //tab != 'ldap' && pin?.isRegistered, // 다른 사번으로 로그인 차단 요청
-            bio: bioSupported && tab != 'bio' && users && bio?.isRegistered && pin?.isRegistered,
-            bioRegister: bioSupported && tab != 'bio' && users && !bio?.isRegistered && pin?.isRegistered,
-            changePin: tab == 'pin' && users && !pin?.modFlag,
+            bio: bioSupported && tab != 'bio' && jwt && bio?.isRegistered && pin?.isRegistered,
+            bioRegister: bioSupported && tab != 'bio' && jwt && !bio?.isRegistered && pin?.isRegistered,
+            changePin: tab == 'pin' && jwt && !pin?.modFlag,
         });
     }, [tab, pin, bio]);
 

@@ -12,11 +12,11 @@ const Web = () => {
     const isLink = useSelector((state) => state.commonReducer.isLink);
     const camera = useSelector((state) => state.commonReducer.camera);
     const params = useSelector((state) => state.commonReducer.params);
-    const token = useSelector((state) => state.loginReducer.token);
 
     const webViewRef = useRef(null);
 
     const [backButtonEnabled, setBackButtonEnabled] = useState(false);
+    const [exitPressed, setExitPressed] = useState(false);
     let timeout = null;
 
     // webview 통신
@@ -129,8 +129,21 @@ const Web = () => {
                 store.dispatch(dispatchOne('SET_CAMERA', false));
                 router.back();
             } else {
-                store.dispatch(dispatchOne('SET_EXIT', true));
+                if (exitPressed) {
+                    store.dispatch(dispatchOne('SET_EXIT', true));
+                    clearTimeout(timeout);
+                } else {
+                    store.dispatch(dispatchOne('SET_SNACK', '버튼을 한 번 더 누르면 종료됩니다.'));
+                    setExitPressed(true);
+
+                    timeout = setTimeout(() => {
+                        setExitPressed(false);
+                    }, 2000);
+
+                    return () => clearTimeout(timeout);
+                }
             }
+
             return true;
         };
         // Subscribe to back state event
@@ -138,10 +151,11 @@ const Web = () => {
 
         // Unsubscribe
         return () => BackHandler.removeEventListener('hardwareBackPress', backHandler);
-    }, [backButtonEnabled, camera]);
+    }, [backButtonEnabled, camera, exitPressed]);
 
     useEffect(() => {
         setBackButtonEnabled(false);
+        setExitPressed(false);
 
         timeout = setTimeout(() => {
             handleError();

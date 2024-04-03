@@ -12,14 +12,8 @@ Notifications.setNotificationHandler({
         shouldPlaySound: true,
         shouldSetBadge: false,
     }),
-    handleSuccess: (result) => {
-        console.log('handleSuccess');
-        console.log(result);
-    },
-    handleError: (result) => {
-        console.log('handleError');
-        console.log(result);
-    },
+    handleSuccess: (result) => {},
+    handleError: (result) => {},
 });
 
 export const pushStore = (_store) => {
@@ -29,10 +23,9 @@ export const pushStore = (_store) => {
 // push 토큰 발급
 export async function getPushToken() {
     const notification = store.getState().commonReducer.notification;
-    console.log(notification);
 
     if (notification) {
-        return (await Notifications.getDevicePushTokenAsync()).data;
+        return (await Notifications.getExpoPushTokenAsync()).data;
     }
 
     return null;
@@ -46,14 +39,10 @@ export function useNotification() {
         checkNotificationPermission();
 
         const received1 = Notifications.addNotificationReceivedListener((response) => {
-            console.log('received1');
-            console.log(response);
             setNotification(response);
         });
 
         const received2 = Notifications.addNotificationResponseReceivedListener((response) => {
-            console.log('received2');
-            console.log(response);
             redirect(response.notification);
         });
 
@@ -62,11 +51,6 @@ export function useNotification() {
             received2.remove();
         };
     }, []);
-
-    useEffect(() => {
-        console.log('notification useeffect');
-        console.log(notification);
-    }, [notification]);
 }
 
 // push 권한 확인
@@ -77,13 +61,13 @@ export async function checkNotificationPermission() {
             name: '알림',
             importance: Notifications.AndroidImportance.MAX,
             vibrationPattern: [0, 250, 250, 250],
-            lightColor: '#FF231F7C',
+            // lightColor: '#FF231F7C',
         });
         await Notifications.setNotificationChannelAsync('genius', {
             name: '공지',
             importance: Notifications.AndroidImportance.MAX,
             vibrationPattern: [0, 250, 250, 250],
-            lightColor: '#FF231F7C',
+            // lightColor: '#FF231F7C',
         });
     }
 
@@ -109,8 +93,7 @@ async function checkPermission() {
 
 function redirect(notification) {
     const url = notification.request.content.data?.url;
-    console.log('redirect!!');
-    console.log(url);
+
     if (url) {
         router.push(url);
     }
@@ -125,8 +108,6 @@ export async function sendPushNotification(token) {
         body: 'And here is the body!',
         data: { someData: 'goes here' },
     };
-
-    console.log(message);
 
     await fetch('https://exp.host/--/api/v2/push/send', {
         method: 'POST',

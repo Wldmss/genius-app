@@ -1,26 +1,29 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
-import { commonInputStyles, commonTextStyles } from 'assets/styles';
-import { checkPushToken, login } from 'api/LoginApi';
 import { useSelector } from 'react-redux';
+import { commonInputStyles, commonTextStyles } from 'assets/styles';
 import store from 'store/store';
+import moment from 'moment';
 import { dispatchLogin, dispatchMultiple, dispatchOne } from 'utils/DispatchUtils';
 import * as StorageUtils from 'utils/StorageUtils';
-import LoginInfo from 'modal/LoginInfo';
-import moment from 'moment';
 import { FontText } from 'utils/TextUtils';
+import { checkPushToken, login } from 'api/LoginApi';
+import LoginInfo from 'modal/LoginInfo';
 
 const { EXPO_PUBLIC_NAME } = process.env;
 
 /** LDAP 로그인 */
 const LDAPLogin = () => {
-    const users = useSelector((state) => state.loginReducer.users);
+    const jwt = useSelector((state) => state.loginReducer.jwt);
 
     const otpRef = useRef(null);
-    const timeRef = useRef(0);
+    const maxTime = 10;
+    const [time, setTime] = useState(maxTime);
     const [value, setValue] = useState({ username: '', password: '', otp: '' });
     const [isLogin, setIsLogin] = useState(false);
     const [token, setToken] = useState(null);
+
+    let interval = null;
 
     const changeValue = (id, input) => {
         setValue({ ...value, [id]: input });
@@ -42,12 +45,10 @@ const LDAPLogin = () => {
 
     // LDAP 인증
     const sendLDAP = () => {
-        console.log(value);
-
         // LDAP 로그인
-        login(value.username, value.password).then(({ status, data }) => {
+        login(value.username, value.password).then(({ status, token }) => {
             if (status) {
-                setToken(data ? data.token : null);
+                setToken(token);
                 setIsLogin(true);
             } else {
                 resetUsers();
@@ -59,27 +60,40 @@ const LDAPLogin = () => {
     // OTP 전송 (TODO)
     const sendOTP = () => {
         Alert.alert('인증번호가 전송되었습니다.');
-        console.log('otp send!!');
+
         if (otpRef.current) otpRef.current.focus();
+
+        interval = setInterval(() => {
+            setTime((prevTime) => {
+                if (prevTime == 0) {
+                    clearInterval(interval);
+                    Alert.alert('인증 시간이 초과되었습니다.');
+                    return prevTime;
+                }
+
+                return prevTime - 1;
+            });
+        }, 1000);
+
+        return () => clearInterval(interval);
     };
 
     // OTP 검증
     const checkOTP = () => {
-        console.log(value.otp);
-
         // 인증번호 확인 로직 추가
         if (value.otp == '') {
             Alert.alert('인증번호가 일치하지 않습니다.');
             return;
         }
 
+        clearInterval(interval);
         saveUserData(true);
         // checkUsers();
     };
 
     // 사용자 정보 확인
     const checkUsers = () => {
-        if (users != null && users !== value.username) {
+        if (jwt != null && jwt !== value.username) {
             Alert.alert(
                 EXPO_PUBLIC_NAME,
                 `기본 로그인 정보를 "${value.username}" 으로 변경하시겠습니까?`,
@@ -102,19 +116,18 @@ const LDAPLogin = () => {
                 { cancelable: false }
             );
         } else {
-            saveUserData(users == null);
+            saveUserData(jwt == null);
         }
     };
 
     // 사용자 정보 저장
     const saveUserData = async (changeFlag) => {
-        console.log(token);
         if (changeFlag) {
-            await StorageUtils.setDeviceData('users', token);
+            await StorageUtils.setDeviceData('jwt', token);
         }
 
         let storeData = {
-            SET_USERS: token,
+            SET_JWT: token,
             SET_TOKEN: token,
         };
 
@@ -130,7 +143,7 @@ const LDAPLogin = () => {
 
     // user 정보 reset
     const resetUsers = async () => {
-        await StorageUtils.setDeviceData('users', null);
+        await StorageUtils.setDeviceData('jwt', null);
     };
 
     useEffect(() => {
@@ -178,7 +191,7 @@ const LDAPLogin = () => {
                         />
                         <View style={styles.restTime}>
                             <FontText>남은시간 :</FontText>
-                            <FontText style={commonTextStyles.bold}>{timeRef.current}</FontText>
+                            <FontText style={commonTextStyles.bold}>{time}</FontText>
                             <FontText>초</FontText>
                         </View>
                     </View>

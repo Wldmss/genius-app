@@ -14,7 +14,7 @@ import { pushFcmStore, useFirebase } from 'utils/PushFcm';
 
 import PopModal from 'modal/PopModal';
 import Loading from 'components/Loading';
-import Splash from '(screens)/splash';
+import Splash from '(utils)/splash';
 import Snackbar from 'utils/Snackbar';
 
 import Contents from 'components/Contents';
@@ -33,11 +33,15 @@ const App = () => {
 
     console.log('profile :: ', EXPO_PUBLIC_PROFILE);
 
+    // expo-notification (사용 x)
     // useNotification();
-    useFirebase();
+    // pushStore(store);
 
-    pushStore(store);
+    // firebase-messaging
+    useFirebase();
     pushFcmStore(store);
+
+    // api store
     apiStore(store);
 
     // font load
@@ -69,7 +73,6 @@ const App = () => {
     async function onFetchUpdateAsync() {
         try {
             const update = await Updates.checkForUpdateAsync();
-            // Alert.alert(JSON.stringify(update));
 
             if (update.isAvailable) {
                 Alert.alert(EXPO_PUBLIC_NAME, '업데이트 하시겠습니까?', [
@@ -82,6 +85,7 @@ const App = () => {
                                 await Updates.reloadAsync();
                             } finally {
                                 Alert.alert(`업데이트가 완료되었습니다.`);
+                                // Updates.reloadAsync();
                             }
                         },
                     },

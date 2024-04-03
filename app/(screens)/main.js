@@ -17,6 +17,7 @@ const Main = () => {
             await SecureStore.deleteItemAsync('bio');
             await SecureStore.deleteItemAsync('pin');
             await SecureStore.deleteItemAsync('users');
+            await SecureStore.deleteItemAsync('jwt');
             // await SecureStore.setItemAsync('users', '');
         } catch (err) {
             console.log(err);
@@ -27,7 +28,7 @@ const Main = () => {
     const getStorageData = async () => {
         let bioData = await StorageUtils.getDeviceData('bio'); // 생체 인증 등록 여부 ('true'/'false')
         let pinData = await StorageUtils.getDeviceData('pin'); // 설정 pin
-        let users = await StorageUtils.getDeviceData('users'); // jwt token
+        let jwt = await StorageUtils.getDeviceData('jwt'); // jwt token
 
         let bio = { isRegistered: false, modFlag: false };
         let pin = { isRegistered: false, value: '', modFlag: true };
@@ -54,7 +55,7 @@ const Main = () => {
             dispatchMultiple({
                 SET_PIN: pin,
                 SET_BIO: bio,
-                SET_USERS: users,
+                SET_JWT: jwt,
                 SET_TAB: tabValue,
             })
         );

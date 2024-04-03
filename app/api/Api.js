@@ -11,7 +11,7 @@ export const apiStore = (_store) => {
 
 const AxiosMobile = axios.create({
     baseURL: `${EXPO_PUBLIC_SERVER_URL}/`,
-    timeout: 30000,
+    timeout: 3000,
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     maxRedirects: 0,
 });
@@ -87,7 +87,7 @@ function requestConfig(config, tokenFlag) {
         if (!config.data) config.data = {};
     }
 
-    const token = tokenFlag ? store.getState().loginReducer.users : '';
+    const token = tokenFlag ? store.getState().loginReducer.jwt : '';
 
     if (config.url) {
         config.headers['Authorization'] = `${token}`; // Bearer

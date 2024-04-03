@@ -1,7 +1,7 @@
 const initialState = {
     open: false,
     title: null,
-    hideClose: false,
+    hideClose: false, // 닫기 버튼 유무
     element: null,
 };
 

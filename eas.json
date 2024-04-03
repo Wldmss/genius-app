@@ -10,7 +10,9 @@
                 "EXPO_PUBLIC_VERSION": "1.0.0",
                 "EXPO_PUBLIC_WEB": "https://naver.com",
                 "EXPO_PUBLIC_TEST_SERVER_URL": "http://192.168.55.254:8080",
-                "EXPO_PUBLIC_TEST_API_URL": "/api/v1/"
+                "EXPO_PUBLIC_TEST_API_URL": "/api/v1/",
+                "EXPO_PUBLIC_SERVER_URL": "https://ktedu.kt.com",
+                "EXPO_PUBLIC_API_URL": "/"
             },
             "android": {
                 "image": "latest",
@@ -36,9 +38,7 @@
                 "simulator": true
             },
             "env": {
-                "EXPO_PUBLIC_PROFILE": "development",
-                "EXPO_PUBLIC_SERVER_URL": "https://ktedu.kt.com",
-                "EXPO_PUBLIC_API_URL": "/"
+                "EXPO_PUBLIC_PROFILE": "development"
             }
         },
         "preview": {
@@ -46,18 +46,14 @@
             "channel": "preview",
             "distribution": "internal",
             "env": {
-                "EXPO_PUBLIC_PROFILE": "preview",
-                "EXPO_PUBLIC_SERVER_URL": "https://ktedu.kt.com",
-                "EXPO_PUBLIC_API_URL": "/"
+                "EXPO_PUBLIC_PROFILE": "preview"
             }
         },
         "production": {
             "extends": "base",
             "channel": "production",
             "env": {
-                "EXPO_PUBLIC_PROFILE": "production",
-                "EXPO_PUBLIC_SERVER_URL": "https://ktedu.kt.com",
-                "EXPO_PUBLIC_API_URL": "/"
+                "EXPO_PUBLIC_PROFILE": "production"
             }
         }
     },
