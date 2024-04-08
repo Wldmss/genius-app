@@ -7,6 +7,7 @@ const initialState = {
     notification: false, // 알림 허용 여부
     snack: null, // snack bar 값
     test: null, // 테스트 값
+    exitPressed: false, // 뒤로가기
 };
 
 const commonReducer = (state = initialState, action) => {
@@ -32,6 +33,8 @@ const commonReducer = (state = initialState, action) => {
                 loading: false,
                 isLink: false,
                 camera: false,
+                snack: null,
+                exitPressed: false,
             };
         case 'SET_LINK':
             return {
@@ -63,6 +66,11 @@ const commonReducer = (state = initialState, action) => {
             return {
                 ...state,
                 snack: action.payload,
+            };
+        case 'SET_EXIT_PRESSED':
+            return {
+                ...state,
+                exitPressed: action.payload,
             };
         default:
             return state;

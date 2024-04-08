@@ -28,7 +28,7 @@ export const login = async (username, password) => {
 // test
 export const loginTest = async (userid, pwd, url) => {
     return Api.mobile
-        .post('examLoginProcAjax.do', { userid: userid, pwd: pwd, url: url })
+        .post('loginProcAjax.do', { userid: userid, pwd: pwd, url: url })
         .then((response) => {
             const data = response.data;
             console.log(data);

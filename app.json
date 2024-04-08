@@ -7,8 +7,8 @@
         "orientation": "portrait",
         "icon": "./app/assets/icons/app-icon.png",
         "notification": {
-            "icon": "./app/assets/icons/push-icon_white.png",
-            "color": "#ffffff"
+            "icon": "./app/assets/icons/push-icon.png",
+            "color": "#4b4c4d"
         },
         "userInterfaceStyle": "light",
         "assetBundlePatterns": ["**/*"],
@@ -34,6 +34,9 @@
             "adaptiveIcon": {
                 "foregroundImage": "./app/assets/icons/adaptive-icon.png",
                 "backgroundColor": "#ffffff"
+            },
+            "notification": {
+                "color": "#4b4c4d"
             },
             "permissions": [
                 "android.permission.CAMERA",
@@ -122,8 +125,8 @@
             [
                 "expo-notifications",
                 {
-                    "icon": "./app/assets/icons/push-icon_white.png",
-                    "color": "#ffffff",
+                    "icon": "./app/assets/icons/push-icon.png",
+                    "color": "#4b4c4d",
                     "sounds": []
                 }
             ],

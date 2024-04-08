@@ -4,6 +4,8 @@ import * as Clipboard from 'expo-clipboard';
 import { FontText } from 'utils/TextUtils';
 import { commonInputStyles } from 'assets/styles';
 import { loginTest } from 'api/LoginApi';
+import axios from 'axios';
+import ApiFetch from 'api/ApiFetch';
 
 export default function Test() {
     const test = useSelector((state) => state.commonReducer.test);
@@ -13,7 +15,16 @@ export default function Test() {
     };
 
     const click = async () => {
-        await loginTest('test1001', 'test100!', '');
+        // await loginTest('test1001', 'test100!', '');
+        const send = {
+            userid: 'test1001',
+            pwd: 'test100!',
+            url: '',
+        };
+
+        await ApiFetch.postForm('loginProcAjax.do', send).then((response) => {
+            console.log(response);
+        });
     };
 
     return (

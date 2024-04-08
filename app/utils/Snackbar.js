@@ -1,11 +1,13 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
 import { useSelector } from 'react-redux';
 import { Snackbar as Snack } from 'react-native-paper';
 import store from 'store/store';
 import { dispatchOne } from './DispatchUtils';
 import Constants from 'expo-constants';
 import { FontText } from './TextUtils';
+
+const app_icon = require('assets/icons/app-icon.png');
 
 const Snackbar = () => {
     const snack = useSelector((state) => state.commonReducer.snack);
@@ -21,6 +23,8 @@ const Snackbar = () => {
             }, 2000);
 
             return () => clearTimeout(timeout);
+        } else {
+            onDismissSnackBar();
         }
     }, [snack]);
 
@@ -31,7 +35,10 @@ const Snackbar = () => {
             // wrapperStyle={{ top: Constants.statusBarHeight }}
             onDismiss={onDismissSnackBar}
             onTouchEnd={onDismissSnackBar}>
-            <FontText style={styles.text}>{snack}</FontText>
+            <View style={styles.textBox}>
+                <Image source={app_icon} style={styles.logo} />
+                <FontText style={styles.text}>{snack}</FontText>
+            </View>
         </Snack>
     );
 };
@@ -42,9 +49,18 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
         marginBottom: 25,
     },
+    textBox: {
+        flexDirection: `row`,
+        gap: 10,
+        justifyContent: `center`,
+    },
+    logo: {
+        width: 25,
+        height: 25,
+        borderRadius: 50,
+    },
     text: {
         color: `white`,
-        textAlign: `center`,
     },
 });
 

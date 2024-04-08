@@ -7,6 +7,7 @@ import { Stack, router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { dispatchOne } from 'utils/DispatchUtils';
 import { checkLogin } from 'api/LoginApi';
+import { backEventHandler } from 'utils/BackUtils';
 
 const { EXPO_PUBLIC_NAME } = process.env;
 
@@ -14,6 +15,7 @@ const { EXPO_PUBLIC_NAME } = process.env;
 const Contents = () => {
     const commonOptions = { headerShown: false };
     const sessionTime = 60;
+    const loadTime = 100; //300
 
     const statusBar = useSelector((state) => state.commonReducer.statusBar);
     const token = useSelector((state) => state.loginReducer.token);
@@ -22,8 +24,8 @@ const Contents = () => {
     const expire = useSelector((state) => state.loginReducer.expire);
     const isLogin = useSelector((state) => state.loginReducer.isLogin);
     const jwt = useSelector((state) => state.loginReducer.jwt);
+    const exitPressed = useSelector((state) => state.commonReducer.exitPressed);
 
-    const [exitPressed, setExitPressed] = useState(false);
     let timeout = null;
 
     // 로그인
@@ -49,7 +51,7 @@ const Contents = () => {
                 store.dispatch(dispatchOne('SET_TAB', 'main'));
             }
         } else {
-            if (isLogin) store.dispatch(dispatchOne('SET_TAB', 'web'));
+            if (isLogin) store.dispatch(dispatchOne('SET_TAB', 'web')); //web
         }
     }, [isLogin, token]);
 
@@ -78,7 +80,7 @@ const Contents = () => {
 
                 let timeout = setTimeout(() => {
                     router.push(tab);
-                }, 300);
+                }, loadTime);
 
                 return () => {
                     clearTimeout(timeout);
@@ -89,37 +91,6 @@ const Contents = () => {
         }
     }, [tab]);
 
-    // 뒤로가기
-    useEffect(() => {
-        // Handle back event
-        const backHandler = () => {
-            if (tab != 'web') {
-                if (exitPressed) {
-                    store.dispatch(dispatchOne('SET_EXIT', true));
-                    clearTimeout(timeout);
-                } else {
-                    store.dispatch(dispatchOne('SET_SNACK', '버튼을 한 번 더 누르면 종료됩니다.'));
-                    setExitPressed(true);
-
-                    timeout = setTimeout(() => {
-                        setExitPressed(false);
-                    }, 2000);
-
-                    return () => clearTimeout(timeout);
-                }
-            } else {
-                clearTimeout(timeout);
-            }
-
-            return true;
-        };
-        // Subscribe to back state event
-        BackHandler.addEventListener('hardwareBackPress', backHandler);
-
-        // Unsubscribe
-        return () => BackHandler.removeEventListener('hardwareBackPress', backHandler);
-    }, [tab, exitPressed]);
-
     // 앱 상태 관리
     const handleAppStateChange = (nextAppState) => {
         console.log('App state :::::: ', nextAppState);
@@ -128,7 +99,7 @@ const Contents = () => {
         if (!resetFlag && expire != null) {
             const now = moment();
             const diff = now.diff(expire, 'minutes');
-            resetFlag = diff > sessionTime;
+            resetFlag = diff > sessionTime; // TODO 세션의 기준을 정해야 함
         }
 
         if (resetFlag) {
@@ -143,16 +114,22 @@ const Contents = () => {
         };
     }, [exitFlag]);
 
+    // 뒤로가기
+    useEffect(() => {
+        backEventHandler(timeout);
+    }, [tab, exitPressed]);
+
     // 앱 종료
     useEffect(() => {
         console.log('== exit flag ==');
         console.log(exitFlag);
-        if (exitFlag) {
-            setExitPressed(false);
+        console.log(exitPressed);
+        if (exitFlag && exitPressed) {
+            store.dispatch(dispatchOne('SET_EXIT_PRESSED', false));
             BackHandler.exitApp();
             // exitAlert();
         }
-    }, [exitFlag]);
+    }, [exitFlag, exitPressed]);
 
     // 앱 종료 alert
     const exitAlert = () => {

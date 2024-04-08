@@ -21,6 +21,7 @@ import Contents from 'components/Contents';
 import { apiStore } from 'api/Api';
 
 import * as Updates from 'expo-updates';
+import { backStore } from 'utils/BackUtils';
 
 const { EXPO_PUBLIC_NAME, EXPO_PUBLIC_PROFILE } = process.env;
 
@@ -43,6 +44,9 @@ const App = () => {
 
     // api store
     apiStore(store);
+
+    // back handler store
+    backStore(store);
 
     // font load
     const loadFonts = async () => {

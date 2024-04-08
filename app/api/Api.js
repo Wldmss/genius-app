@@ -12,12 +12,12 @@ export const apiStore = (_store) => {
 const AxiosMobile = axios.create({
     baseURL: `${EXPO_PUBLIC_SERVER_URL}/`,
     timeout: 3000,
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded', Accept: 'application/json' },
     maxRedirects: 0,
 });
 
 AxiosMobile.defaults.timeout = 3000;
-AxiosMobile.defaults.headers.post['Content-Type'] = 'application/json';
+AxiosMobile.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
 
 // 요청 intercept
 AxiosMobile.interceptors.request.use(

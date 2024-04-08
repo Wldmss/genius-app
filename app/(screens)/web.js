@@ -6,17 +6,18 @@ import store from 'store/store';
 import { dispatchOne } from 'utils/DispatchUtils';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { router } from 'expo-router';
+import { backEventHandler } from 'utils/BackUtils';
 
 /** web view */
 const Web = () => {
     const isLink = useSelector((state) => state.commonReducer.isLink);
     const camera = useSelector((state) => state.commonReducer.camera);
     const params = useSelector((state) => state.commonReducer.params);
+    const exitPressed = useSelector((state) => state.commonReducer.exitPressed);
 
     const webViewRef = useRef(null);
 
     const [backButtonEnabled, setBackButtonEnabled] = useState(false);
-    const [exitPressed, setExitPressed] = useState(false);
     let timeout = null;
 
     // webview 통신
@@ -121,41 +122,12 @@ const Web = () => {
     }, [isLink]);
 
     useEffect(() => {
-        // Handle back event
-        const backHandler = () => {
-            if (backButtonEnabled) {
-                webViewRef.current.goBack();
-            } else if (camera) {
-                store.dispatch(dispatchOne('SET_CAMERA', false));
-                router.back();
-            } else {
-                if (exitPressed) {
-                    store.dispatch(dispatchOne('SET_EXIT', true));
-                    clearTimeout(timeout);
-                } else {
-                    store.dispatch(dispatchOne('SET_SNACK', '버튼을 한 번 더 누르면 종료됩니다.'));
-                    setExitPressed(true);
-
-                    timeout = setTimeout(() => {
-                        setExitPressed(false);
-                    }, 2000);
-
-                    return () => clearTimeout(timeout);
-                }
-            }
-
-            return true;
-        };
-        // Subscribe to back state event
-        BackHandler.addEventListener('hardwareBackPress', backHandler);
-
-        // Unsubscribe
-        return () => BackHandler.removeEventListener('hardwareBackPress', backHandler);
-    }, [backButtonEnabled, camera, exitPressed]);
+        backEventHandler(timeout, webViewRef, backButtonEnabled);
+    }, [backButtonEnabled, exitPressed, camera]);
 
     useEffect(() => {
         setBackButtonEnabled(false);
-        setExitPressed(false);
+        store.dispatch(dispatchOne('SET_EXIT_PRESSED', false));
 
         timeout = setTimeout(() => {
             handleError();
@@ -171,11 +143,14 @@ const Web = () => {
             onLoad={webViewLoaded}
             onError={handleError}
             source={{
-                uri: 'https://naver.com',
-                // uri: process.env.EXPO_PUBLIC_WEB,
-                // headers: {
-                //     Authorization: `Bearer ${token}`,
-                // },
+                // uri: 'https://naver.com',
+                uri: 'https://ktedu.kt.com',
+                method: 'POST',
+                body: JSON.stringify({
+                    userid: 'test1001',
+                    pwd: 'test100!',
+                    url: '',
+                }),
             }}
             onNavigationStateChange={onNavigationStateChange}
             onMessage={handleOnMessage}
