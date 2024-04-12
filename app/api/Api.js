@@ -44,7 +44,7 @@ AxiosMobile.interceptors.response.use(
 /** test */
 
 const AxiosTest = axios.create({
-    baseURL: `${EXPO_PUBLIC_TEST_SERVER_URL}`,
+    baseURL: 'http://192.168.50.254:8080', //`${EXPO_PUBLIC_TEST_SERVER_URL}`,
     timeout: 3000,
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     maxRedirects: 0,
@@ -114,28 +114,26 @@ function error(err) {
     let status = errResponse.status;
     let requestConfig = err.config;
 
-    if (err && err.response) {
-        if (!requestConfig.errCheck) {
-            switch (status) {
-                case 400:
-                    Alert.alert('입력 값을 확인해주세요.');
-                    break;
-                case 401:
-                    Alert.alert('인증 정보가 없어 로그아웃 됩니다.');
-                    break;
-                case 404:
-                    Alert.alert('잘못된 경로입니다.');
-                    break;
-                case 406:
-                    Alert.alert('시스템 오류입니다. 관리자에게 문의해주세요.');
-                    break;
-                case 503:
-                    Alert.alert('서버 재시작 중입니다.');
-                    break;
-                default:
-                    Alert.alert('알 수 없는 오류입니다.');
-                    break;
-            }
+    if (!requestConfig.errCheck) {
+        switch (status) {
+            case 400:
+                Alert.alert('입력 값을 확인해주세요.');
+                break;
+            case 401:
+                Alert.alert('인증 정보가 없어 로그아웃 됩니다.');
+                break;
+            case 404:
+                Alert.alert('잘못된 경로입니다.');
+                break;
+            case 406:
+                Alert.alert('시스템 오류입니다. 관리자에게 문의해주세요.');
+                break;
+            case 503:
+                Alert.alert('서버 재시작 중입니다.');
+                break;
+            default:
+                Alert.alert('알 수 없는 오류입니다.');
+                break;
         }
     }
 

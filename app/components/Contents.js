@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Alert, AppState, BackHandler } from 'react-native';
 import store from 'store/store';
@@ -43,8 +43,10 @@ const Contents = () => {
                 }
 
                 // ldap 인증
-                checkLogin().then(({ status }) => {
-                    if (!status) noUsers();
+                checkLogin().then(({ status, data }) => {
+                    if (status && !data) {
+                        noUsers();
+                    }
                 });
             } else {
                 // 최초 접속, 로그아웃

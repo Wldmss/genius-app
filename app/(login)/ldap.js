@@ -18,7 +18,7 @@ const LDAPLogin = () => {
 
     const otpRef = useRef(null);
     const maxTime = 10;
-    const [time, setTime] = useState(maxTime);
+    const [time, setTime] = useState(0);
     const [value, setValue] = useState({ username: '', password: '', otp: '' });
     const [isLogin, setIsLogin] = useState(false);
     const [token, setToken] = useState(null);
@@ -63,19 +63,7 @@ const LDAPLogin = () => {
 
         if (otpRef.current) otpRef.current.focus();
 
-        interval = setInterval(() => {
-            setTime((prevTime) => {
-                if (prevTime == 0) {
-                    clearInterval(interval);
-                    Alert.alert('인증 시간이 초과되었습니다.');
-                    return prevTime;
-                }
-
-                return prevTime - 1;
-            });
-        }, 1000);
-
-        return () => clearInterval(interval);
+        setTime(maxTime);
     };
 
     // OTP 검증
@@ -86,12 +74,12 @@ const LDAPLogin = () => {
             return;
         }
 
-        clearInterval(interval);
+        setTime(0);
         saveUserData(true);
         // checkUsers();
     };
 
-    // 사용자 정보 확인
+    // 사용자 정보 확인 (로그아웃이 가능하다면 saveUserData() 대신 사용)
     const checkUsers = () => {
         if (jwt != null && jwt !== value.username) {
             Alert.alert(
@@ -132,7 +120,7 @@ const LDAPLogin = () => {
         };
 
         store.dispatch(dispatchMultiple(storeData));
-        store.dispatch(dispatchLogin(moment()));
+        store.dispatch(dispatchLogin(true, moment()));
         store.dispatch(dispatchOne('SET_TAB', 'web'));
         checkPushToken();
     };
@@ -145,6 +133,29 @@ const LDAPLogin = () => {
     const resetUsers = async () => {
         await StorageUtils.setDeviceData('jwt', null);
     };
+
+    // 인증 번호 남은 시간 timer
+    useEffect(() => {
+        if (time > 0) {
+            interval = setInterval(() => {
+                setTime((prevTime) => {
+                    if (prevTime == 0) {
+                        clearInterval(interval);
+                        Alert.alert('인증 시간이 초과되었습니다.');
+                        return prevTime;
+                    }
+
+                    console.log(prevTime - 1);
+
+                    return prevTime - 1;
+                });
+            }, 1000);
+
+            return () => clearInterval(interval);
+        } else {
+            clearInterval(interval);
+        }
+    }, [time]);
 
     useEffect(() => {
         if (isLogin) sendOTP();

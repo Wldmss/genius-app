@@ -7,7 +7,7 @@ const Loading = () => {
     const loading = useSelector((state) => state.commonReducer.loading);
 
     return (
-        <Modal visible={loading} transparent={true} animationType="fade">
+        <Modal visible={true} transparent={true} animationType="fade">
             <View style={styles.modalContainer}>
                 <GeniusLogo />
             </View>
@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.1)',
+        // backgroundColor: 'rgba(0, 0, 0, 0.1)',
     },
 });
 

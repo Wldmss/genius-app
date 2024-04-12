@@ -1,6 +1,6 @@
 import { Alert } from 'react-native';
 import store from 'store/store';
-import { dispatchOne } from 'utils/DispatchUtils';
+import { dispatchLogin, dispatchOne } from 'utils/DispatchUtils';
 import CryptoJS from 'react-native-crypto-js';
 import { getPushToken } from 'utils/Push';
 import { getMessagingToken } from 'utils/PushFcm';
@@ -10,6 +10,7 @@ const { EXPO_PUSH_KEY, EXPO_PUBLIC_PROFILE } = process.env;
 
 // LDAP login
 export const login = async (username, password) => {
+    store.dispatch(dispatchOne('SET_LOADING', true));
     // const encryptUsername = CryptoJS.AES.encrypt(JSON.stringify(username), EXPO_PUSH_KEY).toString();
     // const encryptPassword = password ? CryptoJS.AES.encrypt(JSON.stringify(password), EXPO_PUSH_KEY).toString() : null;
 
@@ -21,7 +22,11 @@ export const login = async (username, password) => {
         })
         .catch(async (err) => {
             console.log(err);
+            store.dispatch(dispatchLogin(false, null));
             return { status: false };
+        })
+        .finally(() => {
+            store.dispatch(dispatchOne('SET_LOADING', false));
         });
 };
 
@@ -41,6 +46,7 @@ export const loginTest = async (userid, pwd, url) => {
 
 // pin/bio 로그인 검증
 export const checkLogin = async () => {
+    store.dispatch(dispatchOne('SET_LOADING', true));
     return Api.test
         .get('login/check')
         .then(({ status, data }) => {
@@ -52,7 +58,11 @@ export const checkLogin = async () => {
         })
         .catch(async (err) => {
             console.log(err);
+            store.dispatch(dispatchLogin(false, null));
             return { status: false };
+        })
+        .finally(() => {
+            store.dispatch(dispatchOne('SET_LOADING', false));
         });
 };
 

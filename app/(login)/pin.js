@@ -76,6 +76,8 @@ const PinLogin = () => {
 
     // pin 설정
     const handlePinButton = () => {
+        Keyboard.dismiss();
+
         if (value.enter.length != pinLength || (pin?.modFlag && value.check.length != pinLength) || (isMod && value.origin.length != pinLength)) {
             Alert.alert(`${pinLength}자리를 입력해주세요.`);
             return false;
@@ -122,7 +124,7 @@ const PinLogin = () => {
     // PIN 로그인
     const loginPin = () => {
         if (pin.value != null && checkSame(value.enter, pin.value)) {
-            store.dispatch(dispatchLogin(moment()));
+            store.dispatch(dispatchLogin(true, moment()));
         } else {
             enterRef.current.focus();
             Alert.alert('PIN이 일치하지 않습니다. 다시 시도해주세요.');

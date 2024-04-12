@@ -9,7 +9,7 @@
                 "EXPO_PUBLIC_NAME": "지니어스",
                 "EXPO_PUBLIC_VERSION": "1.0.0",
                 "EXPO_PUBLIC_WEB": "https://naver.com",
-                "EXPO_PUBLIC_TEST_SERVER_URL": "http://192.168.55.254:8080",
+                "EXPO_PUBLIC_TEST_SERVER_URL": "http://192.168.50.254:8080",
                 "EXPO_PUBLIC_TEST_API_URL": "/api/v1/",
                 "EXPO_PUBLIC_SERVER_URL": "https://ktedu.kt.com",
                 "EXPO_PUBLIC_API_URL": "/"

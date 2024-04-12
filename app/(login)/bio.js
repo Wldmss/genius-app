@@ -39,7 +39,7 @@ const BioLogin = () => {
         if (bioRecords && (bio?.isRegistered || bio?.modFlag)) {
             const success = await authenticate();
             if (success) {
-                store.dispatch(dispatchLogin(moment()));
+                store.dispatch(dispatchLogin(true, moment()));
             }
         } else {
             Alert.alert('생체 인증이 등록되어있지 않습니다.');

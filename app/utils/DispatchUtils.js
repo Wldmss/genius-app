@@ -10,8 +10,8 @@ export const dispatchOne = (key, value) => (dispatch) => {
     dispatch({ type: key, payload: value });
 };
 
-// 로그인 dispatch
-export const dispatchLogin = (now) => (dispatch) => {
-    dispatch({ type: 'SET_LOGIN', payload: true });
+// 로그인 dispatch (isLogin이 변경되면 Contents.js > useEffect 에서 감지함)
+export const dispatchLogin = (isLogin, now) => (dispatch) => {
+    dispatch({ type: 'SET_LOGIN', payload: isLogin });
     dispatch({ type: 'SET_EXPIRE', payload: now });
 };

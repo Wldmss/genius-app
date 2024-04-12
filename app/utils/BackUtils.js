@@ -1,12 +1,13 @@
 import { BackHandler } from 'react-native';
 import { dispatchOne } from './DispatchUtils';
+import PropTypes from 'prop-types';
 
 export const backStore = (_store) => {
     store = _store;
 };
 
 /** 뒤로 가기 처리 */
-export const backEventHandler = (timeout, webViewRef, backButtonEnabled) => {
+export const backEventHandler = (timeout, goBack, backButtonEnabled) => {
     const tab = store.getState().loginReducer.tab;
     const camera = store.getState().commonReducer.camera;
     const exitPressed = store.getState().commonReducer.exitPressed;
@@ -15,7 +16,7 @@ export const backEventHandler = (timeout, webViewRef, backButtonEnabled) => {
     const backHandler = () => {
         if (tab == 'web' && backButtonEnabled) {
             // web view 내 뒤로 가기
-            webViewRef.current.goBack();
+            goBack();
         } else if (tab == 'web' && camera) {
             // 카메라 open 인 경우
             store.dispatch(dispatchOne('SET_CAMERA', false));
@@ -46,4 +47,10 @@ export const backEventHandler = (timeout, webViewRef, backButtonEnabled) => {
 
     // Unsubscribe
     return () => BackHandler.removeEventListener('hardwareBackPress', backHandler);
+};
+
+backEventHandler.propTypes = {
+    timeout: PropTypes.any.isRequired, // 뒤로가기 timeout
+    goBack: PropTypes.func, // web view undo 처리
+    backEventHandler: PropTypes.bool, // web view 뒤로가기
 };

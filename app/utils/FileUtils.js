@@ -6,6 +6,7 @@ import * as FileSystem from 'expo-file-system';
 export const handleDownloadRequest = async (event, ref) => {
     const url = event.nativeEvent.url;
 
+    console.log(url);
     // 예제로 파일 다운로드 URL을 확인
     if (url.includes('/download-file')) {
         try {

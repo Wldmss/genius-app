@@ -5,9 +5,13 @@ import { FontText } from 'utils/TextUtils';
 
 const error_img = require('assets/images/error.png');
 
-const ErrorPage = () => {
+const ErrorPage = ({ goForward }) => {
     const retry = () => {
-        store.dispatch({ type: 'INIT_APP' });
+        if (goForward) {
+            goForward();
+        } else {
+            store.dispatch({ type: 'INIT_APP' });
+        }
     };
 
     return (

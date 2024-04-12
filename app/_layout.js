@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, SafeAreaView, Alert } from 'react-native';
+import { StyleSheet, SafeAreaView, Alert, TouchableOpacity } from 'react-native';
 import { Provider } from 'react-redux';
 import store from 'store/store';
 
@@ -31,6 +31,7 @@ const splashTime = 2000;
 const App = () => {
     const [fontsLoaded, setFontsLoaded] = useState(false);
     const [splashLoaded, setSplashLoaded] = useState(false);
+    const [hide, setHide] = useState(false);
 
     console.log('profile :: ', EXPO_PUBLIC_PROFILE);
 
@@ -106,6 +107,31 @@ const App = () => {
         prepare();
     }, []);
 
+    // 사용자 활동 감지
+    const handleUserActivity = () => {
+        console.log('touch!!!!!!!!!!!!!!!!!!!!!!!!!');
+        // 사용자 활동이 감지되면 화면을 보여주는 타이머를 초기화하고 화면을 보여주도록 설정
+        setHide(false);
+    };
+
+    // 화면이 처음 렌더링될 때와 사용자 활동을 감지할 때마다 이벤트 핸들러를 등록
+    useEffect(() => {
+        console.log('hide value!');
+        console.log(hide);
+        if (fontsLoaded && !hide) {
+            const activityListener = setInterval(() => {
+                // 일정 간격마다 사용자 활동을 확인
+                // 사용자 활동이 없는 경우 화면을 숨김
+                console.log('hide!!');
+                setHide(true);
+            }, 60000); // 60초 후에 화면을 숨김
+
+            return () => {
+                clearInterval(activityListener); // 컴포넌트가 언마운트될 때 타이머 제거
+            };
+        }
+    }, [hide, fontsLoaded]);
+
     return (
         <Try catch={ErrorBoundary}>
             <Provider store={store}>
@@ -116,7 +142,7 @@ const App = () => {
                         <SafeAreaView style={styles.container}>
                             <Contents />
                             <PopModal />
-                            <Loading />
+                            {/* <Loading /> */}
                             <Snackbar />
                         </SafeAreaView>
                     )
