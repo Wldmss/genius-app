@@ -3,10 +3,10 @@ import { Alert } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 
 /** 사용 x */
-export const handleDownloadRequest = async (event, ref) => {
-    const url = event.nativeEvent.url;
-
+export const handleDownloadRequest = async (url, ref) => {
     console.log(url);
+    console.log(FileSystem.documentDirectory);
+
     // 예제로 파일 다운로드 URL을 확인
     if (url.includes('/download-file')) {
         try {

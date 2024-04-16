@@ -26,6 +26,14 @@ class ApiFecth {
 
         return await response.json();
     }
+
+    async get(url) {
+        const response = await fetch(`${url}`, {
+            method: 'GET',
+        });
+
+        return await response.json();
+    }
 }
 
 export default new ApiFecth();

@@ -11,6 +11,7 @@ import Constants from 'expo-constants';
 
 import { pushStore, useNotification } from 'utils/Push';
 import { pushFcmStore, useFirebase } from 'utils/PushFcm';
+import { backStore } from 'utils/BackUtils';
 
 import PopModal from 'modal/PopModal';
 import Loading from 'components/Loading';
@@ -21,7 +22,6 @@ import Contents from 'components/Contents';
 import { apiStore } from 'api/Api';
 
 import * as Updates from 'expo-updates';
-import { backStore } from 'utils/BackUtils';
 
 const { EXPO_PUBLIC_NAME, EXPO_PUBLIC_PROFILE } = process.env;
 

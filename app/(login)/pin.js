@@ -13,6 +13,8 @@ const PinLogin = () => {
     const pin = useSelector((state) => state.loginReducer.pin);
 
     const pinLength = 6;
+    const pinCount = 5;
+    const resetCount = useRef(pinCount);
     const originRef = useRef(null);
     const enterRef = useRef(null);
     const checkRef = useRef(null);
@@ -21,6 +23,7 @@ const PinLogin = () => {
     const [isMod, setIsMod] = useState(false);
     const [value, setValue] = useState({ enter: '', check: '', origin: '' });
     const [isSame, setIsSame] = useState(null);
+    const [message, setMessage] = useState({ alertFlag: true, text: null });
 
     const changePin = (id, input) => {
         // 숫자가 아닌 경우 return
@@ -63,7 +66,8 @@ const PinLogin = () => {
                     return;
                 }
             } else {
-                registRef.current = registRef.current + 1;
+                Keyboard.dismiss();
+                // registRef.current = registRef.current + 1;
                 return;
             }
         }
@@ -78,32 +82,40 @@ const PinLogin = () => {
     const handlePinButton = () => {
         Keyboard.dismiss();
 
-        if (value.enter.length != pinLength || (pin?.modFlag && value.check.length != pinLength) || (isMod && value.origin.length != pinLength)) {
-            Alert.alert(`${pinLength}자리를 입력해주세요.`);
+        if (
+            isMod &&
+            (value.enter.length != pinLength || (pin?.modFlag && value.check.length != pinLength) || (isMod && value.origin.length != pinLength))
+        ) {
+            // Alert.alert(`${pinLength}자리를 입력해주세요.`);
+            setMessage({ ...message, alertFlag: true, text: `${pinLength}자리를 입력해주세요.` });
             return false;
         }
 
         // pin 수정
         if (isMod && !checkSame(pin?.value, value.origin)) {
-            Alert.alert('현재 PIN이 일치하지 않습니다.');
+            // Alert.alert('현재 PIN이 일치하지 않습니다.');
+            setMessage({ ...message, alertFlag: true, text: '현재 PIN이 일치하지 않습니다.' });
             originRef.current.focus();
             return false;
         }
 
         const sameFlag = !pin?.modFlag || checkSame(value.enter, value.check);
         if (!sameFlag) {
-            Alert.alert('PIN이 일치하지 않습니다.');
+            // Alert.alert('PIN이 일치하지 않습니다.');
+            setMessage({ ...message, alertFlag: true, text: 'PIN이 일치하지 않습니다.' });
             return false;
         }
 
         if (isMod && checkSame(value.enter, value.origin)) {
-            Alert.alert('PIN이 동일합니다. 다른 PIN으로 설정해주세요.');
+            // Alert.alert('PIN이 동일합니다. 다른 PIN으로 설정해주세요.');
+            setMessage({ ...message, alertFlag: true, text: 'PIN이 동일합니다. 다른 PIN으로 설정해주세요.' });
             enterRef.current.focus();
             return false;
         }
 
         if (pin?.modFlag && confirmPin()) {
-            Alert.alert('안전한 PIN을 설정해주세요.');
+            // Alert.alert('안전한 PIN을 설정해주세요.');
+            setMessage({ ...message, alertFlag: true, text: '안전한 PIN을 설정해주세요.' });
             setValue({ ...value, enter: '', check: '' });
             setIsSame(null);
             enterRef.current.focus();
@@ -125,14 +137,30 @@ const PinLogin = () => {
     const loginPin = () => {
         if (pin.value != null && checkSame(value.enter, pin.value)) {
             store.dispatch(dispatchLogin(true, moment()));
+            setMessage({ ...message, alertFlag: true, text: null });
         } else {
             enterRef.current.focus();
-            Alert.alert('PIN이 일치하지 않습니다. 다시 시도해주세요.');
+
+            if (resetCount.current == 1) {
+                Alert.alert('PIN 입력 횟수를 초과하였습니다.\n로그인 정보를 초기화 합니다.');
+                store.dispatch(dispatchOne('RESET_LOGIN', true));
+                resetCount.current = pinCount;
+            } else {
+                resetCount.current = resetCount.current - 1;
+                // Alert.alert('PIN이 일치하지 않습니다. 다시 시도해주세요.');
+                setMessage({
+                    ...message,
+                    alertFlag: true,
+                    text: `PIN이 일치하지 않습니다. (남은 횟수 : ${resetCount.current}회)`,
+                });
+            }
         }
     };
 
     // PIN 등록
     const registPin = async () => {
+        setMessage({ ...message, alertFlag: true, text: null });
+
         try {
             const tabValue = pin.isRegistered ? 'pin' : 'ldap'; // PIN 변경인 경우 PIN 로그인 으로
 
@@ -177,6 +205,10 @@ const PinLogin = () => {
         setIsMod(pin?.isRegistered && pin?.modFlag);
     }, [pin]);
 
+    useEffect(() => {
+        resetCount.current = pinCount;
+    }, []);
+
     return (
         <View style={styles.container} id="pin">
             <View style={styles.inputBox}>
@@ -206,7 +238,7 @@ const PinLogin = () => {
                     style={[commonTextStyles.fonts, commonInputStyles.inputNumber, value.enter.length > 0 ? styles.spacing : '']}
                     onChangeText={(input) => changePin('enter', input)}
                 />
-                {pin?.modFlag && (
+                {pin?.modFlag ? (
                     <>
                         <TextInput
                             id="check"
@@ -220,12 +252,19 @@ const PinLogin = () => {
                             style={[commonTextStyles.fonts, commonInputStyles.inputNumber, value.check.length > 0 ? styles.spacing : '']}
                             onChangeText={(input) => changePin('check', input)}
                         />
+
                         {isSame != null && (
                             <FontText style={isSame != null ? (isSame ? commonTextStyles.success : commonTextStyles.warning) : ''}>
                                 {isSame != null ? (isSame ? `일치합니다` : `일치하지 않습니다`) : ''}
                             </FontText>
                         )}
                     </>
+                ) : (
+                    message.text != null && (
+                        <FontText style={[styles.smallText, message.alertFlag ? commonTextStyles.warning : commonTextStyles.success]}>
+                            {message.text}
+                        </FontText>
+                    )
                 )}
             </View>
             <Pressable style={commonInputStyles.buttonRed} onPress={handlePinButton}>
@@ -244,6 +283,9 @@ const styles = StyleSheet.create({
     },
     spacing: {
         letterSpacing: 5,
+    },
+    smallText: {
+        fontSize: 12,
     },
 });
 

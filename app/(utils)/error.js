@@ -5,10 +5,10 @@ import { FontText } from 'utils/TextUtils';
 
 const error_img = require('assets/images/error.png');
 
-const ErrorPage = ({ goForward }) => {
+const ErrorPage = ({ goBack }) => {
     const retry = () => {
-        if (goForward) {
-            goForward();
+        if (goBack) {
+            goBack();
         } else {
             store.dispatch({ type: 'INIT_APP' });
         }

@@ -9,6 +9,7 @@ const initialState = {
     exitFlag: false, // 앱 종료 여부
     expire: null, // 세션 만료 시간
     isLogin: false, // 로그인 여부
+    resetLogin: false, // 로그인 리셋
 };
 
 const loginReducer = (state = initialState, action) => {
@@ -71,6 +72,12 @@ const loginReducer = (state = initialState, action) => {
             return {
                 ...state,
                 isLogin: action.payload,
+            };
+
+        case 'RESET_LOGIN':
+            return {
+                ...state,
+                resetLogin: action.payload,
             };
         default:
             return state;

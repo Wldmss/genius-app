@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Alert, Platform, View, TouchableWithoutFeedback } from 'react-native';
+import { StyleSheet, Alert, Platform, View, TouchableWithoutFeedback, Linking } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useSelector } from 'react-redux';
 import store from 'store/store';
@@ -10,6 +10,8 @@ import { backEventHandler } from 'utils/BackUtils';
 import * as FileUtils from 'utils/FileUtils';
 import Loading from 'components/Loading';
 import ErrorPage from '(utils)/error';
+import ApiFetch from 'api/ApiFetch';
+import Api from 'api/Api';
 
 /** web view */
 const Web = () => {
@@ -23,11 +25,14 @@ const Web = () => {
     const [backButtonEnabled, setBackButtonEnabled] = useState(false);
 
     // const tempUri = 'https://naver.com';
-    // const tempUri =  'https://ktedu.kt.com';
-    const tempUri = 'https://aice.study/main';
+    // const tempUri = 'https://ktedu.kt.com';
+    // const tempUri = 'https://aice.study/main';
     // const tempUri =  'https://aice.study/info/aice';
     // const tempUri = 'https://ktedu.kt.com/mobile/m/support/notice/noticeList.do';
     // const tempUri =  'https://ktedu.kt.com/education/courseContents.do?classId=200034420_01';
+    // const tempUri = '192.168.50.254:8080/api/v1/file';
+    const tempUri = 'http://192.168.50.254:8080/file';
+
     const [currentURI, setURI] = useState(tempUri);
     const [hide, setHide] = useState(false);
 
@@ -38,8 +43,8 @@ const Web = () => {
         const { data } = event.nativeEvent;
         console.log(data);
 
-        if (data) {
-            switch (data) {
+        if (data.type) {
+            switch (data.type) {
                 case 'enterFullscreen':
                     enterFullscreen();
                     break;
@@ -54,6 +59,11 @@ const Web = () => {
                     break;
                 case 'test':
                     console.log('TEST');
+                    break;
+                case 'download':
+                    console.log('download');
+                    console.log(data.url);
+                    FileUtils.handleDownloadRequest(data.url, webViewRef);
                     break;
                 default:
                     break;
@@ -79,7 +89,7 @@ const Web = () => {
         handleScreen();
     };
 
-    // screen 가로/세로 모드 처리
+    // screen 가로/세로 모드 처리 (사용X)
     const handleScreen = async (landscape) => {
         const type = landscape ? ScreenOrientation.OrientationLock.LANDSCAPE : ScreenOrientation.OrientationLock.PORTRAIT;
         await ScreenOrientation.lockAsync(type);
@@ -117,7 +127,7 @@ const Web = () => {
     // webview error
     const handleError = (event) => {
         console.log('on error :: ');
-        console.log(event);
+        console.log(event.nativeEvent);
         setHide(true);
         store.dispatch(dispatchOne('SET_LOADING', false));
         // store.dispatch(dispatchOne('SET_TAB', 'error'));
@@ -130,11 +140,8 @@ const Web = () => {
 
         setBackButtonEnabled(canGoBack);
 
-        // handle certain doctypes
-        if (url.includes('.pdf')) {
-            webViewRef.current.stopLoading();
-            // open a modal with the PDF viewer
-        }
+        console.log('onNavigationStateChange::');
+        console.log(url);
     };
 
     // webview 뒤로가기
@@ -153,19 +160,20 @@ const Web = () => {
 
     // for ios download
     const handleDownload = ({ nativeEvent }) => {
-        console.log(nativeEvent);
-
         const { downloadUrl } = nativeEvent;
         console.log(downloadUrl);
     };
 
     // onShouldStartLoadWithRequest
     const handleStartLoadWithRequest = (request) => {
-        console.log(request);
+        console.log('handleStartLoadWithRequest');
 
-        if (request.uri == currentURI) return true;
-        setURI(request.uri);
-        return false;
+        const { url } = request;
+        console.log(url);
+
+        if (request.uri != currentURI) setURI(request.uri);
+
+        return true;
     };
 
     useEffect(() => {
@@ -199,7 +207,7 @@ const Web = () => {
             style={[styles.webview, hide ? styles.none : styles.flex]}
             source={{
                 uri: tempUri,
-                // method: 'POST',
+                method: 'POST',
                 // body: JSON.stringify({
                 //     userid: 'test1001',
                 //     pwd: 'test100!',
@@ -209,7 +217,7 @@ const Web = () => {
             onLoadStart={() => setHide(true)}
             onLoad={webViewLoaded}
             onMessage={handleOnMessage}
-            onError={(event) => handleError(event)}
+            onError={handleError}
             onHttpError={handleError}
             onNavigationStateChange={onNavigationStateChange}
             originWhitelist={['*']}
@@ -219,6 +227,19 @@ const Web = () => {
                     // alert("Message: " + message + "\\n\\nError: " + error);
                     return true;
                 };
+
+                window.onload = function() {
+                    triggerOnSubmit();
+                };
+
+                function triggerOnSubmit() {
+                    // let form = document.getElementById("downloadFrm");
+                    var form = $("#downloadFrm");
+                    form.onsubmit = function() {
+                        alert('form submitted!');
+                        return true;
+                    }
+                }
             `}
             injectedJavaScript={`
                 window.addEventListener('click', function (event) {
@@ -227,10 +248,10 @@ const Web = () => {
             `}
             startInLoadingState={true}
             renderLoading={() => <Loading />}
-            renderError={(errorName) => {
+            renderError={(event) => {
                 console.log('renderError');
-                console.log(errorName);
-                return <ErrorPage goForward={goForward} />;
+                console.log(event);
+                return <ErrorPage goBack={goBack} />;
             }}
             cacheEnabled={true}
             thirdPartyCookiesEnabled={true}
@@ -256,14 +277,16 @@ const Web = () => {
             onContentProcessDidTerminate={(syntheticEvent) => {
                 const { nativeEvent } = syntheticEvent;
                 console.warn('Content process terminated, reloading', nativeEvent);
-                webViewRef.current.reload();
+                // webViewRef.current.reload();
             }}
         />
     );
 };
 
 const styles = StyleSheet.create({
-    webview: { backgroundColor: `#ffffff` },
+    webview: {
+        backgroundColor: `#ffffff`,
+    },
     flex: {
         flex: 1,
     },

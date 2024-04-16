@@ -1,34 +1,45 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
+import { useSelector } from 'react-redux';
 import store from 'store/store';
 import * as SecureStore from 'expo-secure-store';
 import * as Authentication from 'expo-local-authentication';
-import { dispatchMultiple } from 'utils/DispatchUtils';
+import { dispatchMultiple, dispatchOne } from 'utils/DispatchUtils';
 import * as StorageUtils from 'utils/StorageUtils';
 
 /** genius main */
 const Main = () => {
     const [doneBio, setDoneBio] = useState(false);
+    const resetLogin = useSelector((state) => state.loginReducer.resetLogin);
 
     // 테스트 용 (storage delete)
     const storeStorageData = async () => {
         try {
-            await SecureStore.deleteItemAsync('genius');
             await SecureStore.deleteItemAsync('bio');
             await SecureStore.deleteItemAsync('pin');
-            await SecureStore.deleteItemAsync('users');
             await SecureStore.deleteItemAsync('jwt');
-            // await SecureStore.setItemAsync('users', '');
+            await SecureStore.deleteItemAsync('hasVisit');
+            // await SecureStore.setItemAsync('jwt', '');
         } catch (err) {
             console.log(err);
         }
     };
 
+    // 로그인 리셋
+    const resetStorageData = async () => {
+        await SecureStore.deleteItemAsync('pin');
+        await SecureStore.deleteItemAsync('bio');
+        await SecureStore.deleteItemAsync('jwt');
+
+        store.dispatch(dispatchOne('RESET_LOGIN', false));
+        store.dispatch(dispatchOne('SET_TAB', 'main'));
+    };
+
     // async store data
     const getStorageData = async () => {
-        let bioData = await StorageUtils.getDeviceData('bio'); // 생체 인증 등록 여부 ('true'/'false')
-        let pinData = await StorageUtils.getDeviceData('pin'); // 설정 pin
-        let jwt = await StorageUtils.getDeviceData('jwt'); // jwt token
+        const bioData = await StorageUtils.getDeviceData('bio'); // 생체 인증 등록 여부 ('true'/'false')
+        const pinData = await StorageUtils.getDeviceData('pin'); // 설정 pin
+        const jwt = await StorageUtils.getDeviceData('jwt'); // jwt token
 
         let bio = { isRegistered: false, modFlag: false };
         let pin = { isRegistered: false, value: '', modFlag: true };
@@ -83,9 +94,18 @@ const Main = () => {
         setDoneBio(true);
     };
 
-    useEffect(() => {
-        // storeStorageData();
+    // 최초 접속 확인
+    const checkFirst = async () => {
+        try {
+            const hasVisit = await StorageUtils.getDeviceData('hasVisit');
+            return hasVisit == null || hasVisit != 'true';
+        } catch (err) {
+            return false;
+        }
+    };
 
+    // storage 데이터 확인
+    const checkStorage = () => {
         if (doneBio) {
             getStorageData();
         } else {
@@ -93,7 +113,23 @@ const Main = () => {
                 getStorageData();
             });
         }
+    };
+
+    useEffect(() => {
+        // storeStorageData();
+
+        checkFirst().then((isFirst) => {
+            if (isFirst) {
+                store.dispatch(dispatchOne('SET_TAB', 'guide'));
+            } else {
+                checkStorage();
+            }
+        });
     }, []);
+
+    useEffect(() => {
+        if (resetLogin) resetStorageData();
+    }, [resetLogin]);
 
     return <View style={styles.container}></View>;
 };
