@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import { Alert, Platform, StyleSheet, View } from 'react-native';
 import messaging from '@react-native-firebase/messaging';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
@@ -115,7 +115,8 @@ export function useFirebase() {
 
         // Handle user opening the app from a notification (when the app is in the background)
         messaging().onNotificationOpenedApp(async (remoteMessage) => {
-            console.log('Notification caused app to open from background state:', remoteMessage.data.screen, navigation);
+            store.dispatch(dispatchOne('SET_LINK', true));
+            store.dispatch(dispatchOne('SET_PARAMS', remoteMessage.data));
         });
 
         // Handle push notifications when the app is in the background

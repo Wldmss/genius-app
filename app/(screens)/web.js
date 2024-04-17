@@ -25,26 +25,32 @@ const Web = () => {
     const [backButtonEnabled, setBackButtonEnabled] = useState(false);
 
     // const tempUri = 'https://naver.com';
+    // const tempUri = 'https://m.mail.naver.com/v2/read/0/6110';
     // const tempUri = 'https://ktedu.kt.com';
     // const tempUri = 'https://aice.study/main';
     // const tempUri =  'https://aice.study/info/aice';
-    // const tempUri = 'https://ktedu.kt.com/mobile/m/support/notice/noticeList.do';
+    const tempUri = 'https://ktedu.kt.com/mobile/m/support/notice/noticeList.do';
     // const tempUri =  'https://ktedu.kt.com/education/courseContents.do?classId=200034420_01';
     // const tempUri = '192.168.50.254:8080/api/v1/file';
-    const tempUri = 'http://192.168.50.254:8080/file';
+    // const tempUri = '192.168.50.254:8080/file';
 
     const [currentURI, setURI] = useState(tempUri);
     const [hide, setHide] = useState(false);
+    const [postData, setPostData] = useState({});
+    const [init, setInit] = useState(false);
 
     let timeout = null;
 
     // webview 통신
     const handleOnMessage = (event) => {
         const { data } = event.nativeEvent;
-        console.log(data);
+        console.log('handleOnMessage');
 
-        if (data.type) {
-            switch (data.type) {
+        const sendData = JSON.parse(data);
+        console.log(sendData);
+
+        if (sendData.type) {
+            switch (sendData.type) {
                 case 'enterFullscreen':
                     enterFullscreen();
                     break;
@@ -61,9 +67,19 @@ const Web = () => {
                     console.log('TEST');
                     break;
                 case 'download':
-                    console.log('download');
-                    console.log(data.url);
-                    FileUtils.handleDownloadRequest(data.url, webViewRef);
+                    // webViewRef.current.stopLoading();
+                    // window.location.href = sendData.url;
+                    // Linking.openURL(sendData.url);
+                    // FileUtils.handleDownloadRequest(sendData.url, webViewRef);
+                    break;
+                case 'downloadBtn':
+                    webViewRef.current.stopLoading();
+                    const url = 'http://192.168.50.254:8080/api/v1/file';
+                    if (Linking.canOpenURL(url)) {
+                        Linking.openURL(url);
+                    } else {
+                        Linking.addEventListener('url', url);
+                    }
                     break;
                 default:
                     break;
@@ -116,21 +132,26 @@ const Web = () => {
     };
 
     // webview load
-    const webViewLoaded = (event) => {
-        console.log(event.nativeEvent);
+    const webViewLoaded = ({ nativeEvent }) => {
+        console.log('webViewLoaded');
+        console.log(nativeEvent);
         clearTimeout(timeout);
         store.dispatch(dispatchOne('SET_LOADING', false));
         setBackButtonEnabled(true);
         setHide(false);
+        setInit(true);
     };
 
     // webview error
-    const handleError = (event) => {
-        console.log('on error :: ');
-        console.log(event.nativeEvent);
-        setHide(true);
-        store.dispatch(dispatchOne('SET_LOADING', false));
-        // store.dispatch(dispatchOne('SET_TAB', 'error'));
+    const handleError = (syntheticEvent) => {
+        if (syntheticEvent) {
+            const { nativeEvent } = syntheticEvent;
+            console.log('on error :: ');
+            console.log(nativeEvent);
+            setHide(true);
+            store.dispatch(dispatchOne('SET_LOADING', false));
+            // store.dispatch(dispatchOne('SET_TAB', 'error'));
+        }
     };
 
     // Webview navigation state change
@@ -138,7 +159,9 @@ const Web = () => {
         const { url, canGoBack } = navState;
         if (!url) return;
 
-        setBackButtonEnabled(canGoBack);
+        let goBack = url.includes('portalMain.do') || url.includes('login.do') ? false : canGoBack;
+
+        setBackButtonEnabled(goBack);
 
         console.log('onNavigationStateChange::');
         console.log(url);
@@ -151,10 +174,10 @@ const Web = () => {
 
     // webview 앞으로 가기
     const goForward = () => {
-        webViewRef.current.goForward(handleGoFoward);
+        webViewRef.current.goForward(handleHide);
     };
 
-    const handleGoFoward = () => {
+    const handleHide = () => {
         setHide(false);
     };
 
@@ -171,15 +194,18 @@ const Web = () => {
         const { url } = request;
         console.log(url);
 
-        if (request.uri != currentURI) setURI(request.uri);
+        if (url != currentURI) setURI(url);
 
         return true;
     };
 
     useEffect(() => {
+        console.log('is link :: ', isLink);
         if (isLink) {
             Alert.alert('is linked!!');
+
             console.log(params);
+            if (params && Object.keys(params).length > 0) setPostData(params);
         }
         console.log(isLink ? '@@@@@@ is link @@@@@' : 'XXXXX not link xXXXXX');
         // todo QR 로그인 후 뭔가 해야함
@@ -195,7 +221,9 @@ const Web = () => {
         store.dispatch(dispatchOne('SET_EXIT_PRESSED', false));
 
         timeout = setTimeout(() => {
-            if (hide) handleError();
+            if (hide) {
+                handleError();
+            }
         }, 10000);
 
         return () => clearTimeout(timeout);
@@ -208,43 +236,33 @@ const Web = () => {
             source={{
                 uri: tempUri,
                 method: 'POST',
-                // body: JSON.stringify({
-                //     userid: 'test1001',
-                //     pwd: 'test100!',
-                //     url: '',
-                // }),
+                body: JSON.stringify(postData),
             }}
-            onLoadStart={() => setHide(true)}
+            onLoadStart={() => !init && setHide(true)}
             onLoad={webViewLoaded}
             onMessage={handleOnMessage}
             onError={handleError}
-            onHttpError={handleError}
             onNavigationStateChange={onNavigationStateChange}
             originWhitelist={['*']}
             onShouldStartLoadWithRequest={handleStartLoadWithRequest}
+            javaScriptCanOpenWindowsAutomatically={true}
             injectedJavaScriptBeforeContentLoaded={`
                 window.onerror = function(message, sourcefile, lineno, colno, error){
                     // alert("Message: " + message + "\\n\\nError: " + error);
                     return true;
                 };
-
-                window.onload = function() {
-                    triggerOnSubmit();
-                };
-
-                function triggerOnSubmit() {
-                    // let form = document.getElementById("downloadFrm");
-                    var form = $("#downloadFrm");
-                    form.onsubmit = function() {
-                        alert('form submitted!');
-                        return true;
-                    }
-                }
             `}
             injectedJavaScript={`
                 window.addEventListener('click', function (event) {
-                    window.ReactNativeWebView.postMessage(JSON.stringify(event.target.id));
-                }
+                    if (event.target.tagName === 'A') {
+                        const url = event.target.href;
+                        window.ReactNativeWebView.postMessage(JSON.stringify({type : 'download', url: url}));
+                        // event.preventDefault();
+                    } else {
+                        window.ReactNativeWebView.postMessage(JSON.stringify({type : event.target.id}));
+                        // event.preventDefault();
+                    }
+                });
             `}
             startInLoadingState={true}
             renderLoading={() => <Loading />}
@@ -269,6 +287,7 @@ const Web = () => {
             automaticallyAdjustContentInsets={false}
             allowUniversalAccessFromFileURLs={true}
             allowFileAccess={true}
+            allowFileAccessFromFileURLs={true}
             onOpenWindow={(syntheticEvent) => {
                 const { nativeEvent } = syntheticEvent;
                 const { targetUrl } = nativeEvent;

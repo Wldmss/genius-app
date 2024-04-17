@@ -5,6 +5,7 @@ import CryptoJS from 'react-native-crypto-js';
 import { getPushToken } from 'utils/Push';
 import { getMessagingToken } from 'utils/PushFcm';
 import Api from './Api';
+import * as Device from 'expo-device';
 
 const { EXPO_PUSH_KEY, EXPO_PUBLIC_PROFILE } = process.env;
 
@@ -68,13 +69,8 @@ export const checkLogin = async () => {
 
 // push 토큰 값 확인
 export const checkPushToken = async () => {
-    // await getPushToken().then((deviceToken) => {
-    //     console.log('---deviceToken---');
-    //     console.log(deviceToken);
-    //     // store.dispatch(dispatchOne('SET_TEST', deviceToken));
-    //     // const encryptPushToken = CryptoJS.AES.encrypt(JSON.stringify(deviceToken), EXPO_PUSH_KEY).toString();
-    //     Api.test.post('push', { deviceToken: deviceToken });
-    // });
+    checkDevice();
+
     await getMessagingToken().then((deviceToken) => {
         console.log('---deviceToken---');
         console.log(deviceToken);
@@ -82,4 +78,42 @@ export const checkPushToken = async () => {
         // const encryptPushToken = CryptoJS.AES.encrypt(JSON.stringify(deviceToken), EXPO_PUSH_KEY).toString();
         Api.test.post('push', { deviceToken: deviceToken });
     });
+};
+
+// expo push 토큰 값 확인
+const checkExpoPushToken = async () => {
+    await getPushToken().then((deviceToken) => {
+        console.log('---deviceToken---');
+        console.log(deviceToken);
+        // store.dispatch(dispatchOne('SET_TEST', deviceToken));
+        // const encryptPushToken = CryptoJS.AES.encrypt(JSON.stringify(deviceToken), EXPO_PUSH_KEY).toString();
+        Api.test.post('push', { deviceToken: deviceToken });
+    });
+};
+
+// device 정보 확인
+const checkDevice = () => {
+    const brandType = {
+        samsung: 'Android',
+        google: 'Android',
+        xiaomi: 'Android',
+        apple: 'IOS',
+    };
+
+    const deviceType = ['UNKNOWN', 'PHONE', 'TABLET', 'DESKTOP', 'TV', 'WATCH'];
+
+    const brand = Device.brand;
+
+    console.log(brand);
+
+    const deviceInfo = {
+        deviceType: Device.deviceType <= 6 ? deviceType[Device.deviceType] : 'UNKNOWN',
+        brand: brand == null ? 'web' : brandType[brand.toLowerCase()],
+        buildId: Device.osBuildId,
+        osVersion: Device.osVersion,
+    };
+
+    console.log(deviceInfo);
+
+    return deviceInfo;
 };

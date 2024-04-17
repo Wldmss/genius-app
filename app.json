@@ -15,7 +15,6 @@
         "ios": {
             "supportsTablet": true,
             "requireFullScreen": true,
-            "bundleIdentifier":"",
             "infoPlist": {
                 "NSFaceIDUsageDescription": "Allow $(PRODUCT_NAME) to use Face ID.",
                 "NSCameraUsageDescription": "Allow $(PRODUCT_NAME) to access camera.",

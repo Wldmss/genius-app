@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import store from 'store/store';
 import { useLocalSearchParams } from 'expo-router';
 import { dispatchOne } from 'utils/DispatchUtils';
+import { Alert } from 'react-native';
 
 /** 링크 접속 */
 export default function Link() {
