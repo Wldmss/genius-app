@@ -62,11 +62,16 @@ const App = () => {
     const prepare = async () => {
         try {
             loadFonts();
-            if (EXPO_PUBLIC_PROFILE == 'production') {
-                await onFetchUpdateAsync();
-            } else {
-                await new Promise((resolve) => setTimeout(resolve, splashTime));
-            }
+            await checkServer();
+
+            // TEST
+            await new Promise((resolve) => setTimeout(resolve, splashTime));
+
+            // if (EXPO_PUBLIC_PROFILE == 'production') {
+            //     await onFetchUpdateAsync();
+            // } else {
+            //     await new Promise((resolve) => setTimeout(resolve, splashTime));
+            // }
         } catch (e) {
             console.warn(e);
         } finally {
@@ -77,6 +82,7 @@ const App = () => {
     // 앱 업데이트 체크
     async function onFetchUpdateAsync() {
         try {
+            // app version 체크해서 서버랑 하기
             const update = await Updates.checkForUpdateAsync();
 
             if (update.isAvailable) {
@@ -102,6 +108,9 @@ const App = () => {
             Alert.alert(`${error}`);
         }
     }
+
+    // 서버 체크
+    const checkServer = async () => {};
 
     useEffect(() => {
         prepare();

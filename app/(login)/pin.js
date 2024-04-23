@@ -253,10 +253,16 @@ const PinLogin = () => {
                             onChangeText={(input) => changePin('check', input)}
                         />
 
-                        {isSame != null && (
+                        {isSame != null ? (
                             <FontText style={isSame != null ? (isSame ? commonTextStyles.success : commonTextStyles.warning) : ''}>
                                 {isSame != null ? (isSame ? `일치합니다` : `일치하지 않습니다`) : ''}
                             </FontText>
+                        ) : (
+                            message.text != null && (
+                                <FontText style={[styles.smallText, message.alertFlag ? commonTextStyles.warning : commonTextStyles.success]}>
+                                    {message.text}
+                                </FontText>
+                            )
                         )}
                     </>
                 ) : (

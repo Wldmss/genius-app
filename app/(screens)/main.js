@@ -118,13 +118,18 @@ const Main = () => {
     useEffect(() => {
         // storeStorageData();
 
-        checkFirst().then((isFirst) => {
-            if (isFirst) {
-                store.dispatch(dispatchOne('SET_TAB', 'guide'));
-            } else {
-                checkStorage();
-            }
-        });
+        // TEST
+        // if (process.env.EXPO_PUBLIC_PROFILE == 'production') {
+        checkStorage();
+        // } else {
+        //     checkFirst().then((isFirst) => {
+        //         if (isFirst) {
+        //             store.dispatch(dispatchOne('SET_TAB', 'guide'));
+        //         } else {
+        //             checkStorage();
+        //         }
+        //     });
+        // }
     }, []);
 
     useEffect(() => {

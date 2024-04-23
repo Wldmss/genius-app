@@ -26,13 +26,14 @@ const Web = () => {
 
     // const tempUri = 'https://naver.com';
     // const tempUri = 'https://m.mail.naver.com/v2/read/0/6110';
-    // const tempUri = 'https://ktedu.kt.com';
+    const tempUri = 'https://ktedu.kt.com';
     // const tempUri = 'https://aice.study/main';
     // const tempUri =  'https://aice.study/info/aice';
-    const tempUri = 'https://ktedu.kt.com/mobile/m/support/notice/noticeList.do';
+    // const tempUri = 'https://ktedu.kt.com/mobile/m/support/notice/noticeList.do';
     // const tempUri =  'https://ktedu.kt.com/education/courseContents.do?classId=200034420_01';
     // const tempUri = '192.168.50.254:8080/api/v1/file';
     // const tempUri = '192.168.50.254:8080/file';
+    const devUrl = 'https://dev.ktedu.kt.com:2443';
 
     const [currentURI, setURI] = useState(tempUri);
     const [hide, setHide] = useState(false);
@@ -229,12 +230,17 @@ const Web = () => {
         return () => clearTimeout(timeout);
     }, []);
 
+    // useEffect(() => {
+    //     // TEST
+    //     Alert.alert(`${process.env.EXPO_PUBLIC_PROFILE}\n${process.env.EXPO_PUBLIC_PROFILE == 'production' ? devUrl : tempUri}`);
+    // }, []);
+
     return (
         <WebView
             ref={webViewRef}
             style={[styles.webview, hide ? styles.none : styles.flex]}
             source={{
-                uri: tempUri,
+                uri: devUrl,
                 method: 'POST',
                 body: JSON.stringify(postData),
             }}
