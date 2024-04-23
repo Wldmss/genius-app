@@ -10,8 +10,6 @@ import { FontText } from 'utils/TextUtils';
 import { checkPushToken, login } from 'api/LoginApi';
 import LoginInfo from 'modal/LoginInfo';
 
-const { EXPO_PUBLIC_NAME } = process.env;
-
 /** LDAP 로그인 */
 const LDAPLogin = () => {
     const jwt = useSelector((state) => state.loginReducer.jwt);
@@ -83,7 +81,7 @@ const LDAPLogin = () => {
     const checkUsers = () => {
         if (jwt != null && jwt !== value.username) {
             Alert.alert(
-                EXPO_PUBLIC_NAME,
+                process.env.EXPO_PUBLIC_NAME,
                 `기본 로그인 정보를 "${value.username}" 으로 변경하시겠습니까?`,
                 [
                     {

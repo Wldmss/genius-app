@@ -8,13 +8,15 @@
         "icon": "./app/assets/icons/app-icon.png",
         "notification": {
             "icon": "./app/assets/icons/push-icon.png",
-            "color": "#4b4c4d"
+            "color": "#ffffff"
         },
         "userInterfaceStyle": "light",
         "assetBundlePatterns": ["**/*"],
         "ios": {
+            "googleServicesFile": "./GoogleService-Info.plist",
             "supportsTablet": true,
             "requireFullScreen": true,
+            "bundleIdentifier": "com.ktds.genius",
             "infoPlist": {
                 "NSFaceIDUsageDescription": "Allow $(PRODUCT_NAME) to use Face ID.",
                 "NSCameraUsageDescription": "Allow $(PRODUCT_NAME) to access camera.",
@@ -27,16 +29,13 @@
             "config": {
                 "usesNonExemptEncryption": false
             },
-            "associatedDomains": ["applinks:genius.kt.com"]
+            "associatedDomains": ["applinks:ktgenius.kt.com"]
         },
         "android": {
             "googleServicesFile": "./google-services.json",
             "adaptiveIcon": {
                 "foregroundImage": "./app/assets/icons/adaptive-icon.png",
                 "backgroundColor": "#ffffff"
-            },
-            "notification": {
-                "color": "#4b4c4d"
             },
             "permissions": [
                 "android.permission.CAMERA",
@@ -127,7 +126,7 @@
                 "expo-notifications",
                 {
                     "icon": "./app/assets/icons/push-icon.png",
-                    "color": "#4b4c4d",
+                    "color": "#ffffff",
                     "sounds": []
                 }
             ],

@@ -230,17 +230,17 @@ const Web = () => {
         return () => clearTimeout(timeout);
     }, []);
 
-    // useEffect(() => {
-    //     // TEST
-    //     Alert.alert(`${process.env.EXPO_PUBLIC_PROFILE}\n${process.env.EXPO_PUBLIC_PROFILE == 'production' ? devUrl : tempUri}`);
-    // }, []);
+    useEffect(() => {
+        // TEST
+        Alert.alert(`${process.env.EXPO_PUBLIC_PROFILE}\n${process.env.EXPO_PUBLIC_PROFILE == 'production' ? devUrl : tempUri}`);
+    }, []);
 
     return (
         <WebView
             ref={webViewRef}
             style={[styles.webview, hide ? styles.none : styles.flex]}
             source={{
-                uri: devUrl,
+                uri: process.env.EXPO_PUBLIC_PROFILE == 'production' ? devUrl : tempUri,
                 method: 'POST',
                 body: JSON.stringify(postData),
             }}

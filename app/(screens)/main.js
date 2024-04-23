@@ -119,17 +119,17 @@ const Main = () => {
         // storeStorageData();
 
         // TEST
-        // if (process.env.EXPO_PUBLIC_PROFILE == 'production') {
-        checkStorage();
-        // } else {
-        //     checkFirst().then((isFirst) => {
-        //         if (isFirst) {
-        //             store.dispatch(dispatchOne('SET_TAB', 'guide'));
-        //         } else {
-        //             checkStorage();
-        //         }
-        //     });
-        // }
+        if (process.env.EXPO_PUBLIC_PROFILE == 'production') {
+            checkStorage();
+        } else {
+            checkFirst().then((isFirst) => {
+                if (isFirst) {
+                    store.dispatch(dispatchOne('SET_TAB', 'guide'));
+                } else {
+                    checkStorage();
+                }
+            });
+        }
     }, []);
 
     useEffect(() => {

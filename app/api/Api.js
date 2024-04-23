@@ -1,8 +1,6 @@
 import axios from 'axios';
 import { Alert } from 'react-native';
 
-const { EXPO_PUBLIC_SERVER_URL, EXPO_PUBLIC_TEST_SERVER_URL, EXPO_PUBLIC_API_URL, EXPO_PUBLIC_TEST_API_URL } = process.env;
-
 export const apiStore = (_store) => {
     store = _store;
 };
@@ -10,7 +8,7 @@ export const apiStore = (_store) => {
 /** ktedu */
 
 const AxiosMobile = axios.create({
-    baseURL: `${EXPO_PUBLIC_SERVER_URL}/`,
+    baseURL: `${process.env.EXPO_PUBLIC_SERVER_URL}/`,
     timeout: 3000,
     headers: { 'Content-Type': 'application/x-www-form-urlencoded', Accept: 'application/json' },
     maxRedirects: 0,
@@ -22,7 +20,7 @@ AxiosMobile.defaults.headers.post['Content-Type'] = 'application/x-www-form-urle
 // 요청 intercept
 AxiosMobile.interceptors.request.use(
     function (config) {
-        config.url = `${EXPO_PUBLIC_API_URL}${config.url}`;
+        config.url = `${process.env.EXPO_PUBLIC_API_URL}${config.url}`;
         console.log(config.url);
         return requestConfig(config);
     },
@@ -44,7 +42,7 @@ AxiosMobile.interceptors.response.use(
 /** test */
 
 const AxiosTest = axios.create({
-    baseURL: 'http://172.30.1.91:8080', // 'http://192.168.50.254:8080', //`${EXPO_PUBLIC_TEST_SERVER_URL}`,
+    baseURL: 'http://192.168.50.254:8080', // 'http://192.168.50.254:8080', //`${EXPO_PUBLIC_TEST_SERVER_URL}`,
     timeout: 3000,
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     maxRedirects: 0,
@@ -56,7 +54,7 @@ AxiosTest.defaults.headers.post['Content-Type'] = 'application/json';
 // 요청 intercept
 AxiosTest.interceptors.request.use(
     function (config) {
-        config.url = `${EXPO_PUBLIC_TEST_API_URL}${config.url}`;
+        config.url = `${process.env.EXPO_PUBLIC_TEST_API_URL}${config.url}`;
         return requestConfig(config, true);
     },
     function (err) {

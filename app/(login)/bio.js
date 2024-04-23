@@ -9,8 +9,6 @@ import * as StorageUtils from 'utils/StorageUtils';
 import { dispatchLogin, dispatchOne } from 'utils/DispatchUtils';
 import { FontText } from 'utils/TextUtils';
 
-const { EXPO_PUBLIC_NAME } = process.env;
-
 /** 생체 인증 로그인/등록 */
 const BioLogin = () => {
     const pin = useSelector((state) => state.loginReducer.pin);
@@ -32,7 +30,7 @@ const BioLogin = () => {
     const authenticate = async (isRegister) => {
         try {
             const { success } = await Authentication.authenticateAsync({
-                promptMessage: `${EXPO_PUBLIC_NAME} ${isRegister ? `등록` : `로그인`}`,
+                promptMessage: `${process.env.EXPO_PUBLIC_NAME} ${isRegister ? `등록` : `로그인`}`,
                 AuthenticationType: bioSupported,
             });
 
@@ -59,7 +57,7 @@ const BioLogin = () => {
     const registBio = async () => {
         const success = await authenticate(true);
         if (success) {
-            Alert.alert(EXPO_PUBLIC_NAME, '생체 인증이 등록되었습니다.', [
+            Alert.alert(process.env.EXPO_PUBLIC_NAME, '생체 인증이 등록되었습니다.', [
                 {
                     text: '확인',
                     onPress: async () => {

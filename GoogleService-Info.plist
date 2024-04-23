@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>785867783883-i3irkev5iiuvk9ed5m1m497025s8m3d0.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDBr-Fwlu8okkpXVQunyz9S1geApbdd6B0</string>
+	<key>GCM_SENDER_ID</key>
+	<string>785867783883</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.ktds.genius</string>
+	<key>PROJECT_ID</key>
+	<string>genius-mobile-35601</string>
+	<key>STORAGE_BUCKET</key>
+	<string>genius-mobile-35601.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:785867783883:ios:260146c8b5c832ff0be54e</string>
+</dict>
+</plist>

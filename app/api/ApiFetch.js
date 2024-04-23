@@ -1,8 +1,6 @@
-const { EXPO_PUBLIC_SERVER_URL } = process.env;
-
 class ApiFecth {
     async postForm(url, body) {
-        const response = await fetch(`${EXPO_PUBLIC_SERVER_URL}/${url}`, {
+        const response = await fetch(`${process.env.EXPO_PUBLIC_SERVER_URL}/${url}`, {
             method: 'POST',
             headers: {
                 Accept: 'application/json',
@@ -15,7 +13,7 @@ class ApiFecth {
     }
 
     async post(url, body) {
-        const response = await fetch(`${EXPO_PUBLIC_SERVER_URL}/${url}`, {
+        const response = await fetch(`${process.env.EXPO_PUBLIC_SERVER_URL}/${url}`, {
             method: 'POST',
             headers: {
                 Accept: 'application/json',

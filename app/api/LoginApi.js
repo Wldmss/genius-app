@@ -7,34 +7,49 @@ import { getMessagingToken } from 'utils/PushFcm';
 import Api from './Api';
 import * as Device from 'expo-device';
 
-const { EXPO_PUSH_KEY, EXPO_PUBLIC_PROFILE } = process.env;
+// server check
+export const checkServer = async () => {
+    if (process.env.EXPO_PUBLIC_PROFILE == 'production') {
+        return true;
+    } else {
+        return Api.test
+            .get('check')
+            .then((result) => {
+                if (result) return true;
+                return false;
+            })
+            .catch((err) => {
+                return false;
+            });
+    }
+};
 
 // LDAP login
 export const login = async (username, password) => {
     store.dispatch(dispatchOne('SET_LOADING', true));
-    // const encryptUsername = CryptoJS.AES.encrypt(JSON.stringify(username), EXPO_PUSH_KEY).toString();
-    // const encryptPassword = password ? CryptoJS.AES.encrypt(JSON.stringify(password), EXPO_PUSH_KEY).toString() : null;
+    // const encryptUsername = CryptoJS.AES.encrypt(JSON.stringify(username), process.env.EXPO_PUSH_KEY).toString();
+    // const encryptPassword = password ? CryptoJS.AES.encrypt(JSON.stringify(password), process.env.EXPO_PUSH_KEY).toString() : null;
 
     // TEST
-    // if (EXPO_PUBLIC_PROFILE == 'production') {
-    store.dispatch(dispatchOne('SET_LOADING', false));
-    return { status: true, token: 'token' };
-    // } else {
-    //     return Api.test
-    //         .post('login', { username: username, password: password })
-    //         .then(({ status, data }) => {
-    //             console.log(status);
-    //             return { status: status == 200, token: data ? data.token : null };
-    //         })
-    //         .catch(async (err) => {
-    //             console.log(err);
-    //             store.dispatch(dispatchLogin(false, null));
-    //             return { status: false };
-    //         })
-    //         .finally(() => {
-    //             store.dispatch(dispatchOne('SET_LOADING', false));
-    //         });
-    // }
+    if (process.env.EXPO_PUBLIC_PROFILE == 'production') {
+        store.dispatch(dispatchOne('SET_LOADING', false));
+        return { status: true, token: 'token' };
+    } else {
+        return Api.test
+            .post('login', { username: username, password: password })
+            .then(({ status, data }) => {
+                console.log(status);
+                return { status: status == 200, token: data ? data.token : null };
+            })
+            .catch(async (err) => {
+                console.log(err);
+                store.dispatch(dispatchLogin(false, null));
+                return { status: false };
+            })
+            .finally(() => {
+                store.dispatch(dispatchOne('SET_LOADING', false));
+            });
+    }
 };
 
 // test
@@ -56,44 +71,44 @@ export const checkLogin = async () => {
     store.dispatch(dispatchOne('SET_LOADING', true));
 
     // TEST
-    // if (EXPO_PUBLIC_PROFILE == 'production') {
-    store.dispatch(dispatchOne('SET_LOADING', false));
-    store.dispatch(dispatchOne('SET_TOKEN', 'token'));
-    return { status: true, data: 'token' };
-    // } else {
-    //     return Api.test
-    //         .get('login/check')
-    //         .then(({ status, data }) => {
-    //             console.log(status);
-    //             store.dispatch(dispatchOne('SET_TOKEN', data['token']));
-    //             checkPushToken();
+    if (process.env.EXPO_PUBLIC_PROFILE == 'production') {
+        store.dispatch(dispatchOne('SET_LOADING', false));
+        store.dispatch(dispatchOne('SET_TOKEN', 'token'));
+        return { status: true, data: 'token' };
+    } else {
+        return Api.test
+            .get('login/check')
+            .then(({ status, data }) => {
+                console.log(status);
+                store.dispatch(dispatchOne('SET_TOKEN', data['token']));
+                checkPushToken();
 
-    //             return { status: status == 200, data: data };
-    //         })
-    //         .catch(async (err) => {
-    //             console.log(err);
-    //             store.dispatch(dispatchLogin(false, null));
-    //             return { status: false };
-    //         })
-    //         .finally(() => {
-    //             store.dispatch(dispatchOne('SET_LOADING', false));
-    //         });
-    // }
+                return { status: status == 200, data: data };
+            })
+            .catch(async (err) => {
+                console.log(err);
+                store.dispatch(dispatchLogin(false, null));
+                return { status: false };
+            })
+            .finally(() => {
+                store.dispatch(dispatchOne('SET_LOADING', false));
+            });
+    }
 };
 
 // push 토큰 값 확인
 export const checkPushToken = async () => {
     // TEST
-    // if (EXPO_PUBLIC_PROFILE != 'production') {
-    //     checkDevice();
-    //     await getMessagingToken().then((deviceToken) => {
-    //         console.log('---deviceToken---');
-    //         console.log(deviceToken);
-    //         store.dispatch(dispatchOne('SET_TEST', deviceToken));
-    //         // const encryptPushToken = CryptoJS.AES.encrypt(JSON.stringify(deviceToken), EXPO_PUSH_KEY).toString();
-    //         Api.test.post('push', { deviceToken: deviceToken });
-    //     });
-    // }
+    if (process.env.EXPO_PUBLIC_PROFILE != 'production') {
+        checkDevice();
+        await getMessagingToken().then((deviceToken) => {
+            console.log('---deviceToken---');
+            console.log(deviceToken);
+            store.dispatch(dispatchOne('SET_TEST', deviceToken));
+            // const encryptPushToken = CryptoJS.AES.encrypt(JSON.stringify(deviceToken), EXPO_PUSH_KEY).toString();
+            Api.test.post('push', { deviceToken: deviceToken });
+        });
+    }
 };
 
 // expo push 토큰 값 확인

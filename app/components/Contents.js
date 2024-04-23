@@ -9,8 +9,6 @@ import { dispatchOne } from 'utils/DispatchUtils';
 import { checkLogin } from 'api/LoginApi';
 import { backEventHandler } from 'utils/BackUtils';
 
-const { EXPO_PUBLIC_NAME } = process.env;
-
 /** 페이지 router */
 const Contents = () => {
     const commonOptions = { headerShown: false };
@@ -59,14 +57,18 @@ const Contents = () => {
 
     // 로그인 정보 불일치
     const noUsers = (noUserFlag) => {
-        Alert.alert(EXPO_PUBLIC_NAME, `로그인 정보가 ${noUserFlag ? '없습니다.' : '일치하지 않습니다.'}\nLDAP 로그인 페이지로 이동합니다.`, [
-            {
-                text: '확인',
-                onPress: async () => {
-                    store.dispatch(dispatchOne('SET_TAB', 'ldap'));
+        Alert.alert(
+            process.env.EXPO_PUBLIC_NAME,
+            `로그인 정보가 ${noUserFlag ? '없습니다.' : '일치하지 않습니다.'}\nLDAP 로그인 페이지로 이동합니다.`,
+            [
+                {
+                    text: '확인',
+                    onPress: async () => {
+                        store.dispatch(dispatchOne('SET_TAB', 'ldap'));
+                    },
                 },
-            },
-        ]);
+            ]
+        );
     };
 
     // tab 변경 이벤트
@@ -135,7 +137,7 @@ const Contents = () => {
 
     // 앱 종료 alert
     const exitAlert = () => {
-        Alert.alert('앱 종료', `${EXPO_PUBLIC_NAME}를 종료하시겠습니까?`, [
+        Alert.alert('앱 종료', `${process.env.EXPO_PUBLIC_NAME}를 종료하시겠습니까?`, [
             {
                 text: '아니요',
                 onPress: () => {

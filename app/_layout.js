@@ -22,8 +22,7 @@ import Contents from 'components/Contents';
 import { apiStore } from 'api/Api';
 
 import * as Updates from 'expo-updates';
-
-const { EXPO_PUBLIC_NAME, EXPO_PUBLIC_PROFILE } = process.env;
+import { checkServer } from 'api/LoginApi';
 
 const splashTime = 2000;
 
@@ -33,7 +32,7 @@ const App = () => {
     const [splashLoaded, setSplashLoaded] = useState(false);
     const [hide, setHide] = useState(false);
 
-    console.log('profile :: ', EXPO_PUBLIC_PROFILE);
+    console.log('profile :: ', process.env.EXPO_PUBLIC_PROFILE);
 
     // expo-notification (사용 x)
     // useNotification();
@@ -62,20 +61,22 @@ const App = () => {
     const prepare = async () => {
         try {
             loadFonts();
-            await checkServer();
+            const check = await serverCheck();
 
-            // TEST
-            await new Promise((resolve) => setTimeout(resolve, splashTime));
+            if (check) {
+                // TEST
 
-            // if (EXPO_PUBLIC_PROFILE == 'production') {
-            //     await onFetchUpdateAsync();
-            // } else {
-            //     await new Promise((resolve) => setTimeout(resolve, splashTime));
-            // }
+                if (process.env.EXPO_PUBLIC_PROFILE == 'production') {
+                    // await onFetchUpdateAsync();
+                } else {
+                    await new Promise((resolve) => setTimeout(resolve, splashTime));
+                }
+
+                setSplashLoaded(true);
+            }
         } catch (e) {
-            console.warn(e);
-        } finally {
             setSplashLoaded(true);
+            console.warn(e);
         }
     };
 
@@ -86,7 +87,7 @@ const App = () => {
             const update = await Updates.checkForUpdateAsync();
 
             if (update.isAvailable) {
-                Alert.alert(EXPO_PUBLIC_NAME, '업데이트 하시겠습니까?', [
+                Alert.alert(process.env.EXPO_PUBLIC_NAME, '업데이트 하시겠습니까?', [
                     { text: '아니요', onPress: () => null, style: 'cancel' },
                     {
                         text: '예',
@@ -110,7 +111,12 @@ const App = () => {
     }
 
     // 서버 체크
-    const checkServer = async () => {};
+    const serverCheck = async () => {
+        return await checkServer().then((result) => {
+            if (!result) Alert.alert('잠시 후 다시 시도해주세요.');
+            return result;
+        });
+    };
 
     useEffect(() => {
         prepare();
