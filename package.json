@@ -19,7 +19,8 @@
         "build:ios:prod": "npx eas build -p ios --profile production --clear-cache",
         "update:prod": "npx eas update --branch production --message ",
         "update": "npx eas update:configure",
-        "clear": "npx expo build:clear"
+        "clear": "npx expo build:clear",
+        "doctor": "npx -y expo-doctor"
     },
     "dependencies": {
         "@expo/metro-runtime": "~3.1.3",

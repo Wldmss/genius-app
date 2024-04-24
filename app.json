@@ -1,8 +1,8 @@
 {
     "expo": {
-        "name": "kt-genius",
-        "slug": "kt-genius",
-        "scheme": "genius",
+        "name": "KTgenius",
+        "slug": "ktgenius",
+        "scheme": "ktgenius",
         "version": "1.0.0",
         "orientation": "portrait",
         "icon": "./app/assets/icons/app-icon.png",
@@ -49,7 +49,7 @@
                 "android.permission.WRITE_EXTERNAL_STORAGE"
             ],
             "runtimeVersion": "1.0.0",
-            "package": "com.ktds.genius",
+            "package": "com.kt.ktgenius",
             "intentFilters": [
                 {
                     "action": "VIEW",
@@ -63,7 +63,7 @@
         },
         "extra": {
             "eas": {
-                "projectId": "bd698549-609f-476e-9339-4d0566f95b31"
+                "projectId": "12c06e96-2a78-4817-ab16-1136a97dbd07"
             },
             "router": {
                 "origin": false
@@ -105,7 +105,7 @@
             [
                 "expo-updates",
                 {
-                    "username": "wldms"
+                    "username": "insic_lee"
                 }
             ],
             "expo-router",
@@ -138,8 +138,8 @@
             ]
         ],
         "updates": {
-            "url": "https://u.expo.dev/bd698549-609f-476e-9339-4d0566f95b31"
+            "url": "https://u.expo.dev/12c06e96-2a78-4817-ab16-1136a97dbd07"
         },
-        "owner": "wldms"
+        "owner": "insic_lee"
     }
 }

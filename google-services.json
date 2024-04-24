@@ -1,38 +1,29 @@
 {
-    "project_info": {
-        "project_number": "785867783883",
-        "project_id": "genius-mobile-35601",
-        "storage_bucket": "genius-mobile-35601.appspot.com"
-    },
-    "client": [
-        {
-            "client_info": {
-                "mobilesdk_app_id": "1:785867783883:android:8b149f122a8eabff0be54e",
-                "android_client_info": {
-                    "package_name": "com.ktds.genius"
-                }
-            },
-            "oauth_client": [
-                {
-                    "client_id": "785867783883-i3irkev5iiuvk9ed5m1m497025s8m3d0.apps.googleusercontent.com",
-                    "client_type": 1,
-                    "android_info": {
-                        "package_name": "com.ktds.genius",
-                        "certificate_hash": "7b366237e77208d2f0fda7313d926d9fab6ec852"
-                    }
-                }
-            ],
-            "api_key": [
-                {
-                    "current_key": "AIzaSyBVfD5MITQDzTnZijsTkQBo1xpjr6omF_M"
-                }
-            ],
-            "services": {
-                "appinvite_service": {
-                    "other_platform_oauth_client": []
-                }
-            }
+  "project_info": {
+    "project_number": "90130813574",
+    "project_id": "ktgenius-4fbf4",
+    "storage_bucket": "ktgenius-4fbf4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:90130813574:android:fdb7b7db2e48d831afb707",
+        "android_client_info": {
+          "package_name": "com.kt.ktgenius"
         }
-    ],
-    "configuration_version": "1"
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCBwOXfmtZ2vi9oXPrYzYr56bpw-Y1BGAw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
 }
