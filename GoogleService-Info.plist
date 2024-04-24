@@ -11,7 +11,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.ktds.genius</string>
+	<string>com.kt.ktgenius</string>
 	<key>PROJECT_ID</key>
 	<string>genius-mobile-35601</string>
 	<key>STORAGE_BUCKET</key>
@@ -27,6 +27,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:785867783883:ios:260146c8b5c832ff0be54e</string>
+	<string>1:785867783883:ios:03494e338ad881dd0be54e</string>
 </dict>
 </plist>

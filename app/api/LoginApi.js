@@ -98,17 +98,15 @@ export const checkLogin = async () => {
 
 // push 토큰 값 확인
 export const checkPushToken = async () => {
-    // TEST
-    if (process.env.EXPO_PUBLIC_PROFILE != 'production') {
-        checkDevice();
-        await getMessagingToken().then((deviceToken) => {
-            console.log('---deviceToken---');
-            console.log(deviceToken);
-            store.dispatch(dispatchOne('SET_TEST', deviceToken));
-            // const encryptPushToken = CryptoJS.AES.encrypt(JSON.stringify(deviceToken), EXPO_PUSH_KEY).toString();
-            Api.test.post('push', { deviceToken: deviceToken });
-        });
-    }
+    checkDevice();
+    await getMessagingToken().then((deviceToken) => {
+        console.log('---deviceToken---');
+        console.log(deviceToken);
+        store.dispatch(dispatchOne('SET_TEST', deviceToken));
+        // const encryptPushToken = CryptoJS.AES.encrypt(JSON.stringify(deviceToken), EXPO_PUSH_KEY).toString();
+        // TEST
+        if (process.env.EXPO_PUBLIC_PROFILE != 'production') Api.test.post('push', { deviceToken: deviceToken });
+    });
 };
 
 // expo push 토큰 값 확인

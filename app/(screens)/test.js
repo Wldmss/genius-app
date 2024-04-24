@@ -33,9 +33,9 @@ export default function Test() {
                 {test}
             </FontText>
 
-            <Pressable style={commonInputStyles.buttonWhite} onPress={click}>
+            {/* <Pressable style={commonInputStyles.buttonWhite} onPress={click}>
                 <FontText>테스트</FontText>
-            </Pressable>
+            </Pressable> */}
         </View>
     );
 }

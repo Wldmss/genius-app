@@ -16,7 +16,7 @@
             "googleServicesFile": "./GoogleService-Info.plist",
             "supportsTablet": true,
             "requireFullScreen": true,
-            "bundleIdentifier": "com.ktds.genius",
+            "bundleIdentifier": "com.kt.ktgenius",
             "infoPlist": {
                 "NSFaceIDUsageDescription": "Allow $(PRODUCT_NAME) to use Face ID.",
                 "NSCameraUsageDescription": "Allow $(PRODUCT_NAME) to access camera.",
