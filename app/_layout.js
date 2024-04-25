@@ -14,7 +14,6 @@ import { pushFcmStore, useFirebase } from 'utils/PushFcm';
 import { backStore } from 'utils/BackUtils';
 
 import PopModal from 'modal/PopModal';
-import Loading from 'components/Loading';
 import Splash from '(utils)/splash';
 import Snackbar from 'utils/Snackbar';
 
@@ -25,6 +24,7 @@ import * as Updates from 'expo-updates';
 import { checkServer } from 'api/LoginApi';
 
 const splashTime = 2000;
+const { profile } = Constants.expoConfig.extra;
 
 /** layout (main) */
 const App = () => {
@@ -32,7 +32,7 @@ const App = () => {
     const [splashLoaded, setSplashLoaded] = useState(false);
     const [hide, setHide] = useState(false);
 
-    console.log('profile :: ', process.env.EXPO_PUBLIC_PROFILE);
+    console.log('profile :: ', profile);
 
     // expo-notification (사용 x)
     // useNotification();
@@ -66,8 +66,8 @@ const App = () => {
             if (check) {
                 // TEST
 
-                if (process.env.EXPO_PUBLIC_PROFILE == 'production') {
-                    // await onFetchUpdateAsync();
+                if (profile == 'production') {
+                    await onFetchUpdateAsync();
                 } else {
                     await new Promise((resolve) => setTimeout(resolve, splashTime));
                 }
@@ -157,7 +157,6 @@ const App = () => {
                         <SafeAreaView style={styles.container}>
                             <Contents />
                             <PopModal />
-                            {/* <Loading /> */}
                             <Snackbar />
                         </SafeAreaView>
                     )

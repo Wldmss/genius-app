@@ -7,7 +7,6 @@
             "node": "20.11.1",
             "env": {
                 "EXPO_PUBLIC_NAME": "지니어스",
-                "EXPO_PUBLIC_VERSION": "1.0.0",
                 "EXPO_PUBLIC_WEB": "https://naver.com",
                 "EXPO_PUBLIC_TEST_SERVER_URL": "http://192.168.50.254:8080",
                 "EXPO_PUBLIC_TEST_API_URL": "/api/v1/",
@@ -16,45 +15,47 @@
             },
             "android": {
                 "image": "latest",
-                "buildType": "apk",
-                "env": {
-                    "EXPO_PUBLIC_PLATFORM": "android"
-                }
+                "buildType": "apk"
             },
             "ios": {
-                "image": "latest",
-                "env": {
-                    "EXPO_PUBLIC_PLATFORM": "ios"
-                }
+                "image": "latest"
             },
             "channel": "base"
+        },
+        "preview": {
+            "extends": "base",
+            "channel": "preview",
+            "distribution": "internal"
         },
         "development": {
             "extends": "base",
             "channel": "development",
             "developmentClient": true,
             "distribution": "internal",
+            "autoIncrement": true,
             "ios": {
                 "simulator": true
-            },
-            "env": {
-                "EXPO_PUBLIC_PROFILE": "development"
             }
         },
-        "preview": {
+        "staging-android": {
             "extends": "base",
-            "channel": "preview",
-            "distribution": "internal",
-            "env": {
-                "EXPO_PUBLIC_PROFILE": "preview"
-            }
+            "channel": "staging-android",
+            "autoIncrement": true
         },
-        "production": {
+        "staging-ios": {
             "extends": "base",
-            "channel": "production",
-            "env": {
-                "EXPO_PUBLIC_PROFILE": "production"
-            }
+            "channel": "staging-ios",
+            "autoIncrement": true
+        },
+        "production-android": {
+            "extends": "base",
+            "channel": "production-android",
+            "autoIncrement": true
+        },
+        "production-ios": {
+            "extends": "base",
+            "channel": "production-ios",
+            "autoIncrement": true
         }
     },
     "submit": {

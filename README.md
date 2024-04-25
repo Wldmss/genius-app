@@ -76,18 +76,33 @@
 
     5. 업데이트
 
-2.  device 설정
-    -   web : webview 지원이 안됨
-    -   android, ios expo go APP
-        -   PC와 mobile이 같은 네트워크에 접속되어 있어야 함
-        -   앱스토어에서 다운로드 -> QR 또는 링크를 통해 접속
-        -   android : Expo
-        -   ios : Expo Go
-    -   mobile USB 연결
+## 프로젝트 배포
+
+1. android
+
+    - npm run build:prod
+    - npm run build:sta # 개발 서버 주소로 배포
+
+2. ios
+
+    - npm run build:ios:prod
+    - npm run build:ios:sta # 개발 서버 주소로 배포
+
+3. expo.dev 에서 .apk, .ipa 다운로드
+
+## device 설정
+
+    - web : webview 지원이 안됨
+    - android, ios expo go APP
+        - PC와 mobile이 같은 네트워크에 접속되어 있어야 함
+        - 앱스토어에서 다운로드 -> QR 또는 링크를 통해 접속
+        - android : Expo
+        - ios : Expo Go
+    - mobile USB 연결
 
 ## 이슈
 
-    - expo-cli를 통해 만들어졌지만 추가 기능에 따라 react native cli로 변경 가능성 있음 => eject 참고
+-   expo-cli를 통해 만들어졌지만 추가 기능에 따라 react native cli로 변경 가능성 있음 => eject 참고
 
 ## 구조
 
@@ -111,6 +126,7 @@
         -   \_layout
         -   main : 메인
         -   web : web view
+        -   guide : 가이드 페이지
     -   (utils)
         -   \_layout
         -   camera : QR 스캔
@@ -125,6 +141,7 @@
         -   LoginInfo : LDAP 로그인 페이지 문의 및 연락처
     -   api
         -   Api : axios 설정
+        -   ApiFetch : fetch method 설정
         -   ApiService : api method 설정 (사용x)
         -   LoginApi : 로그인 api
     -   assets : 이미지, css 파일
@@ -135,7 +152,8 @@
             -   loginReducer : 로그인 관련
             -   modalReducer : 모달 관련
     -   utils
-        -   DispatchUtil : dispatch 관련
+    -   BackUtiles : back handler 관련
+        -   DispatchUtils : dispatch 관련
         -   ErrorBoundary : error 처리
         -   ImageUtils : 이미지 관련
         -   Push : push 알림 설정 (expo-notification) (사용 x)
@@ -143,3 +161,20 @@
         -   Snackbar : snack bar 설정
         -   StorageUtils : async storage 관련
         -   TextUtils : text 관련
+
+## 환경 변수 로드 순서
+
+### eas.json (env) << eas secrets << .env
+
+-   https://docs.expo.dev/build-reference/variables/#setting-plaintext-environment-variables-in-easjson
+-   local 에서는 eas.json, eas secrets가 적용되지 않기 때문에 .env에 값을 넣어야 한다. 따라서, .env는 .gitignore할 것
+-   .env 에서 사용하는 환경 변수는 'EXPO*PUBLIC*' 으로 시작한다.
+-   eas secrets에 등록하지 않는 환경 변수는 .env 와 eas.json에 모두 설정한다.
+
+## eas secrets
+
+-   npx eas secret:create --scope project --name GOOGLE_SERVICES_JSON --type file --value ./google-services.json
+-   npx eas secret:create --scope project --name GOOGLE_SERVICES_IOS --type file --value ./GoogleService-Info.plist
+-   npx eas secret:push --scope project --env-file .env
+-   npx eas secret:create --scope project --name SECRET_NAME --value secretvalue --type string
+-   npx eas secret:list # secrets 정보

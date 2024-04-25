@@ -29,10 +29,13 @@ yarn-error.*
 *.pem
 
 # local env files
-.env
+# .env*
 
 # typescript
 *.tsbuildinfo
 
 android/
 ios/
+
+# ./google-service.json
+# ./GoogleService-Info.plist

@@ -6,6 +6,9 @@ import * as SecureStore from 'expo-secure-store';
 import * as Authentication from 'expo-local-authentication';
 import { dispatchMultiple, dispatchOne } from 'utils/DispatchUtils';
 import * as StorageUtils from 'utils/StorageUtils';
+import Constants from 'expo-constants';
+
+const { profile } = Constants.expoConfig.extra;
 
 /** genius main */
 const Main = () => {
@@ -119,7 +122,7 @@ const Main = () => {
         // storeStorageData();
 
         // TEST
-        if (process.env.EXPO_PUBLIC_PROFILE == 'production') {
+        if (profile == 'staging') {
             checkStorage();
         } else {
             checkFirst().then((isFirst) => {

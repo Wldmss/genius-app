@@ -6,10 +6,13 @@ import { getPushToken } from 'utils/Push';
 import { getMessagingToken } from 'utils/PushFcm';
 import Api from './Api';
 import * as Device from 'expo-device';
+import Constants from 'expo-constants';
+
+const { profile } = Constants.expoConfig.extra;
 
 // server check
 export const checkServer = async () => {
-    if (process.env.EXPO_PUBLIC_PROFILE == 'production') {
+    if (profile == 'staging') {
         return true;
     } else {
         return Api.test
@@ -27,11 +30,11 @@ export const checkServer = async () => {
 // LDAP login
 export const login = async (username, password) => {
     store.dispatch(dispatchOne('SET_LOADING', true));
-    // const encryptUsername = CryptoJS.AES.encrypt(JSON.stringify(username), process.env.EXPO_PUSH_KEY).toString();
-    // const encryptPassword = password ? CryptoJS.AES.encrypt(JSON.stringify(password), process.env.EXPO_PUSH_KEY).toString() : null;
+    // const encryptUsername = CryptoJS.AES.encrypt(JSON.stringify(username), process.env.AES_KEY).toString();
+    // const encryptPassword = password ? CryptoJS.AES.encrypt(JSON.stringify(password), process.env.AES_KEY).toString() : null;
 
     // TEST
-    if (process.env.EXPO_PUBLIC_PROFILE == 'production') {
+    if (profile == 'staging') {
         store.dispatch(dispatchOne('SET_LOADING', false));
         return { status: true, token: 'token' };
     } else {
@@ -71,7 +74,7 @@ export const checkLogin = async () => {
     store.dispatch(dispatchOne('SET_LOADING', true));
 
     // TEST
-    if (process.env.EXPO_PUBLIC_PROFILE == 'production') {
+    if (profile == 'staging') {
         store.dispatch(dispatchOne('SET_LOADING', false));
         store.dispatch(dispatchOne('SET_TOKEN', 'token'));
         return { status: true, data: 'token' };
@@ -103,9 +106,9 @@ export const checkPushToken = async () => {
         console.log('---deviceToken---');
         console.log(deviceToken);
         store.dispatch(dispatchOne('SET_TEST', deviceToken));
-        // const encryptPushToken = CryptoJS.AES.encrypt(JSON.stringify(deviceToken), EXPO_PUSH_KEY).toString();
+        // const encryptPushToken = CryptoJS.AES.encrypt(JSON.stringify(deviceToken), AES_KEY).toString();
         // TEST
-        if (process.env.EXPO_PUBLIC_PROFILE != 'production') Api.test.post('push', { deviceToken: deviceToken });
+        if (profile != 'staging') Api.test.post('push', { deviceToken: deviceToken });
     });
 };
 
@@ -115,7 +118,7 @@ const checkExpoPushToken = async () => {
         console.log('---deviceToken---');
         console.log(deviceToken);
         // store.dispatch(dispatchOne('SET_TEST', deviceToken));
-        // const encryptPushToken = CryptoJS.AES.encrypt(JSON.stringify(deviceToken), EXPO_PUSH_KEY).toString();
+        // const encryptPushToken = CryptoJS.AES.encrypt(JSON.stringify(deviceToken), AES_KEY).toString();
         Api.test.post('push', { deviceToken: deviceToken });
     });
 };
@@ -140,6 +143,7 @@ const checkDevice = () => {
         brand: brand == null ? 'web' : brandType[brand.toLowerCase()],
         buildId: Device.osBuildId,
         osVersion: Device.osVersion,
+        appVersion: Constants.expoConfig.version,
     };
 
     console.log(deviceInfo);

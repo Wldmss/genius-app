@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Alert, Platform, View, TouchableWithoutFeedback, Linking } from 'react-native';
+import { StyleSheet, Alert, Platform, Linking } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useSelector } from 'react-redux';
 import store from 'store/store';
@@ -12,6 +12,9 @@ import Loading from 'components/Loading';
 import ErrorPage from '(utils)/error';
 import ApiFetch from 'api/ApiFetch';
 import Api from 'api/Api';
+import Constants from 'expo-constants';
+
+const { profile } = Constants.expoConfig.extra;
 
 /** web view */
 const Web = () => {
@@ -232,7 +235,7 @@ const Web = () => {
 
     useEffect(() => {
         // TEST
-        Alert.alert(`${process.env.EXPO_PUBLIC_PROFILE}\n${process.env.EXPO_PUBLIC_PROFILE == 'production' ? devUrl : tempUri}`);
+        Alert.alert(`${profile}\n${profile == 'staging' ? devUrl : tempUri}`);
     }, []);
 
     return (
@@ -240,7 +243,7 @@ const Web = () => {
             ref={webViewRef}
             style={[styles.webview, hide ? styles.none : styles.flex]}
             source={{
-                uri: process.env.EXPO_PUBLIC_PROFILE == 'production' ? devUrl : tempUri,
+                uri: profile == 'staging' ? devUrl : tempUri,
                 method: 'POST',
                 body: JSON.stringify(postData),
             }}
