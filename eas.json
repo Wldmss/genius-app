@@ -15,7 +15,8 @@
             },
             "android": {
                 "image": "latest",
-                "buildType": "apk"
+                "buildType": "apk",
+                "artifactPath": "지니어스_$(date +'%y%m%d-%H%M').apk"
             },
             "ios": {
                 "image": "latest"
