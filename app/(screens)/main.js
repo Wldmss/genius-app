@@ -121,18 +121,9 @@ const Main = () => {
     useEffect(() => {
         // storeStorageData();
 
-        // TEST
-        if (profile == 'staging') {
+        checkFirst().then((isFirst) => {
             checkStorage();
-        } else {
-            checkFirst().then((isFirst) => {
-                if (isFirst) {
-                    store.dispatch(dispatchOne('SET_TAB', 'guide'));
-                } else {
-                    checkStorage();
-                }
-            });
-        }
+        });
     }, []);
 
     useEffect(() => {
