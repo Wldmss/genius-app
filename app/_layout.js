@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, SafeAreaView, Alert, TouchableOpacity } from 'react-native';
+import { StyleSheet, SafeAreaView, Alert, TouchableOpacity, Text } from 'react-native';
 import { Provider } from 'react-redux';
 import store from 'store/store';
 
@@ -22,6 +22,7 @@ import { apiStore } from 'api/Api';
 
 import * as Updates from 'expo-updates';
 import { checkServer } from 'api/LoginApi';
+import ProgressBar from 'utils/ProgressBar';
 
 const splashTime = 2000;
 const { profile } = Constants.expoConfig.extra;
@@ -31,6 +32,8 @@ const App = () => {
     const [fontsLoaded, setFontsLoaded] = useState(false);
     const [splashLoaded, setSplashLoaded] = useState(false);
     const [hide, setHide] = useState(false);
+    const [isUpdate, setIsUpdate] = useState(false);
+    const [updateProgress, setUpdateProgress] = useState(0);
 
     console.log('profile :: ', profile);
 
@@ -64,27 +67,31 @@ const App = () => {
             const check = await serverCheck();
 
             if (check) {
+                await onFetchUpdateAsync();
+                await new Promise((resolve) => setTimeout(resolve, splashTime));
                 // TEST
-
-                if (profile == 'production') {
-                    await onFetchUpdateAsync();
-                } else {
-                    await new Promise((resolve) => setTimeout(resolve, splashTime));
-                }
-
-                setSplashLoaded(true);
+                // if (profile.includes('staging')) {
+                //     await onFetchUpdateAsync();
+                // } else {
+                //     await new Promise((resolve) => setTimeout(resolve, splashTime));
+                // }
             }
         } catch (e) {
-            setSplashLoaded(true);
             console.warn(e);
+        } finally {
+            setSplashLoaded(true);
         }
     };
 
     // 앱 업데이트 체크
     async function onFetchUpdateAsync() {
+        const osVersion = Constants.expoConfig.version;
+        Alert.alert(osVersion);
         try {
             // app version 체크해서 서버랑 하기
+            Alert.alert('업데이트 체크');
             const update = await Updates.checkForUpdateAsync();
+            Alert.alert(update);
 
             if (update.isAvailable) {
                 Alert.alert(process.env.EXPO_PUBLIC_NAME, '업데이트 하시겠습니까?', [
@@ -93,11 +100,17 @@ const App = () => {
                         text: '예',
                         onPress: async () => {
                             try {
-                                await Updates.fetchUpdateAsync();
-                                await Updates.reloadAsync();
+                                setIsUpdate(true);
+                                const { downloadedBytes, totalBytes } = await Updates.fetchUpdateAsync();
+                                setUpdateProgress(downloadedBytes / totalBytes);
+
+                                Alert.alert(downloadedBytes / totalBytes);
+                                if (downloadedBytes === totalBytes) {
+                                    await Updates.reloadAsync();
+                                }
                             } finally {
+                                setIsUpdate(false);
                                 Alert.alert(`업데이트가 완료되었습니다.`);
-                                // Updates.reloadAsync();
                             }
                         },
                     },
@@ -106,6 +119,7 @@ const App = () => {
                 return true;
             }
         } catch (error) {
+            console.log(error);
             Alert.alert(`${error}`);
         }
     }
@@ -122,14 +136,14 @@ const App = () => {
         prepare();
     }, []);
 
-    // 사용자 활동 감지
+    // 사용자 활동 감지 (사용 x)
     const handleUserActivity = () => {
         console.log('touch!!!!!!!!!!!!!!!!!!!!!!!!!');
         // 사용자 활동이 감지되면 화면을 보여주는 타이머를 초기화하고 화면을 보여주도록 설정
         setHide(false);
     };
 
-    // 화면이 처음 렌더링될 때와 사용자 활동을 감지할 때마다 이벤트 핸들러를 등록
+    // 화면이 처음 렌더링될 때와 사용자 활동을 감지할 때마다 이벤트 핸들러를 등록 (사용 x)
     useEffect(() => {
         console.log('hide value!');
         console.log(hide);
@@ -158,6 +172,8 @@ const App = () => {
                             <Contents />
                             <PopModal />
                             <Snackbar />
+                            {isUpdate && <ProgressBar percent={updateProgress} />}
+                            <Text>3</Text>
                         </SafeAreaView>
                     )
                 )}

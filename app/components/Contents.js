@@ -98,7 +98,7 @@ const Contents = () => {
     // 앱 상태 관리
     const handleAppStateChange = (nextAppState) => {
         console.log('App state :::::: ', nextAppState);
-        let resetFlag = nextAppState === 'active' && exitFlag;
+        let resetFlag = false; // nextAppState === 'active' && exitFlag;
 
         if (!resetFlag && expire != null) {
             const now = moment();

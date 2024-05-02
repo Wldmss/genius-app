@@ -12,7 +12,7 @@ const { profile } = Constants.expoConfig.extra;
 
 // server check
 export const checkServer = async () => {
-    if (profile == 'staging') {
+    if (profile.includes('staging')) {
         return true;
     } else {
         return Api.test
@@ -34,7 +34,7 @@ export const login = async (username, password) => {
     // const encryptPassword = password ? CryptoJS.AES.encrypt(JSON.stringify(password), process.env.AES_KEY).toString() : null;
 
     // TEST
-    if (profile == 'staging') {
+    if (profile.includes('staging')) {
         store.dispatch(dispatchOne('SET_LOADING', false));
         return { status: true, token: 'token' };
     } else {
@@ -70,27 +70,32 @@ export const loginTest = async (userid, pwd, url) => {
 };
 
 // pin/bio 로그인 검증
-export const checkLogin = async () => {
-    store.dispatch(dispatchOne('SET_LOADING', true));
+export const checkLogin = async (checkFlag) => {
+    if (!checkFlag) store.dispatch(dispatchOne('SET_LOADING', true));
 
     // TEST
-    if (profile == 'staging') {
-        store.dispatch(dispatchOne('SET_LOADING', false));
-        store.dispatch(dispatchOne('SET_TOKEN', 'token'));
+    if (profile.includes('staging')) {
+        if (!checkFlag) {
+            store.dispatch(dispatchOne('SET_LOADING', false));
+            store.dispatch(dispatchOne('SET_TOKEN', 'token'));
+        }
+
         return { status: true, data: 'token' };
     } else {
         return Api.test
             .get('login/check')
             .then(({ status, data }) => {
                 console.log(status);
-                store.dispatch(dispatchOne('SET_TOKEN', data['token']));
-                checkPushToken();
+                if (!checkFlag) {
+                    store.dispatch(dispatchOne('SET_TOKEN', data['token']));
+                    checkPushToken();
+                }
 
                 return { status: status == 200, data: data };
             })
             .catch(async (err) => {
                 console.log(err);
-                store.dispatch(dispatchLogin(false, null));
+                if (!checkFlag) store.dispatch(dispatchLogin(false, null));
                 return { status: false };
             })
             .finally(() => {
@@ -108,7 +113,7 @@ export const checkPushToken = async () => {
         store.dispatch(dispatchOne('SET_TEST', deviceToken));
         // const encryptPushToken = CryptoJS.AES.encrypt(JSON.stringify(deviceToken), AES_KEY).toString();
         // TEST
-        if (profile != 'staging') Api.test.post('push', { deviceToken: deviceToken });
+        if (!profile.includes('staging')) Api.test.post('push', { deviceToken: deviceToken });
     });
 };
 
@@ -123,7 +128,7 @@ const checkExpoPushToken = async () => {
     });
 };
 
-// device 정보 확인
+// device 정보 확인 (로그인 시마다 서버에 전송)
 const checkDevice = () => {
     const brandType = {
         samsung: 'Android',
@@ -144,6 +149,7 @@ const checkDevice = () => {
         buildId: Device.osBuildId,
         osVersion: Device.osVersion,
         appVersion: Constants.expoConfig.version,
+        // 모델명
     };
 
     console.log(deviceInfo);

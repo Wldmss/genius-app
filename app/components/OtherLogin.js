@@ -16,6 +16,7 @@ const OtherLogin = () => {
     const bioSupported = useSelector((state) => state.loginReducer.bioSupported);
     const tab = useSelector((state) => state.loginReducer.tab);
     const jwt = useSelector((state) => state.loginReducer.jwt);
+    const webPinFlag = useSelector((state) => state.loginReducer.webPinFlag);
 
     const [type, setType] = useState({ pin: false, ldap: false, bio: false, bioRegister: false, changePin: false });
 
@@ -32,16 +33,16 @@ const OtherLogin = () => {
         setType({
             ...type,
             pin: (tab != 'pin' && jwt) || (tab == 'pin' && pin?.isRegistered && pin?.modFlag),
-            ldap: false, //tab != 'ldap' && pin?.isRegistered, // 다른 사번으로 로그인 차단 요청
+            ldap: false, // tab != 'ldap' && pin?.isRegistered, // 다른 사번으로 로그인 차단 요청
             bio: bioSupported && tab != 'bio' && jwt && bio?.isRegistered && pin?.isRegistered,
             bioRegister: bioSupported && tab != 'bio' && jwt && !bio?.isRegistered && pin?.isRegistered,
-            changePin: tab == 'pin' && jwt && !pin?.modFlag,
+            changePin: false, // tab == 'pin' && jwt && !pin?.modFlag,  // 웹에서만 PIN 변경
         });
     }, [tab, pin, bio]);
 
     return (
         <View style={styles.container}>
-            {(type.pin || type.ldap || type.bio || type.bioRegister || type.changePin) && (
+            {(type.pin || type.ldap || type.bio || type.bioRegister || type.changePin) && !webPinFlag && (
                 <View style={styles.otherContainer}>
                     <FontTextG style={styles.otherTitle}>다른 방법으로 로그인</FontTextG>
                     <View style={styles.otherLoginBox}>

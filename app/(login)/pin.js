@@ -3,14 +3,16 @@ import { StyleSheet, View, TextInput, Pressable, Alert, Keyboard } from 'react-n
 import { commonInputStyles, commonTextStyles } from 'assets/styles';
 import { useSelector } from 'react-redux';
 import store from 'store/store';
-import { dispatchLogin, dispatchOne } from 'utils/DispatchUtils';
+import { dispatchLogin, dispatchMultiple, dispatchOne } from 'utils/DispatchUtils';
 import * as StorageUtils from 'utils/StorageUtils';
 import moment from 'moment';
 import { FontText } from 'utils/TextUtils';
+import { checkLogin } from 'api/LoginApi';
 
 /** pin 로그인/등록/수정 */
 const PinLogin = () => {
     const pin = useSelector((state) => state.loginReducer.pin);
+    const webPinFlag = useSelector((state) => state.loginReducer.webPinFlag);
 
     const pinLength = 6;
     const pinCount = 5;
@@ -44,7 +46,11 @@ const PinLogin = () => {
                 sameFlag = null;
             }
 
-            setIsSame(sameFlag);
+            setMessage({
+                ...message,
+                text: sameFlag == null ? null : sameFlag ? '일치합니다.' : '일치하지 않습니다.',
+                alertFlag: sameFlag != null && !sameFlag,
+            });
 
             if (sameFlag && id == 'check') {
                 Keyboard.dismiss();
@@ -117,7 +123,6 @@ const PinLogin = () => {
             // Alert.alert('안전한 PIN을 설정해주세요.');
             setMessage({ ...message, alertFlag: true, text: '안전한 PIN을 설정해주세요.' });
             setValue({ ...value, enter: '', check: '' });
-            setIsSame(null);
             enterRef.current.focus();
             return false;
         }
@@ -162,17 +167,51 @@ const PinLogin = () => {
         setMessage({ ...message, alertFlag: true, text: null });
 
         try {
-            const tabValue = pin.isRegistered ? 'pin' : 'ldap'; // PIN 변경인 경우 PIN 로그인 으로
-
-            await StorageUtils.setDeviceData('pin', value.enter);
-            store.dispatch(dispatchOne('SET_PIN', { ...pin, isRegistered: true, value: value.enter, modFlag: false }));
-
-            Alert.alert(`PIN이 ${isMod ? '변경' : '설정'}되었습니다.`);
-
-            store.dispatch(dispatchOne('SET_TAB', tabValue));
+            await registChangePin();
         } catch (err) {
             console.log(err);
         }
+    };
+
+    // pin 체크 시 token 검증
+    const checkLoginInfo = async () => {
+        await checkLogin(true).then(async (res) => {
+            if (res.status) {
+                await registChangePin();
+            } else {
+                Alert.alert(process.env.EXPO_PUBLIC_NAME, `PIN 변경 권한이 없습니다.`, [
+                    {
+                        text: '확인',
+                        onPress: async () => {
+                            store.dispatch(
+                                dispatchMultiple({
+                                    SET_PIN: { ...pin, modFlag: false },
+                                    SET_TAB: 'pin',
+                                })
+                            );
+                        },
+                    },
+                ]);
+            }
+        });
+    };
+
+    // pin 변경
+    const registChangePin = async () => {
+        const tabValue = webPinFlag ? 'web' : pin.isRegistered ? 'pin' : 'ldap'; // PIN 변경인 경우 PIN 로그인 으로, 웹에서 변경시 웹으로
+
+        await StorageUtils.setDeviceData('pin', value.enter);
+        store.dispatch(dispatchOne('SET_PIN', { ...pin, isRegistered: true, value: value.enter, modFlag: false }));
+
+        Alert.alert(`PIN이 ${isMod ? '변경' : '설정'}되었습니다.`);
+
+        const dispatchData = {
+            SET_TAB: tabValue,
+        };
+
+        if (webPinFlag) dispatchData['SET_WEBPIN'] = false;
+
+        store.dispatch(dispatchMultiple(dispatchData));
     };
 
     // PIN 검사
@@ -207,6 +246,7 @@ const PinLogin = () => {
 
     useEffect(() => {
         resetCount.current = pinCount;
+        if (webPinFlag) store.dispatch(dispatchOne('SET_PIN', { ...pin, modFlag: true }));
     }, []);
 
     return (
@@ -238,7 +278,7 @@ const PinLogin = () => {
                     style={[commonTextStyles.fonts, commonInputStyles.inputNumber, value.enter.length > 0 ? styles.spacing : '']}
                     onChangeText={(input) => changePin('enter', input)}
                 />
-                {pin?.modFlag ? (
+                {pin?.modFlag && (
                     <>
                         <TextInput
                             id="check"
@@ -252,25 +292,12 @@ const PinLogin = () => {
                             style={[commonTextStyles.fonts, commonInputStyles.inputNumber, value.check.length > 0 ? styles.spacing : '']}
                             onChangeText={(input) => changePin('check', input)}
                         />
-
-                        {isSame != null ? (
-                            <FontText style={isSame != null ? (isSame ? commonTextStyles.success : commonTextStyles.warning) : ''}>
-                                {isSame != null ? (isSame ? `일치합니다` : `일치하지 않습니다`) : ''}
-                            </FontText>
-                        ) : (
-                            message.text != null && (
-                                <FontText style={[styles.smallText, message.alertFlag ? commonTextStyles.warning : commonTextStyles.success]}>
-                                    {message.text}
-                                </FontText>
-                            )
-                        )}
                     </>
-                ) : (
-                    message.text != null && (
-                        <FontText style={[styles.smallText, message.alertFlag ? commonTextStyles.warning : commonTextStyles.success]}>
-                            {message.text}
-                        </FontText>
-                    )
+                )}
+                {message.text != null && (
+                    <FontText style={[styles.smallText, message.alertFlag ? commonTextStyles.warning : commonTextStyles.success]}>
+                        {message.text}
+                    </FontText>
                 )}
             </View>
             <Pressable style={commonInputStyles.buttonRed} onPress={handlePinButton}>

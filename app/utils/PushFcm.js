@@ -10,6 +10,14 @@ export const pushFcmStore = (_store) => {
     store = _store;
 };
 
+Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+    }),
+});
+
 // push 토큰 발급
 export async function getMessagingToken() {
     const notification = store.getState().commonReducer.notification;
@@ -40,7 +48,7 @@ export async function checkNotificationPermission() {
             name: '알림',
             importance: Notifications.AndroidImportance.MAX,
             vibrationPattern: [0, 250, 250, 250],
-            lightColor: `#ffffff`,
+            lightColor: `#000000`,
             // lightColor: '#FF231F7C',
         });
 
@@ -95,6 +103,21 @@ async function unsubscribeFromTopic(topic) {
     await messaging().unsubscribeFromTopic(topic);
 }
 
+// foreground 알림용 스케줄러
+async function schedulePushNotification(notification, data) {
+    const message = {
+        title: notification.title,
+        body: notification.body,
+        data: data,
+    };
+
+    await Notifications.scheduleNotificationAsync({
+        content: message,
+        trigger: null,
+        // trigger: { seconds: 1 },
+    });
+}
+
 /** FCM push 알림 설정 */
 export function useFirebase() {
     useEffect(() => {
@@ -128,6 +151,8 @@ export function useFirebase() {
         const unsubscribe = messaging().onMessage(async (remoteMessage) => {
             // Alert.alert('new massage!!', JSON.stringify(remoteMessage));
             console.log('new massage!!', JSON.stringify(remoteMessage));
+            schedulePushNotification(remoteMessage.notification, remoteMessage.data);
+
             // handleForegroundPush();
 
             // if (Platform.OS === 'ios') {

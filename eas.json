@@ -15,8 +15,7 @@
             },
             "android": {
                 "image": "latest",
-                "buildType": "apk",
-                "artifactPath": "지니어스_$(date +'%y%m%d-%H%M').apk"
+                "buildType": "apk"
             },
             "ios": {
                 "image": "latest"
@@ -37,6 +36,11 @@
             "ios": {
                 "simulator": true
             }
+        },
+        "staging": {
+            "extends": "base",
+            "channel": "staging",
+            "autoIncrement": true
         },
         "staging-android": {
             "extends": "base",

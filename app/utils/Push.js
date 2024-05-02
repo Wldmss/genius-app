@@ -31,6 +31,11 @@ export async function getPushToken() {
     return null;
 }
 
+// push 토큰 발급
+async function getExpoToken() {
+    return (await Notifications.getExpoPushTokenAsync()).data;
+}
+
 /** push 알림 설정 (expo-notification) */
 export function useNotification() {
     const [notification, setNotification] = useState(false);
@@ -39,10 +44,12 @@ export function useNotification() {
         checkNotificationPermission();
 
         const received1 = Notifications.addNotificationReceivedListener((response) => {
+            console.log(response);
             setNotification(response);
         });
 
         const received2 = Notifications.addNotificationResponseReceivedListener((response) => {
+            console.log(response);
             redirect(response.notification);
         });
 
@@ -100,13 +107,13 @@ function redirect(notification) {
 }
 
 // push 전송 test (expo-notification)
-export async function sendPushNotification(token) {
+export async function sendPushNotification(notification, data) {
+    const token = await getExpoToken();
+
     const message = {
-        to: token,
-        sound: 'default',
-        title: 'Original Title',
-        body: 'And here is the body!',
-        data: { someData: 'goes here' },
+        title: notification.title,
+        body: notification.body,
+        data: data,
     };
 
     await fetch('https://exp.host/--/api/v2/push/send', {

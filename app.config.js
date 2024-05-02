@@ -5,7 +5,9 @@ module.exports = ({ config }) => {
                 return ' (local)';
             case 'development':
                 return ' (dev)';
-            case 'staging':
+            case 'staging-android':
+                return ' (test)';
+            case 'staging-ios':
                 return ' (test)';
             default:
                 return '';
@@ -26,6 +28,10 @@ module.exports = ({ config }) => {
         extra: {
             ...config.extra,
             profile: process.env.EAS_BUILD_PROFILE || process.env.EXPO_PUBLIC_PROFILE,
+        },
+        updates: {
+            ...config.updates,
+            releaseChannel: process.env.EAS_BUILD_PROFILE,
         },
     };
 };

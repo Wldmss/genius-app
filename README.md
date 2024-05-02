@@ -74,8 +74,6 @@
 
         - npx -y expo-doctor
 
-    5. 업데이트
-
 ## 프로젝트 배포
 
 1. android
@@ -89,6 +87,16 @@
     - npm run build:ios:sta # 개발 서버 주소로 배포
 
 3. expo.dev 에서 .apk, .ipa 다운로드
+
+## 업데이트
+
+1. expo-updates
+    - 반영이 안되는 경우
+        - native code 변경 시 (expo 에서는 해당 안됨)
+        - 큰 데이터 파일
+        - 운영체제 버전 변경
+        - 프로젝트 구조 변경
+        - 외부 라이브러리, SDK 주요 버전 업그레이드
 
 ## device 설정
 

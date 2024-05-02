@@ -10,6 +10,7 @@ const initialState = {
     expire: null, // 세션 만료 시간
     isLogin: false, // 로그인 여부
     resetLogin: false, // 로그인 리셋
+    webPinFlag: false, // 웹에서 pin 변경
 };
 
 const loginReducer = (state = initialState, action) => {
@@ -78,6 +79,11 @@ const loginReducer = (state = initialState, action) => {
             return {
                 ...state,
                 resetLogin: action.payload,
+            };
+        case 'SET_WEBPIN':
+            return {
+                ...state,
+                webPinFlag: action.payload,
             };
         default:
             return state;

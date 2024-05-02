@@ -3,7 +3,7 @@ import { StyleSheet, Alert, Platform, Linking } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useSelector } from 'react-redux';
 import store from 'store/store';
-import { dispatchOne } from 'utils/DispatchUtils';
+import { dispatchMultiple, dispatchOne } from 'utils/DispatchUtils';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { router } from 'expo-router';
 import { backEventHandler } from 'utils/BackUtils';
@@ -35,7 +35,7 @@ const Web = () => {
     // const tempUri = 'https://ktedu.kt.com/mobile/m/support/notice/noticeList.do';
     // const tempUri =  'https://ktedu.kt.com/education/courseContents.do?classId=200034420_01';
     // const tempUri = '192.168.50.254:8080/api/v1/file';
-    // const tempUri = '192.168.50.254:8080/file';
+    // const tempUri = '192.168.31.254:8080/file';
     const devUrl = 'https://dev.ktedu.kt.com:2443';
 
     const [currentURI, setURI] = useState(tempUri);
@@ -66,6 +66,12 @@ const Web = () => {
                     break;
                 case 'openCamera':
                     openCamera();
+                    break;
+                case 'changePin':
+                    store.dispatch(dispatchMultiple({ SET_WEBPIN: true, SET_TAB: 'pin' }));
+                    break;
+                case 'count':
+                    store.dispatch(dispatchMultiple({ SET_WEBPIN: true, SET_TAB: 'pin' }));
                     break;
                 case 'test':
                     console.log('TEST');
@@ -235,7 +241,7 @@ const Web = () => {
 
     useEffect(() => {
         // TEST
-        Alert.alert(`${profile}\n${profile == 'staging' ? devUrl : tempUri}`);
+        Alert.alert(`${profile}\n${profile.includes('staging') ? devUrl : tempUri}`);
     }, []);
 
     return (
@@ -243,10 +249,12 @@ const Web = () => {
             ref={webViewRef}
             style={[styles.webview, hide ? styles.none : styles.flex]}
             source={{
-                uri: profile == 'staging' ? devUrl : tempUri,
+                uri: tempUri,
+                // uri: profile.includes('staging') ? devUrl : tempUri,
                 method: 'POST',
                 body: JSON.stringify(postData),
             }}
+            javaScriptEnabled={true}
             onLoadStart={() => !init && setHide(true)}
             onLoad={webViewLoaded}
             onMessage={handleOnMessage}
