@@ -87,6 +87,7 @@ const App = () => {
     async function onFetchUpdateAsync() {
         const osVersion = Constants.expoConfig.version;
         Alert.alert(osVersion);
+
         try {
             // app version 체크해서 서버랑 하기
             Alert.alert('업데이트 체크');
@@ -173,7 +174,7 @@ const App = () => {
                             <PopModal />
                             <Snackbar />
                             {isUpdate && <ProgressBar percent={updateProgress} />}
-                            <Text>3</Text>
+                            <Text>4</Text>
                         </SafeAreaView>
                     )
                 )}

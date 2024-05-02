@@ -38,7 +38,7 @@
             "associatedDomains": ["applinks:ktgenius.kt.com"]
         },
         "android": {
-            "versionCode": 10,
+            "versionCode": 11,
             "adaptiveIcon": {
                 "foregroundImage": "./app/assets/icons/adaptive-icon.png",
                 "backgroundColor": "#ffffff"
