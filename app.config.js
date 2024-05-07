@@ -4,13 +4,30 @@ module.exports = ({ config }) => {
             case 'preview':
                 return ' (local)';
             case 'development':
-                return ' (dev)';
+                return ' (개발)';
+            case 'staging':
+                return ' (테스트)';
             case 'staging-android':
-                return ' (test)';
+                return ' (테스트)';
             case 'staging-ios':
-                return ' (test)';
+                return ' (테스트)';
             default:
                 return '';
+        }
+    };
+
+    const channel = () => {
+        switch (process.env.EAS_BUILD_PROFILE) {
+            case 'staging-android':
+                return 'staging';
+            case 'staging-ios':
+                return 'staging';
+            case 'production-android':
+                return 'production';
+            case 'production-ios':
+                return 'production';
+            default:
+                return process.env.EAS_BUILD_PROFILE;
         }
     };
 
@@ -31,7 +48,7 @@ module.exports = ({ config }) => {
         },
         updates: {
             ...config.updates,
-            releaseChannel: process.env.EAS_BUILD_PROFILE,
+            releaseChannel: channel(),
         },
     };
 };

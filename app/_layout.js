@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, SafeAreaView, Alert, TouchableOpacity, Text } from 'react-native';
+import { StyleSheet, SafeAreaView, Alert, Pressable } from 'react-native';
 import { Provider } from 'react-redux';
 import store from 'store/store';
 
@@ -22,7 +22,9 @@ import { apiStore } from 'api/Api';
 
 import * as Updates from 'expo-updates';
 import { checkServer } from 'api/LoginApi';
-import ProgressBar from 'utils/ProgressBar';
+import { commonInputStyles } from 'assets/styles';
+import { FontText } from 'utils/TextUtils';
+import { dispatchOne } from 'utils/DispatchUtils';
 
 const splashTime = 2000;
 const { profile } = Constants.expoConfig.extra;
@@ -34,6 +36,7 @@ const App = () => {
     const [hide, setHide] = useState(false);
     const [isUpdate, setIsUpdate] = useState(false);
     const [updateProgress, setUpdateProgress] = useState(0);
+    const [version, setVersion] = useState(Constants.expoConfig.runtimeVersion);
 
     console.log('profile :: ', profile);
 
@@ -64,64 +67,51 @@ const App = () => {
     const prepare = async () => {
         try {
             loadFonts();
-            const check = await serverCheck();
+            serverCheck();
 
-            if (check) {
-                await onFetchUpdateAsync();
-                await new Promise((resolve) => setTimeout(resolve, splashTime));
-                // TEST
-                // if (profile.includes('staging')) {
-                //     await onFetchUpdateAsync();
-                // } else {
-                //     await new Promise((resolve) => setTimeout(resolve, splashTime));
-                // }
+            if (profile.includes('staging') || profile.includes('production')) {
+                await onFetchUpdateAsync(true);
+            } else {
+                await new Promise((resolve) => setTimeout(resolve, splashTime)).then(() => {
+                    setSplashLoaded(true);
+                });
             }
         } catch (e) {
             console.warn(e);
-        } finally {
-            setSplashLoaded(true);
         }
     };
 
     // 앱 업데이트 체크
-    async function onFetchUpdateAsync() {
-        const osVersion = Constants.expoConfig.version;
-        Alert.alert(osVersion);
-
+    /** runTimeVersion이 동일해야 업데이트가 가능함 */
+    async function onFetchUpdateAsync(flag) {
         try {
-            // app version 체크해서 서버랑 하기
-            Alert.alert('업데이트 체크');
-            const update = await Updates.checkForUpdateAsync();
-            Alert.alert(update);
+            const update = await Updates.checkForUpdateAsync(); // 업데이트 확인
 
-            if (update.isAvailable) {
-                Alert.alert(process.env.EXPO_PUBLIC_NAME, '업데이트 하시겠습니까?', [
-                    { text: '아니요', onPress: () => null, style: 'cancel' },
-                    {
-                        text: '예',
-                        onPress: async () => {
-                            try {
-                                setIsUpdate(true);
-                                const { downloadedBytes, totalBytes } = await Updates.fetchUpdateAsync();
-                                setUpdateProgress(downloadedBytes / totalBytes);
+            if (flag && update.isAvailable) {
+                try {
+                    setIsUpdate(true);
+                    await Updates.fetchUpdateAsync(); // 업데이트 다운로드 (expo-updates)
+                } finally {
+                    setVersion(update.manifest.runtimeVersion);
+                    setIsUpdate(false);
+                    await Updates.reloadAsync().then(() => {
+                        Alert.alert('end!!');
+                    });
+                }
 
-                                Alert.alert(downloadedBytes / totalBytes);
-                                if (downloadedBytes === totalBytes) {
-                                    await Updates.reloadAsync();
-                                }
-                            } finally {
-                                setIsUpdate(false);
-                                Alert.alert(`업데이트가 완료되었습니다.`);
-                            }
-                        },
-                    },
-                ]);
-
-                return true;
+                // Alert.alert(process.env.EXPO_PUBLIC_NAME, '업데이트 하시겠습니까?', [
+                //     { text: '아니요', onPress: () => null, style: 'cancel' },
+                //     {
+                //         text: '예',
+                //         onPress: async () => {
+                //         },
+                //     },
+                // ]);
             }
         } catch (error) {
             console.log(error);
-            Alert.alert(`${error}`);
+        } finally {
+            setSplashLoaded(true);
         }
     }
 
@@ -166,15 +156,19 @@ const App = () => {
         <Try catch={ErrorBoundary}>
             <Provider store={store}>
                 {!splashLoaded ? (
-                    <Splash />
+                    <Splash isUpdate={isUpdate} updateProgress={updateProgress} onFetchUpdateAsync={onFetchUpdateAsync} version={version} />
                 ) : (
                     fontsLoaded && (
                         <SafeAreaView style={styles.container}>
                             <Contents />
                             <PopModal />
                             <Snackbar />
-                            {isUpdate && <ProgressBar percent={updateProgress} />}
-                            <Text>4</Text>
+                            <Pressable style={commonInputStyles.buttonWhite} onPress={() => onFetchUpdateAsync(false)}>
+                                <FontText>업데이트 체크</FontText>
+                            </Pressable>
+                            <Pressable style={commonInputStyles.buttonWhite} onPress={() => onFetchUpdateAsync(true)}>
+                                <FontText>업데이트3</FontText>
+                            </Pressable>
                         </SafeAreaView>
                     )
                 )}

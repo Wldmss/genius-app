@@ -39,3 +39,5 @@ ios/
 
 ./google-service.json
 ./GoogleService-Info.plist
+
+./INFO.md

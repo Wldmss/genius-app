@@ -1,12 +1,13 @@
 import { StyleSheet, Text, View } from 'react-native';
 
-const ProgressBar = ({ percent }) => {
+const ProgressBar = ({ percent, version }) => {
     return (
         <View style={styles.container}>
             <Text style={styles.progressBarText}>업데이트 중...</Text>
             <View style={styles.progressBar}>
                 <View style={styles.progressBarFill} width={percent * 100 + '%'} />
             </View>
+            <Text style={styles.progressBarText}>{`v.${version}`}</Text>
         </View>
     );
 };
@@ -15,7 +16,7 @@ const styles = StyleSheet.create({
     container: {
         position: `absolute`,
         width: '100%',
-        bottom: 0,
+        bottom: 5,
     },
     progressBar: {
         flex: 1,

@@ -42,25 +42,22 @@
             "channel": "staging",
             "autoIncrement": true
         },
-        "staging-android": {
+        "production": {
             "extends": "base",
-            "channel": "staging-android",
+            "channel": "production",
             "autoIncrement": true
+        },
+        "staging-android": {
+            "extends": "staging"
         },
         "staging-ios": {
-            "extends": "base",
-            "channel": "staging-ios",
-            "autoIncrement": true
+            "extends": "staging"
         },
         "production-android": {
-            "extends": "base",
-            "channel": "production-android",
-            "autoIncrement": true
+            "extends": "production"
         },
         "production-ios": {
-            "extends": "base",
-            "channel": "production-ios",
-            "autoIncrement": true
+            "extends": "production"
         }
     },
     "submit": {
