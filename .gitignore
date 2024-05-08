@@ -39,11 +39,11 @@ android/
 ios/
 
 # FCM
-google-service.json
-GoogleService-Info.plist
+./google-service.json
+./GoogleService-Info.plist
 
 # 계정 정보
-INFO.md
+info/
 
 # APNs 관련 파일
 apns/
