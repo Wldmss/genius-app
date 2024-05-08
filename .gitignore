@@ -34,10 +34,16 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
+# prebuild folder
 android/
 ios/
 
-./google-service.json
-./GoogleService-Info.plist
+# FCM
+google-service.json
+GoogleService-Info.plist
 
-./INFO.md
+# 계정 정보
+INFO.md
+
+# APNs 관련 파일
+apns/

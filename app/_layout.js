@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, SafeAreaView, Alert, Pressable } from 'react-native';
+import { StyleSheet, SafeAreaView, Alert } from 'react-native';
 import { Provider } from 'react-redux';
 import store from 'store/store';
 
@@ -10,7 +10,7 @@ import { ErrorBoundary } from 'utils/ErrorBoundary';
 import Constants from 'expo-constants';
 
 import { pushStore, useNotification } from 'utils/Push';
-import { pushFcmStore, useFirebase } from 'utils/PushFcm';
+// import { pushFcmStore, useFirebase } from 'utils/PushFcm';
 import { backStore } from 'utils/BackUtils';
 
 import PopModal from 'modal/PopModal';
@@ -22,9 +22,6 @@ import { apiStore } from 'api/Api';
 
 import * as Updates from 'expo-updates';
 import { checkServer } from 'api/LoginApi';
-import { commonInputStyles } from 'assets/styles';
-import { FontText } from 'utils/TextUtils';
-import { dispatchOne } from 'utils/DispatchUtils';
 
 const splashTime = 2000;
 const { profile } = Constants.expoConfig.extra;
@@ -41,12 +38,12 @@ const App = () => {
     console.log('profile :: ', profile);
 
     // expo-notification (사용 x)
-    // useNotification();
-    // pushStore(store);
+    useNotification();
+    pushStore(store);
 
     // firebase-messaging
-    useFirebase();
-    pushFcmStore(store);
+    // useFirebase();
+    // pushFcmStore(store);
 
     // api store
     apiStore(store);
@@ -89,14 +86,13 @@ const App = () => {
 
             if (flag && update.isAvailable) {
                 try {
+                    setVersion(update.manifest.runtimeVersion);
                     setIsUpdate(true);
                     await Updates.fetchUpdateAsync(); // 업데이트 다운로드 (expo-updates)
+                    setSplashLoaded(true);
                 } finally {
-                    setVersion(update.manifest.runtimeVersion);
                     setIsUpdate(false);
-                    await Updates.reloadAsync().then(() => {
-                        Alert.alert('end!!');
-                    });
+                    await Updates.reloadAsync();
                 }
 
                 // Alert.alert(process.env.EXPO_PUBLIC_NAME, '업데이트 하시겠습니까?', [
@@ -156,19 +152,13 @@ const App = () => {
         <Try catch={ErrorBoundary}>
             <Provider store={store}>
                 {!splashLoaded ? (
-                    <Splash isUpdate={isUpdate} updateProgress={updateProgress} onFetchUpdateAsync={onFetchUpdateAsync} version={version} />
+                    <Splash isUpdate={isUpdate} updateProgress={updateProgress} version={version} />
                 ) : (
                     fontsLoaded && (
                         <SafeAreaView style={styles.container}>
                             <Contents />
                             <PopModal />
                             <Snackbar />
-                            <Pressable style={commonInputStyles.buttonWhite} onPress={() => onFetchUpdateAsync(false)}>
-                                <FontText>업데이트 체크</FontText>
-                            </Pressable>
-                            <Pressable style={commonInputStyles.buttonWhite} onPress={() => onFetchUpdateAsync(true)}>
-                                <FontText>업데이트3</FontText>
-                            </Pressable>
                         </SafeAreaView>
                     )
                 )}

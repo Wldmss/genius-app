@@ -3,10 +3,11 @@ import store from 'store/store';
 import { dispatchLogin, dispatchOne } from 'utils/DispatchUtils';
 import CryptoJS from 'react-native-crypto-js';
 import { getPushToken } from 'utils/Push';
-import { getMessagingToken } from 'utils/PushFcm';
+// import { getMessagingToken } from 'utils/PushFcm';
 import Api from './Api';
 import * as Device from 'expo-device';
 import Constants from 'expo-constants';
+// import DeviceInfo from 'react-native-device-info';
 
 const { profile } = Constants.expoConfig.extra;
 
@@ -107,7 +108,8 @@ export const checkLogin = async (checkFlag) => {
 // push 토큰 값 확인
 export const checkPushToken = async () => {
     checkDevice();
-    await getMessagingToken().then((deviceToken) => {
+
+    await getPushToken().then((deviceToken) => {
         console.log('---deviceToken---');
         console.log(deviceToken);
         store.dispatch(dispatchOne('SET_TEST', deviceToken));
@@ -115,6 +117,15 @@ export const checkPushToken = async () => {
         // TEST
         if (!profile.includes('staging')) Api.test.post('push', { deviceToken: deviceToken });
     });
+
+    // await getMessagingToken().then((deviceToken) => {
+    //     console.log('---deviceToken---');
+    //     console.log(deviceToken);
+    //     store.dispatch(dispatchOne('SET_TEST', deviceToken));
+    //     // const encryptPushToken = CryptoJS.AES.encrypt(JSON.stringify(deviceToken), AES_KEY).toString();
+    //     // TEST
+    //     if (!profile.includes('staging')) Api.test.post('push', { deviceToken: deviceToken });
+    // });
 };
 
 // expo push 토큰 값 확인
@@ -149,7 +160,8 @@ const checkDevice = () => {
         buildId: Device.osBuildId,
         osVersion: Device.osVersion,
         appVersion: Constants.expoConfig.version,
-        // 모델명
+        // deviceId: DeviceInfo.getDeviceId(),
+        // 모델명 device id?
     };
 
     console.log(deviceInfo);

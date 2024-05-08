@@ -1,25 +1,15 @@
-import { View, StyleSheet, Pressable } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import Constants from 'expo-constants';
 import { GeniusLogo } from 'utils/ImageUtils';
-import { commonInputStyles } from 'assets/styles';
-import { FontText } from 'utils/TextUtils';
 import ProgressBar from 'utils/ProgressBar';
 
 /** splash screen */
-const Splash = ({ isUpdate, updateProgress, onFetchUpdateAsync, version }) => {
+const Splash = ({ isUpdate, updateProgress, version }) => {
     return (
         <View style={styles.container}>
             <View style={styles.center}>
                 <GeniusLogo />
                 {isUpdate && <ProgressBar percent={updateProgress} version={version} />}
-            </View>
-            <View style={styles.test}>
-                <Pressable style={commonInputStyles.buttonWhite} onPress={() => onFetchUpdateAsync(false)}>
-                    <FontText>업데이트 체크</FontText>
-                </Pressable>
-                <Pressable style={commonInputStyles.buttonWhite} onPress={() => onFetchUpdateAsync(true)}>
-                    <FontText>업데이트3</FontText>
-                </Pressable>
             </View>
         </View>
     );

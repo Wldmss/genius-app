@@ -16,15 +16,14 @@
     },
     "updates": {
       "url": "https://u.expo.dev/12c06e96-2a78-4817-ab16-1136a97dbd07",
-      "fallbackToCacheTimeout": 0,
-      "enabled": true
+      "fallbackToCacheTimeout": 0
     },
     "userInterfaceStyle": "light",
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
-      "buildNumber": "1.0.0",
+      "buildNumber": "1.0.1",
       "supportsTablet": true,
       "requireFullScreen": true,
       "bundleIdentifier": "com.kt.ktgenius",
@@ -46,7 +45,7 @@
       ]
     },
     "android": {
-      "versionCode": 14,
+      "versionCode": 16,
       "adaptiveIcon": {
         "foregroundImage": "./app/assets/icons/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -134,16 +133,6 @@
           "ios": {
             "useFrameworks": "static"
           }
-        }
-      ],
-      "@react-native-firebase/app",
-      "@react-native-firebase/messaging",
-      [
-        "expo-notifications",
-        {
-          "icon": "./app/assets/icons/push-icon.png",
-          "color": "#ffffff",
-          "sounds": []
         }
       ],
       [
