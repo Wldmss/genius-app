@@ -91,12 +91,18 @@
 ## 업데이트
 
 1. expo-updates
+
     - 반영이 안되는 경우
         - native code 변경 시 (expo 에서는 해당 안됨)
         - 큰 데이터 파일
         - 운영체제 버전 변경
         - 프로젝트 구조 변경
         - 외부 라이브러리, SDK 주요 버전 업그레이드
+
+2. ios provision 파일 변경
+    - npm run credentials
+    - IOS > select profile > Build Credentials: Manage everything needed to build your project > Provisioning Profile: Delete one from your project
+        - apple developer 에서 삭제되는게 아니고, expo 에 등록된 파일이 삭제되므로 걱정x
 
 ## device 설정
 
@@ -176,7 +182,7 @@
 
 -   https://docs.expo.dev/build-reference/variables/#setting-plaintext-environment-variables-in-easjson
 -   local 에서는 eas.json, eas secrets가 적용되지 않기 때문에 .env에 값을 넣어야 한다. 따라서, .env는 .gitignore할 것
--   .env 에서 사용하는 환경 변수는 'EXPO*PUBLIC*' 으로 시작한다.
+-   .env 에서 사용하는 환경 변수는 'EXPO_PUBLIC' 으로 시작한다.
 -   eas secrets에 등록하지 않는 환경 변수는 .env 와 eas.json에 모두 설정한다.
 
 ## eas secrets

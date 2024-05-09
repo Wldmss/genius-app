@@ -1,148 +1,142 @@
 {
-  "expo": {
-    "name": "KTgenius",
-    "slug": "ktgenius",
-    "scheme": "ktgenius",
-    "version": "1.0.0",
-    "owner": "insic_lee",
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
-    "orientation": "portrait",
-    "icon": "./app/assets/icons/app-icon.png",
-    "notification": {
-      "icon": "./app/assets/icons/push-icon.png",
-      "color": "#ffffff"
-    },
-    "updates": {
-      "url": "https://u.expo.dev/12c06e96-2a78-4817-ab16-1136a97dbd07",
-      "fallbackToCacheTimeout": 0
-    },
-    "userInterfaceStyle": "light",
-    "assetBundlePatterns": [
-      "**/*"
-    ],
-    "ios": {
-      "buildNumber": "1.0.1",
-      "supportsTablet": true,
-      "requireFullScreen": true,
-      "bundleIdentifier": "com.kt.ktgenius",
-      "infoPlist": {
-        "NSFaceIDUsageDescription": "Allow $(PRODUCT_NAME) to use Face ID.",
-        "NSCameraUsageDescription": "Allow $(PRODUCT_NAME) to access camera.",
-        "NSMicrophoneUsageDescription": "Allow $(PRODUCT_NAME) to access your microphone",
-        "UIBackgroundModes": [
-          "location",
-          "fetch",
-          "remote-notification"
+    "expo": {
+        "name": "KTgenius",
+        "slug": "ktgenius",
+        "scheme": "ktgenius",
+        "version": "1.0.0",
+        "owner": "insic_lee",
+        "runtimeVersion": {
+            "policy": "appVersion"
+        },
+        "orientation": "portrait",
+        "icon": "./app/assets/icons/app-icon.png",
+        "notification": {
+            "icon": "./app/assets/icons/push-icon_white.png",
+            "color": "#ffffff"
+        },
+        "updates": {
+            "url": "https://u.expo.dev/12c06e96-2a78-4817-ab16-1136a97dbd07",
+            "fallbackToCacheTimeout": 0
+        },
+        "userInterfaceStyle": "light",
+        "assetBundlePatterns": ["**/*"],
+        "ios": {
+            "buildNumber": "1.0.1",
+            "supportsTablet": true,
+            "requireFullScreen": true,
+            "bundleIdentifier": "com.kt.ktgenius",
+            "infoPlist": {
+                "NSFaceIDUsageDescription": "Allow $(PRODUCT_NAME) to use Face ID.",
+                "NSCameraUsageDescription": "Allow $(PRODUCT_NAME) to access camera.",
+                "NSMicrophoneUsageDescription": "Allow $(PRODUCT_NAME) to access your microphone",
+                "UIBackgroundModes": ["location", "fetch", "remote-notification"]
+            },
+            "config": {
+                "usesNonExemptEncryption": false
+            },
+            "associatedDomains": ["applinks:ktgenius.kt.com"]
+        },
+        "android": {
+            "versionCode": 18,
+            "adaptiveIcon": {
+                "foregroundImage": "./app/assets/icons/adaptive-icon.png",
+                "backgroundColor": "#ffffff"
+            },
+            "permissions": [
+                "android.permission.CAMERA",
+                "android.permission.USE_BIOMETRIC",
+                "android.permission.USE_FINGERPRINT",
+                "android.permission.CAMERA",
+                "android.permission.RECORD_AUDIO",
+                "android.permission.INTERNET",
+                "android.permission.FOREGROUND_SERVICE",
+                "android.permission.SYSTEM_ALERT_WINDOW",
+                "android.permission.WRITE_EXTERNAL_STORAGE"
+            ],
+            "package": "com.kt.ktgenius",
+            "intentFilters": [
+                {
+                    "action": "VIEW",
+                    "autoVerify": true,
+                    "category": ["BROWSABLE", "DEFAULT"]
+                }
+            ]
+        },
+        "web": {
+            "favicon": "./app/assets/icons/app-icon.png"
+        },
+        "extra": {
+            "eas": {
+                "projectId": "12c06e96-2a78-4817-ab16-1136a97dbd07"
+            },
+            "router": {
+                "origin": false
+            }
+        },
+        "plugins": [
+            [
+                "expo-local-authentication",
+                {
+                    "faceIDPermission": "Allow $(PRODUCT_NAME) to use Face ID."
+                }
+            ],
+            [
+                "expo-secure-store",
+                {
+                    "faceIDPermission": "Allow $(PRODUCT_NAME) to access your Face ID biometric data."
+                }
+            ],
+            [
+                "expo-screen-orientation",
+                {
+                    "initialOrientation": "DEFAULT"
+                }
+            ],
+            [
+                "expo-camera",
+                {
+                    "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
+                    "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
+                    "recordAudioAndroid": true
+                }
+            ],
+            [
+                "expo-barcode-scanner",
+                {
+                    "cameraPermission": "Allow $(PRODUCT_NAME) to access camera."
+                }
+            ],
+            [
+                "expo-updates",
+                {
+                    "username": "insic_lee"
+                }
+            ],
+            "expo-router",
+            [
+                "expo-build-properties",
+                {
+                    "android": {
+                        "usesCleartextTraffic": true
+                    },
+                    "ios": {
+                        "useFrameworks": "static"
+                    }
+                }
+            ],
+            [
+                "expo-font",
+                {
+                    "fonts": ["./app/assets/fonts/NotoSansKR-Regular.ttf"]
+                }
+            ],
+            [
+                "expo-notifications",
+                {
+                    "icon": "./app/assets/icons/push-icon_white.png",
+                    "color": "#ffffff"
+                }
+            ]
         ]
-      },
-      "config": {
-        "usesNonExemptEncryption": false
-      },
-      "associatedDomains": [
-        "applinks:ktgenius.kt.com"
-      ]
-    },
-    "android": {
-      "versionCode": 16,
-      "adaptiveIcon": {
-        "foregroundImage": "./app/assets/icons/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
-      "permissions": [
-        "android.permission.CAMERA",
-        "android.permission.USE_BIOMETRIC",
-        "android.permission.USE_FINGERPRINT",
-        "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO",
-        "android.permission.INTERNET",
-        "android.permission.FOREGROUND_SERVICE",
-        "android.permission.SYSTEM_ALERT_WINDOW",
-        "android.permission.WRITE_EXTERNAL_STORAGE"
-      ],
-      "package": "com.kt.ktgenius",
-      "intentFilters": [
-        {
-          "action": "VIEW",
-          "autoVerify": true,
-          "category": [
-            "BROWSABLE",
-            "DEFAULT"
-          ]
-        }
-      ]
-    },
-    "web": {
-      "favicon": "./app/assets/icons/app-icon.png"
-    },
-    "extra": {
-      "eas": {
-        "projectId": "12c06e96-2a78-4817-ab16-1136a97dbd07"
-      },
-      "router": {
-        "origin": false
-      }
-    },
-    "plugins": [
-      [
-        "expo-local-authentication",
-        {
-          "faceIDPermission": "Allow $(PRODUCT_NAME) to use Face ID."
-        }
-      ],
-      [
-        "expo-secure-store",
-        {
-          "faceIDPermission": "Allow $(PRODUCT_NAME) to access your Face ID biometric data."
-        }
-      ],
-      [
-        "expo-screen-orientation",
-        {
-          "initialOrientation": "DEFAULT"
-        }
-      ],
-      [
-        "expo-camera",
-        {
-          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
-          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
-          "recordAudioAndroid": true
-        }
-      ],
-      [
-        "expo-barcode-scanner",
-        {
-          "cameraPermission": "Allow $(PRODUCT_NAME) to access camera."
-        }
-      ],
-      [
-        "expo-updates",
-        {
-          "username": "insic_lee"
-        }
-      ],
-      "expo-router",
-      [
-        "expo-build-properties",
-        {
-          "android": {
-            "usesCleartextTraffic": true
-          },
-          "ios": {
-            "useFrameworks": "static"
-          }
-        }
-      ],
-      [
-        "expo-font",
-        {
-          "fonts": [
-            "./app/assets/fonts/NotoSansKR-Regular.ttf"
-          ]
-        }
-      ]
-    ]
-  }
+    }
 }

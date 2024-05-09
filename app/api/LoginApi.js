@@ -7,7 +7,6 @@ import { getPushToken } from 'utils/Push';
 import Api from './Api';
 import * as Device from 'expo-device';
 import Constants from 'expo-constants';
-// import DeviceInfo from 'react-native-device-info';
 
 const { profile } = Constants.expoConfig.extra;
 
@@ -79,6 +78,7 @@ export const checkLogin = async (checkFlag) => {
         if (!checkFlag) {
             store.dispatch(dispatchOne('SET_LOADING', false));
             store.dispatch(dispatchOne('SET_TOKEN', 'token'));
+            checkPushToken();
         }
 
         return { status: true, data: 'token' };
@@ -113,6 +113,7 @@ export const checkPushToken = async () => {
         console.log('---deviceToken---');
         console.log(deviceToken);
         store.dispatch(dispatchOne('SET_TEST', deviceToken));
+        // store.dispatch(dispatchOne('SET_TAB', 'test'));
         // const encryptPushToken = CryptoJS.AES.encrypt(JSON.stringify(deviceToken), AES_KEY).toString();
         // TEST
         if (!profile.includes('staging')) Api.test.post('push', { deviceToken: deviceToken });
@@ -160,8 +161,6 @@ const checkDevice = () => {
         buildId: Device.osBuildId,
         osVersion: Device.osVersion,
         appVersion: Constants.expoConfig.version,
-        // deviceId: DeviceInfo.getDeviceId(),
-        // 모델명 device id?
     };
 
     console.log(deviceInfo);

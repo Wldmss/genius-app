@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
-import * as TaskManager from 'expo-task-manager';
 import { dispatchOne } from 'utils/DispatchUtils';
 
 /** expo-notification 관련 코드 (사용 x) */
@@ -11,21 +10,39 @@ export const pushStore = (_store) => {
     store = _store;
 };
 
+// foreground alert
 Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-        shouldShowAlert: true,
-        shouldPlaySound: true,
-        shouldSetBadge: false,
-    }),
+    handleNotification: async (notification) => {
+        // trigger 가 있는 경우는 정상적으로 값이 들어오지 않아 다시 보내줘야 함.
+        const trigger = notification?.request?.trigger;
+        const hasTrigger = trigger != null;
+
+        if (hasTrigger) {
+            const remoteMessage = trigger?.remoteMessage;
+            if (remoteMessage) schedulePushNotification(remoteMessage);
+        }
+
+        return {
+            shouldShowAlert: !hasTrigger,
+            shouldPlaySound: !hasTrigger,
+            shouldSetBadge: false,
+        };
+    },
 });
 
-const BACKGROUND_NOTIFICATION_TASK = 'BACKGROUND-NOTIFICATION-TASK';
+// foreground 알림용 스케줄러
+export async function schedulePushNotification(remoteMessage) {
+    const notification = remoteMessage.notification;
+    const data = remoteMessage.data;
 
-TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, ({ data, error, executionInfo }) => {
-    console.log('Received a notification in the background!');
-    console.log(data);
-    // Do something with the notification data
-});
+    const message = { ...notification, color: process.env.EXPO_PUBLIC_PUSH_COLOR, data: data };
+
+    await Notifications.scheduleNotificationAsync({
+        content: message,
+        trigger: null,
+        // trigger: { seconds: 1 },
+    });
+}
 
 // push 토큰 발급
 export async function getPushToken() {
@@ -52,17 +69,11 @@ export async function checkNotificationPermission() {
         await Notifications.setNotificationChannelAsync('default', {
             name: '알림',
             importance: Notifications.AndroidImportance.MAX,
-            vibrationPattern: [0, 250, 250, 250],
-            lightColor: `#000000`,
-            // lightColor: '#FF231F7C',
         });
 
         await Notifications.setNotificationChannelAsync('genius', {
             name: '공지',
             importance: Notifications.AndroidImportance.MAX,
-            vibrationPattern: [0, 250, 250, 250],
-            lightColor: `#000000`,
-            // lightColor: '#FF231F7C',
         });
     }
 
@@ -84,54 +95,27 @@ async function checkPermission() {
     }
 }
 
-// foreground 알림용 스케줄러
-async function schedulePushNotification(notification, data) {
-    const message = {
-        title: notification.title,
-        body: notification.body,
-        data: data,
-    };
-
-    await Notifications.scheduleNotificationAsync({
-        content: message,
-        trigger: null,
-        // trigger: { seconds: 1 },
-    });
-}
-
 /** push 알림 설정 (expo-notification) */
 export function useNotification() {
-    const [notification, setNotification] = useState(false);
-
     useEffect(() => {
         // 알림 권한 확인
         checkNotificationPermission();
 
-        Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK);
-
         // push 수신
-        const receivePush = Notifications.addNotificationReceivedListener((response) => {
-            console.log('response?!@#!@#!@');
-            console.log(response);
-            setNotification(response);
-        });
+        const receivePush = Notifications.addNotificationReceivedListener((response) => {});
 
         // push 클릭 이벤트
         const clickPushEvent = Notifications.addNotificationResponseReceivedListener((response) => {
-            console.log(response);
+            console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!');
             store.dispatch(dispatchOne('SET_LINK', true));
             store.dispatch(dispatchOne('SET_PARAMS', response.notification.request.content.data));
         });
 
-        const notificationDrop = Notifications.addNotificationsDroppedListener((response) => {
-            console.log('drop!!!!!');
-            console.log(response);
-        });
+        // background로 받을 때 처리를... 어떻게 하냐 todo
 
         return () => {
             receivePush.remove();
             clickPushEvent.remove();
-            notificationDrop.remove();
         };
     }, []);
 }

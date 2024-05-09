@@ -6,6 +6,8 @@
 // import { dispatchOne } from './DispatchUtils';
 // import { FontText } from './TextUtils';
 
+// // react-native-firebase/messaging (사용 x) - ios build가 안됨
+
 // export const pushFcmStore = (_store) => {
 //     store = _store;
 // };
