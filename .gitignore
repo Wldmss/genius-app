@@ -29,7 +29,7 @@ yarn-error.*
 *.pem
 
 # local env files
-.env*
+# .env*
 
 # typescript
 *.tsbuildinfo
@@ -38,12 +38,8 @@ yarn-error.*
 android/
 ios/
 
-# FCM
-./google-service.json
-./GoogleService-Info.plist
-
-# 계정 정보
-info/
-
 # APNs 관련 파일
 apns/
+
+# FCM, 계정 등 기타 파일
+info/
