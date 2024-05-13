@@ -1,10 +1,12 @@
 module.exports = ({ config }) => {
-    const profile = process.env.EAS_BUILD_PROFILE || process.env.EXPO_PUBLIC_PROFILE;
+    const profile = (process.env.EAS_BUILD_PROFILE || process.env.EXPO_PUBLIC_PROFILE || 'production').trim();
 
     const appType = () => {
         switch (profile) {
             case 'development':
                 return ' (개발)';
+            case 'test':
+                return ' (지은)';
             case 'staging':
                 return ' (테스트)';
             default:
@@ -26,6 +28,7 @@ module.exports = ({ config }) => {
         extra: {
             ...config.extra,
             profile: profile,
+            isTest: profile == 'test' || profile == 'staging',
         },
     };
 };

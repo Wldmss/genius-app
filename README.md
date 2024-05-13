@@ -192,3 +192,12 @@
 -   npx eas secret:push --scope project --env-file .env
 -   npx eas secret:create --scope project --name SECRET_NAME --value secretvalue --type string
 -   npx eas secret:list # secrets 정보
+
+## push 설정 관련
+
+    - 색상
+        - android : was > androidconfig.color
+    - icon
+        - foreground : app.json > plugins > expo-notifications > icon
+        - background : app.json > icon
+        - prebuild 시 : app.json > notification

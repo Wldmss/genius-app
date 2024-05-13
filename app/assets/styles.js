@@ -9,6 +9,7 @@ export const commonStyles = StyleSheet.create({
     },
     geniusLogo: {
         width: 200,
+        height: 200,
     },
 });
 

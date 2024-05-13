@@ -70,9 +70,6 @@ const Web = () => {
                 case 'changePin':
                     store.dispatch(dispatchMultiple({ SET_WEBPIN: true, SET_TAB: 'pin' }));
                     break;
-                case 'count':
-                    store.dispatch(dispatchMultiple({ SET_WEBPIN: true, SET_TAB: 'pin' }));
-                    break;
                 case 'test':
                     console.log('TEST');
                     break;
@@ -211,11 +208,21 @@ const Web = () => {
 
     useEffect(() => {
         console.log('is link :: ', isLink);
+        let sendData = {
+            userid: 'test1001',
+            pwd: 'test100!',
+            url: '',
+        };
+
         if (isLink) {
             Alert.alert('is linked!!');
 
             console.log(params);
-            if (params && Object.keys(params).length > 0) setPostData(params);
+            if (params && Object.keys(params).length > 0) {
+                sendData = { ...sendData, ...params };
+                console.log(sendData);
+                setPostData(sendData);
+            }
         }
         console.log(isLink ? '@@@@@@ is link @@@@@' : 'XXXXX not link xXXXXX');
         // todo QR 로그인 후 뭔가 해야함
@@ -241,7 +248,8 @@ const Web = () => {
 
     useEffect(() => {
         // TEST
-        Alert.alert(`${profile}\n${profile.includes('staging') ? devUrl : tempUri}`);
+        if (profile.includes('test')) Alert.alert(`${profile}\n${tempUri}`);
+        if (profile.includes('staging')) Alert.alert(`${tempUri}\nwebview 페이지 입니다.`);
     }, []);
 
     return (

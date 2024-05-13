@@ -219,19 +219,28 @@ const PinLogin = () => {
         const checkPin = value.enter;
 
         // 연속된 숫자 확인
-        let isSequential = true;
+        let isSequentialAscending = true;
+        let isSequentialDescending = true;
+
         for (let i = 0; i < checkPin.length - 1; i++) {
             const currentDigit = parseInt(checkPin[i]);
             const nextDigit = parseInt(checkPin[i + 1]);
+
+            // 오름차순 확인
             if (nextDigit !== currentDigit + 1) {
-                isSequential = false; // 연속된 숫자가 아님
+                isSequentialAscending = false; // 오름차순이 아님
+            }
+
+            // 내림차순 확인
+            if (nextDigit !== currentDigit - 1) {
+                isSequentialDescending = false; // 내림차순이 아님
             }
         }
 
         // 동일한 숫자 확인
         const passPattern = /^(?!(\d)\1{5}$)\d{6}$/;
 
-        return isSequential || !passPattern.test(checkPin);
+        return isSequentialAscending || isSequentialDescending || !passPattern.test(checkPin);
     };
 
     // 로그인 trigger

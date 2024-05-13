@@ -37,6 +37,11 @@
                 "simulator": true
             }
         },
+        "test": {
+            "extends": "base",
+            "channel": "test",
+            "autoIncrement": true
+        },
         "staging": {
             "extends": "base",
             "channel": "staging",
@@ -46,18 +51,6 @@
             "extends": "base",
             "channel": "production",
             "autoIncrement": true
-        },
-        "staging-android": {
-            "extends": "staging"
-        },
-        "staging-ios": {
-            "extends": "staging"
-        },
-        "production-android": {
-            "extends": "production"
-        },
-        "production-ios": {
-            "extends": "production"
         }
     },
     "submit": {

@@ -8,8 +8,6 @@ import { dispatchMultiple, dispatchOne } from 'utils/DispatchUtils';
 import * as StorageUtils from 'utils/StorageUtils';
 import Constants from 'expo-constants';
 
-const { profile } = Constants.expoConfig.extra;
-
 /** genius main */
 const Main = () => {
     const [doneBio, setDoneBio] = useState(false);

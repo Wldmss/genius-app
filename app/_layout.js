@@ -24,7 +24,7 @@ import * as Updates from 'expo-updates';
 import { checkServer } from 'api/LoginApi';
 
 const splashTime = 2000;
-const { profile } = Constants.expoConfig.extra;
+const { profile, isTest } = Constants.expoConfig.extra;
 
 /** layout (main) */
 const App = () => {
@@ -33,9 +33,10 @@ const App = () => {
     const [hide, setHide] = useState(false);
     const [isUpdate, setIsUpdate] = useState(false);
     const [updateProgress, setUpdateProgress] = useState(0);
-    const [version, setVersion] = useState(Constants.expoConfig.runtimeVersion);
+    const [version, setVersion] = useState(Constants.expoConfig.version);
 
     console.log('profile :: ', profile);
+    console.log(process.env.GOOGLE_SERVICES_JSON);
 
     // expo-notification (사용 x)
     useNotification();
@@ -66,7 +67,7 @@ const App = () => {
             loadFonts();
             serverCheck();
 
-            if (profile.includes('staging') || profile.includes('production')) {
+            if (isTest || profile.includes('production')) {
                 await onFetchUpdateAsync(true);
             } else {
                 await new Promise((resolve) => setTimeout(resolve, splashTime)).then(() => {
@@ -114,7 +115,7 @@ const App = () => {
     // 서버 체크
     const serverCheck = async () => {
         return await checkServer().then((result) => {
-            if (!result) Alert.alert('잠시 후 다시 시도해주세요.');
+            if (!result) Alert.alert('접속이 불안정합니다.\n종료 후 다시 접속해주세요.');
             return result;
         });
     };

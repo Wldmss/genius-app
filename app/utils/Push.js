@@ -25,7 +25,7 @@ Notifications.setNotificationHandler({
         return {
             shouldShowAlert: !hasTrigger,
             shouldPlaySound: !hasTrigger,
-            shouldSetBadge: false,
+            shouldSetBadge: !hasTrigger,
         };
     },
 });
@@ -35,7 +35,7 @@ export async function schedulePushNotification(remoteMessage) {
     const notification = remoteMessage.notification;
     const data = remoteMessage.data;
 
-    const message = { ...notification, color: process.env.EXPO_PUBLIC_PUSH_COLOR, data: data };
+    const message = { ...notification, data: data };
 
     await Notifications.scheduleNotificationAsync({
         content: message,
@@ -48,11 +48,16 @@ export async function schedulePushNotification(remoteMessage) {
 export async function getPushToken() {
     const notification = store.getState().commonReducer.notification;
 
-    if (notification) {
-        return (await Notifications.getDevicePushTokenAsync()).data;
-    }
+    try {
+        if (notification) {
+            return (await Notifications.getDevicePushTokenAsync()).data;
+        }
 
-    return null;
+        return null;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
 }
 
 // push 토큰 발급 (expo token)

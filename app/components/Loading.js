@@ -8,9 +8,7 @@ const Loading = () => {
 
     return (
         <Modal visible={true} transparent={true} animationType="fade">
-            <View style={styles.modalContainer}>
-                <GeniusLogo />
-            </View>
+            <View style={styles.modalContainer}>{/* <GeniusLogo /> */}</View>
         </Modal>
     );
 };

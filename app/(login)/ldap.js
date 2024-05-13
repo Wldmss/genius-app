@@ -7,7 +7,7 @@ import moment from 'moment';
 import { dispatchLogin, dispatchMultiple, dispatchOne } from 'utils/DispatchUtils';
 import * as StorageUtils from 'utils/StorageUtils';
 import { FontText } from 'utils/TextUtils';
-import { checkPushToken, login } from 'api/LoginApi';
+import { login } from 'api/LoginApi';
 import LoginInfo from 'modal/LoginInfo';
 
 /** LDAP 로그인 */
@@ -50,7 +50,6 @@ const LDAPLogin = () => {
                 setIsLogin(true);
             } else {
                 resetUsers();
-                Alert.alert('로그인에 실패했습니다.');
             }
         });
     };
@@ -120,7 +119,6 @@ const LDAPLogin = () => {
         store.dispatch(dispatchMultiple(storeData));
         store.dispatch(dispatchLogin(true, moment()));
         store.dispatch(dispatchOne('SET_TAB', 'web'));
-        checkPushToken();
     };
 
     const showInfo = () => {

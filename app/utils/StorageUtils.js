@@ -5,10 +5,11 @@ import * as SecureStore from 'expo-secure-store';
 // get data
 export const getDeviceData = async (key) => {
     try {
-        const storageData = await SecureStore.getItemAsync(key);
+        const storageData = SecureStore.getItem(key, { requireAuthentication: true });
         return storageData != null && storageData != '' ? storageData : null;
     } catch (err) {
         console.log(`Device Data Load Error :: ${err}`);
+        return null;
     }
 };
 
@@ -20,7 +21,7 @@ getDeviceData.propTypes = {
 export const setDeviceData = async (key, value) => {
     try {
         const cryptoValue = value != null ? String(value) : '';
-        await SecureStore.setItemAsync(key, cryptoValue);
+        SecureStore.setItem(key, cryptoValue);
     } catch (err) {
         console.log(`Device Data Save Error :: ${err}`);
     }
