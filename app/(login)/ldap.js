@@ -7,15 +7,15 @@ import moment from 'moment';
 import { dispatchLogin, dispatchMultiple, dispatchOne } from 'utils/DispatchUtils';
 import * as StorageUtils from 'utils/StorageUtils';
 import { FontText } from 'utils/TextUtils';
-import { login } from 'api/LoginApi';
+import { checkSms, login } from 'api/LoginApi';
 import LoginInfo from 'modal/LoginInfo';
 
 /** LDAP 로그인 */
 const LDAPLogin = () => {
-    const jwt = useSelector((state) => state.loginReducer.jwt);
+    const loginKey = useSelector((state) => state.loginReducer.loginKey);
 
     const otpRef = useRef(null);
-    const maxTime = 10;
+    const maxTime = 180;
     const [time, setTime] = useState(0);
     const [value, setValue] = useState({ username: '', password: '', otp: '' });
     const [isLogin, setIsLogin] = useState(false);
@@ -64,7 +64,7 @@ const LDAPLogin = () => {
     };
 
     // OTP 검증
-    const checkOTP = () => {
+    const checkOTP = async () => {
         // 인증번호 확인 로직 추가
         if (value.otp == '') {
             Alert.alert('인증번호가 일치하지 않습니다.');
@@ -72,13 +72,16 @@ const LDAPLogin = () => {
         }
 
         setTime(0);
-        saveUserData(true);
+        await checkSms(value.otp, token).then((response) => {
+            if (response) saveUserData(true);
+        });
+
         // checkUsers();
     };
 
     // 사용자 정보 확인 (로그아웃이 가능하다면 saveUserData() 대신 사용)
     const checkUsers = () => {
-        if (jwt != null && jwt !== value.username) {
+        if (loginKey != null && loginKey !== value.username) {
             Alert.alert(
                 process.env.EXPO_PUBLIC_NAME,
                 `기본 로그인 정보를 "${value.username}" 으로 변경하시겠습니까?`,
@@ -101,18 +104,18 @@ const LDAPLogin = () => {
                 { cancelable: false }
             );
         } else {
-            saveUserData(jwt == null);
+            saveUserData(loginKey == null);
         }
     };
 
     // 사용자 정보 저장
     const saveUserData = async (changeFlag) => {
         if (changeFlag) {
-            await StorageUtils.setDeviceData('jwt', token);
+            await StorageUtils.setDeviceData('loginKey', token);
         }
 
         let storeData = {
-            SET_JWT: token,
+            SET_LOGINKEY: token,
             SET_TOKEN: token,
         };
 
@@ -127,7 +130,7 @@ const LDAPLogin = () => {
 
     // user 정보 reset
     const resetUsers = async () => {
-        await StorageUtils.setDeviceData('jwt', null);
+        await StorageUtils.setDeviceData('loginKey', null);
     };
 
     // 인증 번호 남은 시간 timer

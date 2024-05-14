@@ -10,8 +10,6 @@ import { backEventHandler } from 'utils/BackUtils';
 import * as FileUtils from 'utils/FileUtils';
 import Loading from 'components/Loading';
 import ErrorPage from '(utils)/error';
-import ApiFetch from 'api/ApiFetch';
-import Api from 'api/Api';
 import Constants from 'expo-constants';
 
 const { profile } = Constants.expoConfig.extra;
@@ -22,23 +20,12 @@ const Web = () => {
     const camera = useSelector((state) => state.commonReducer.camera);
     const params = useSelector((state) => state.commonReducer.params);
     const exitPressed = useSelector((state) => state.commonReducer.exitPressed);
+    const webLink = useSelector((state) => state.commonReducer.webLink);
 
     const webViewRef = useRef(null);
 
     const [backButtonEnabled, setBackButtonEnabled] = useState(false);
-
-    // const tempUri = 'https://naver.com';
-    // const tempUri = 'https://m.mail.naver.com/v2/read/0/6110';
-    const tempUri = 'https://ktedu.kt.com';
-    // const tempUri = 'https://aice.study/main';
-    // const tempUri =  'https://aice.study/info/aice';
-    // const tempUri = 'https://ktedu.kt.com/mobile/m/support/notice/noticeList.do';
-    // const tempUri =  'https://ktedu.kt.com/education/courseContents.do?classId=200034420_01';
-    // const tempUri = '192.168.50.254:8080/api/v1/file';
-    // const tempUri = '192.168.31.254:8080/file';
-    const devUrl = 'https://dev.ktedu.kt.com:2443';
-
-    const [currentURI, setURI] = useState(tempUri);
+    const [currentURI, setURI] = useState(webLink);
     const [hide, setHide] = useState(false);
     const [postData, setPostData] = useState({});
     const [init, setInit] = useState(false);
@@ -215,7 +202,8 @@ const Web = () => {
         };
 
         if (isLink) {
-            Alert.alert('is linked!!');
+            // Alert.alert('is linked!!');
+            Alert.alert(JSON.stringify(params));
 
             console.log(params);
             if (params && Object.keys(params).length > 0) {
@@ -248,8 +236,8 @@ const Web = () => {
 
     useEffect(() => {
         // TEST
-        if (profile.includes('test')) Alert.alert(`${profile}\n${tempUri}`);
-        if (profile.includes('staging')) Alert.alert(`${tempUri}\nwebview 페이지 입니다.`);
+        if (profile.includes('test') || profile.includes('development')) Alert.alert(`${profile}\n${process.env.EXPO_PUBLIC_WEB}${webLink}`);
+        if (profile.includes('staging')) Alert.alert(`${process.env.EXPO_PUBLIC_WEB}${webLink}\nwebview 페이지 입니다.`);
     }, []);
 
     return (
@@ -257,8 +245,7 @@ const Web = () => {
             ref={webViewRef}
             style={[styles.webview, hide ? styles.none : styles.flex]}
             source={{
-                uri: tempUri,
-                // uri: profile.includes('staging') ? devUrl : tempUri,
+                uri: `${process.env.EXPO_PUBLIC_WEB}${webLink}`,
                 method: 'POST',
                 body: JSON.stringify(postData),
             }}

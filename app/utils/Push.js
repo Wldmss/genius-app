@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
-import { Platform } from 'react-native';
+import { Alert, Linking, Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import { dispatchOne } from 'utils/DispatchUtils';
+import { router } from 'expo-router';
 
 /** expo-notification 관련 코드 (사용 x) */
 
@@ -109,11 +110,14 @@ export function useNotification() {
         // push 수신
         const receivePush = Notifications.addNotificationReceivedListener((response) => {});
 
-        // push 클릭 이벤트
+        // push 클릭 이벤트 (foreground는 되는데,..)
         const clickPushEvent = Notifications.addNotificationResponseReceivedListener((response) => {
             console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!');
+            const data = response?.notification?.request?.content?.data;
+            store.dispatch(dispatchOne('SET_PARAMS', data));
             store.dispatch(dispatchOne('SET_LINK', true));
-            store.dispatch(dispatchOne('SET_PARAMS', response.notification.request.content.data));
+            store.dispatch(dispatchOne('SET_WEBLINK', data?.url || '/main/portalMain.do'));
+            // store.dispatch(dispatchOne('SET_TAB', 'main'));
         });
 
         // background로 받을 때 처리를... 어떻게 하냐 todo

@@ -21,7 +21,7 @@ const Contents = () => {
     const exitFlag = useSelector((state) => state.loginReducer.exitFlag);
     const expire = useSelector((state) => state.loginReducer.expire);
     const isLogin = useSelector((state) => state.loginReducer.isLogin);
-    const jwt = useSelector((state) => state.loginReducer.jwt);
+    const loginKey = useSelector((state) => state.loginReducer.loginKey);
     const exitPressed = useSelector((state) => state.commonReducer.exitPressed);
 
     let timeout = null;
@@ -31,11 +31,11 @@ const Contents = () => {
         console.log('----------login----------');
         console.log(isLogin);
         console.log(token);
-        console.log(jwt);
+        console.log(loginKey);
 
         if (token == null) {
             if (isLogin) {
-                if (jwt == null) {
+                if (loginKey == null) {
                     noUsers(true);
                     return;
                 }

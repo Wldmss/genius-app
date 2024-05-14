@@ -6,8 +6,6 @@ import * as SecureStore from 'expo-secure-store';
 import * as Authentication from 'expo-local-authentication';
 import { dispatchMultiple, dispatchOne } from 'utils/DispatchUtils';
 import * as StorageUtils from 'utils/StorageUtils';
-import Constants from 'expo-constants';
-
 /** genius main */
 const Main = () => {
     const [doneBio, setDoneBio] = useState(false);
@@ -18,9 +16,9 @@ const Main = () => {
         try {
             await SecureStore.deleteItemAsync('bio');
             await SecureStore.deleteItemAsync('pin');
-            await SecureStore.deleteItemAsync('jwt');
+            await SecureStore.deleteItemAsync('loginKey');
             await SecureStore.deleteItemAsync('hasVisit');
-            // await SecureStore.setItemAsync('jwt', '');
+            // await SecureStore.setItemAsync('loginKey', '');
         } catch (err) {
             console.log(err);
         }
@@ -30,7 +28,7 @@ const Main = () => {
     const resetStorageData = async () => {
         await SecureStore.deleteItemAsync('pin');
         await SecureStore.deleteItemAsync('bio');
-        await SecureStore.deleteItemAsync('jwt');
+        await SecureStore.deleteItemAsync('loginKey');
 
         store.dispatch(dispatchOne('RESET_LOGIN', false));
         store.dispatch(dispatchOne('SET_TAB', 'main'));
@@ -40,7 +38,7 @@ const Main = () => {
     const getStorageData = async () => {
         const bioData = await StorageUtils.getDeviceData('bio'); // 생체 인증 등록 여부 ('true'/'false')
         const pinData = await StorageUtils.getDeviceData('pin'); // 설정 pin
-        const jwt = await StorageUtils.getDeviceData('jwt'); // jwt token
+        const loginKey = await StorageUtils.getDeviceData('loginKey'); // loginKey token
 
         let bio = { isRegistered: false, modFlag: false };
         let pin = { isRegistered: false, value: '', modFlag: true };
@@ -67,7 +65,7 @@ const Main = () => {
             dispatchMultiple({
                 SET_PIN: pin,
                 SET_BIO: bio,
-                SET_JWT: jwt,
+                SET_LOGINKEY: loginKey,
                 SET_TAB: tabValue,
             })
         );

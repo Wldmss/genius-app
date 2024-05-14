@@ -1,6 +1,6 @@
 const initialState = {
-    jwt: null, // storage jwt token
-    token: null, // login token (jwt)
+    loginKey: null, // storage loginKey token
+    token: null, // login token (loginKey)
     pin: null, // { isRegistered: true, value: '', modFlag: false }
     bio: null, // { isRegistered: true, modFlag: false }
     tab: null, // web, ldap, pin, bio, test ..
@@ -30,10 +30,10 @@ const loginReducer = (state = initialState, action) => {
                 ...state,
                 bio: action.payload,
             };
-        case 'SET_JWT':
+        case 'SET_LOGINKEY':
             return {
                 ...state,
-                jwt: action.payload,
+                loginKey: action.payload,
             };
         case 'SET_TAB':
             return {

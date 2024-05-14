@@ -8,5 +8,6 @@ export default function Index() {
         // console.log('Received a notification in the background!');
         console.log(data);
     });
+
     Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK);
 }

@@ -21,10 +21,10 @@ import Contents from 'components/Contents';
 import { apiStore } from 'api/Api';
 
 import * as Updates from 'expo-updates';
-import { checkServer } from 'api/LoginApi';
+import { checkVersion, loginApiStore } from 'api/LoginApi';
 
 const splashTime = 2000;
-const { profile, isTest } = Constants.expoConfig.extra;
+const { profile } = Constants.expoConfig.extra;
 
 /** layout (main) */
 const App = () => {
@@ -38,16 +38,17 @@ const App = () => {
     console.log('profile :: ', profile);
     console.log(process.env.GOOGLE_SERVICES_JSON);
 
-    // expo-notification (사용 x)
+    // expo-notification
     useNotification();
     pushStore(store);
 
-    // firebase-messaging
+    // firebase-messaging (사용 x : ios 빌드 안됨)
     // useFirebase();
     // pushFcmStore(store);
 
     // api store
     apiStore(store);
+    loginApiStore(store);
 
     // back handler store
     backStore(store);
@@ -67,7 +68,7 @@ const App = () => {
             loadFonts();
             serverCheck();
 
-            if (isTest || profile.includes('production')) {
+            if (profile != 'preview' && profile != 'development') {
                 await onFetchUpdateAsync(true);
             } else {
                 await new Promise((resolve) => setTimeout(resolve, splashTime)).then(() => {
@@ -95,15 +96,6 @@ const App = () => {
                     setIsUpdate(false);
                     await Updates.reloadAsync();
                 }
-
-                // Alert.alert(process.env.EXPO_PUBLIC_NAME, '업데이트 하시겠습니까?', [
-                //     { text: '아니요', onPress: () => null, style: 'cancel' },
-                //     {
-                //         text: '예',
-                //         onPress: async () => {
-                //         },
-                //     },
-                // ]);
             }
         } catch (error) {
             console.log(error);
@@ -114,9 +106,19 @@ const App = () => {
 
     // 서버 체크
     const serverCheck = async () => {
-        return await checkServer().then((result) => {
-            if (!result) Alert.alert('접속이 불안정합니다.\n종료 후 다시 접속해주세요.');
-            return result;
+        return await checkVersion().then((result) => {
+            if (result) {
+                Alert.alert(process.env.EXPO_PUBLIC_NAME, '앱을 업데이트 합니다.', [
+                    {
+                        text: '예',
+                        onPress: async () => {
+                            // 앱 자동 업데이트 tODO
+                            Alert.alert('업데이트');
+                        },
+                    },
+                ]);
+            }
+            return true;
         });
     };
 

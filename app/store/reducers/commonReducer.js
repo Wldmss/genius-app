@@ -9,6 +9,7 @@ const initialState = {
     test: null, // 테스트 값
     exitPressed: false, // 뒤로가기
     isFirst: false, // 최초 접속 여부
+    webLink: null, // 웹 접속 링크
 };
 
 const commonReducer = (state = initialState, action) => {
@@ -77,6 +78,11 @@ const commonReducer = (state = initialState, action) => {
             return {
                 ...state,
                 isFirst: action.payload,
+            };
+        case 'SET_WEBLINK':
+            return {
+                ...state,
+                webLink: action.payload,
             };
         default:
             return state;

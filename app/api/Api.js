@@ -85,7 +85,7 @@ function requestConfig(config, tokenFlag) {
         if (!config.data) config.data = {};
     }
 
-    const token = tokenFlag ? store.getState().loginReducer.jwt : '';
+    const token = tokenFlag ? store.getState().loginReducer.loginKey : '';
 
     if (config.url) {
         config.headers['Authorization'] = `${token}`; // Bearer
