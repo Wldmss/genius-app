@@ -11,6 +11,7 @@ import * as FileUtils from 'utils/FileUtils';
 import Loading from 'components/Loading';
 import ErrorPage from '(utils)/error';
 import Constants from 'expo-constants';
+import * as StorageUtils from 'utils/StorageUtils';
 
 const { profile } = Constants.expoConfig.extra;
 
@@ -234,8 +235,18 @@ const Web = () => {
         return () => clearTimeout(timeout);
     }, []);
 
+    const check = async () => {
+        const linkData = await StorageUtils.getDeviceData('link');
+        Alert.alert(JSON.stringify(linkData));
+    };
+
     useEffect(() => {
-        // TEST
+        Alert.alert(webLink);
+    }, [webLink]);
+
+    useEffect(() => {
+        check();
+
         if (profile.includes('test') || profile.includes('development')) Alert.alert(`${profile}\n${process.env.EXPO_PUBLIC_WEB}${webLink}`);
         if (profile.includes('staging')) Alert.alert(`${process.env.EXPO_PUBLIC_WEB}${webLink}\nwebview 페이지 입니다.`);
     }, []);

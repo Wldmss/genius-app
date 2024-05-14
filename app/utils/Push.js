@@ -4,6 +4,7 @@ import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import { dispatchOne } from 'utils/DispatchUtils';
 import { router } from 'expo-router';
+import * as StorageUtils from 'utils/StorageUtils';
 
 /** expo-notification 관련 코드 (사용 x) */
 
@@ -111,13 +112,15 @@ export function useNotification() {
         const receivePush = Notifications.addNotificationReceivedListener((response) => {});
 
         // push 클릭 이벤트 (foreground는 되는데,..)
-        const clickPushEvent = Notifications.addNotificationResponseReceivedListener((response) => {
+        const clickPushEvent = Notifications.addNotificationResponseReceivedListener(async (response) => {
             console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!');
             const data = response?.notification?.request?.content?.data;
             store.dispatch(dispatchOne('SET_PARAMS', data));
             store.dispatch(dispatchOne('SET_LINK', true));
             store.dispatch(dispatchOne('SET_WEBLINK', data?.url || '/main/portalMain.do'));
             // store.dispatch(dispatchOne('SET_TAB', 'main'));
+
+            await StorageUtils.setDeviceData('link', data?.url);
         });
 
         // background로 받을 때 처리를... 어떻게 하냐 todo
