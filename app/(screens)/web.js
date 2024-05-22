@@ -304,10 +304,12 @@ const Web = () => {
             androidLayerType="hardware"
             mixedContentMode="always"
             allowsFullscreenVideo={true} // 영상 전체보기 지원
-            allowsInlineMediaPlayback={true}
+            mediaPlaybackRequiresUserAction={false}
+            allowsInlineMediaPlayback={true} // 영상 inline (ios)
             keyboardDisplayRequiresUserAction={true} // keyboard 프로그래밍 맞춰서 (ios)
             allowsLinkPreview={true} // 링크 미리보기 (ios)
             pullToRefreshEnabled={true} // 당겨서 새로고침 (ios)
+            allowsProtectedMedia={true} // drm 미디어 재생 (android)
             lackPermissionToDownloadMessage="권한이 거부되어 파일을 다운로드할 수 없습니다"
             downloadingMessage="다운로드를 시작합니다."
             onFileDownload={handleDownload}

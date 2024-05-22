@@ -3,7 +3,7 @@ import { Alert, Linking, Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import * as TaskManager from 'expo-task-manager';
 import * as Device from 'expo-device';
-import { dispatchOne } from 'utils/DispatchUtils';
+import { dispatchMultiple, dispatchOne } from 'utils/DispatchUtils';
 import { router } from 'expo-router';
 
 /** expo-notification 관련 코드 (사용 x) */
@@ -116,8 +116,7 @@ async function checkPermission() {
 // web link 설정
 function setLink(response) {
     const data = response?.notification?.request?.content?.data;
-    store.dispatch(dispatchOne('SET_PARAMS', data));
-    store.dispatch(dispatchOne('SET_LINK', true));
+    store.dispatch(dispatchMultiple({ SET_PARAMS: data, SET_LINK: true, SET_TAB: 'main' }));
 }
 
 /** push 알림 설정 (expo-notification) */

@@ -14,6 +14,7 @@ const OtherLogin = () => {
     const pin = useSelector((state) => state.loginReducer.pin);
     const bio = useSelector((state) => state.loginReducer.bio);
     const bioSupported = useSelector((state) => state.loginReducer.bioSupported);
+    const bioRecords = useSelector((state) => state.loginReducer.bioRecords);
     const tab = useSelector((state) => state.loginReducer.tab);
     const loginKey = useSelector((state) => state.loginReducer.loginKey);
     const webPinFlag = useSelector((state) => state.loginReducer.webPinFlag);
@@ -34,8 +35,8 @@ const OtherLogin = () => {
             ...type,
             pin: (tab != 'pin' && loginKey) || (tab == 'pin' && pin?.isRegistered && pin?.modFlag),
             ldap: false, // tab != 'ldap' && pin?.isRegistered, // 다른 사번으로 로그인 차단 요청
-            bio: bioSupported && tab != 'bio' && loginKey && bio?.isRegistered && pin?.isRegistered,
-            bioRegister: bioSupported && tab != 'bio' && loginKey && !bio?.isRegistered && pin?.isRegistered,
+            bio: bioSupported && bioRecords && tab != 'bio' && loginKey && bio?.isRegistered && pin?.isRegistered,
+            bioRegister: bioSupported && bioRecords && tab != 'bio' && loginKey && !bio?.isRegistered && pin?.isRegistered,
             changePin: false, // tab == 'pin' && loginKey && !pin?.modFlag,  // 웹에서만 PIN 변경
         });
     }, [tab, pin, bio]);
