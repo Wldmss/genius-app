@@ -21,7 +21,7 @@
         "userInterfaceStyle": "light",
         "assetBundlePatterns": ["**/*"],
         "ios": {
-            "buildNumber": "1.0.1",
+            "buildNumber": "1.0.6",
             "supportsTablet": true,
             "requireFullScreen": true,
             "bundleIdentifier": "com.kt.ktgenius",
@@ -37,7 +37,7 @@
             "associatedDomains": ["applinks:ktgenius.kt.com"]
         },
         "android": {
-            "versionCode": 20,
+            "versionCode": 21,
             "adaptiveIcon": {
                 "foregroundImage": "./app/assets/icons/adaptive-icon.png",
                 "backgroundColor": "#ffffff"
@@ -56,12 +56,20 @@
             "package": "com.kt.ktgenius",
             "intentFilters": [
                 {
+                    "action": "MAIN",
+                    "autoVerify": true,
+                    "category": ["LAUNCHER"]
+                },
+                {
                     "action": "VIEW",
                     "autoVerify": true,
+                    "data": {
+                        "scheme": "ktgenius",
+                        "host": "link"
+                    },
                     "category": ["BROWSABLE", "DEFAULT"]
                 }
-            ],
-            "useNextNotificationApi": true
+            ]
         },
         "web": {
             "favicon": "./app/assets/icons/app-icon.png"

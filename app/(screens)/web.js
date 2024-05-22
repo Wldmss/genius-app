@@ -22,11 +22,11 @@ const Web = () => {
     const params = useSelector((state) => state.commonReducer.params);
     const exitPressed = useSelector((state) => state.commonReducer.exitPressed);
     const webLink = useSelector((state) => state.commonReducer.webLink);
+    const currentLink = useSelector((state) => state.commonReducer.currentLink);
 
     const webViewRef = useRef(null);
 
     const [backButtonEnabled, setBackButtonEnabled] = useState(false);
-    const [currentURI, setURI] = useState(webLink);
     const [hide, setHide] = useState(false);
     const [postData, setPostData] = useState({});
     const [init, setInit] = useState(false);
@@ -157,9 +157,7 @@ const Web = () => {
         let goBack = url.includes('portalMain.do') || url.includes('login.do') ? false : canGoBack;
 
         setBackButtonEnabled(goBack);
-
-        console.log('onNavigationStateChange::');
-        console.log(url);
+        changeUrl(url);
     };
 
     // webview 뒤로가기
@@ -184,35 +182,47 @@ const Web = () => {
 
     // onShouldStartLoadWithRequest
     const handleStartLoadWithRequest = (request) => {
-        console.log('handleStartLoadWithRequest');
-
         const { url } = request;
-        console.log(url);
-
-        if (url != currentURI) setURI(url);
-
+        changeUrl(url);
         return true;
+    };
+
+    const changeUrl = (url) => {
+        if (url != currentLink) store.dispatch(dispatchOne('SET_CURRENTLINK', url));
     };
 
     useEffect(() => {
         console.log('is link :: ', isLink);
         let sendData = {
-            userid: 'test1001',
-            pwd: 'test100!',
-            url: '',
+            // userid: 'test1001',
+            // pwd: 'test100!',
+            // url: '',
         };
 
-        if (isLink) {
-            // Alert.alert('is linked!!');
-            Alert.alert(JSON.stringify(params));
+        let link = null;
 
+        if (isLink) {
             console.log(params);
+
             if (params && Object.keys(params).length > 0) {
                 sendData = { ...sendData, ...params };
-                console.log(sendData);
-                setPostData(sendData);
+                // setPostData(sendData);
+
+                if (Object.keys(params).includes('url')) {
+                    link = params.url || '/main/portalMain.do';
+                }
+
+                if (params.link == 'checkIn') {
+                    link = currentLink != null ? currentLink.replace(process.env.EXPO_PUBLIC_WEB, '') || '/main/portalMain.do' : '';
+                }
             }
         }
+
+        if (link != null) {
+            console.log(link);
+            store.dispatch(dispatchOne('SET_WEBLINK', link));
+        }
+
         console.log(isLink ? '@@@@@@ is link @@@@@' : 'XXXXX not link xXXXXX');
         // todo QR 로그인 후 뭔가 해야함
     }, [isLink]);
@@ -224,6 +234,7 @@ const Web = () => {
     // web view 로드 오류 처리
     useEffect(() => {
         setBackButtonEnabled(false);
+        store.dispatch(dispatchOne('SET_ACTIVE', true));
         store.dispatch(dispatchOne('SET_EXIT_PRESSED', false));
 
         timeout = setTimeout(() => {
@@ -235,19 +246,12 @@ const Web = () => {
         return () => clearTimeout(timeout);
     }, []);
 
-    const check = async () => {
-        const linkData = await StorageUtils.getDeviceData('link');
-        Alert.alert(JSON.stringify(linkData));
-    };
-
     useEffect(() => {
-        Alert.alert(webLink);
+        // Alert.alert(webLink);
     }, [webLink]);
 
     useEffect(() => {
-        check();
-
-        if (profile.includes('test') || profile.includes('development')) Alert.alert(`${profile}\n${process.env.EXPO_PUBLIC_WEB}${webLink}`);
+        // if (profile.includes('test') || profile.includes('development')) Alert.alert(`${profile}\n${process.env.EXPO_PUBLIC_WEB}${webLink}`);
         if (profile.includes('staging')) Alert.alert(`${process.env.EXPO_PUBLIC_WEB}${webLink}\nwebview 페이지 입니다.`);
     }, []);
 
@@ -256,7 +260,7 @@ const Web = () => {
             ref={webViewRef}
             style={[styles.webview, hide ? styles.none : styles.flex]}
             source={{
-                uri: `${process.env.EXPO_PUBLIC_WEB}${webLink}`,
+                uri: `${process.env.EXPO_PUBLIC_WEB}${webLink || ''}`,
                 method: 'POST',
                 body: JSON.stringify(postData),
             }}

@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { Alert, AppState, BackHandler } from 'react-native';
+import { Alert, AppState, BackHandler, Linking, Pressable, StyleSheet, Text } from 'react-native';
 import store from 'store/store';
 import moment from 'moment';
 import { Stack, router } from 'expo-router';
@@ -8,6 +8,8 @@ import { StatusBar } from 'expo-status-bar';
 import { dispatchOne } from 'utils/DispatchUtils';
 import { checkLogin } from 'api/LoginApi';
 import { backEventHandler } from 'utils/BackUtils';
+import Web from '(screens)/web';
+import * as Update from 'expo-updates';
 
 /** 페이지 router */
 const Contents = () => {
@@ -23,6 +25,10 @@ const Contents = () => {
     const isLogin = useSelector((state) => state.loginReducer.isLogin);
     const loginKey = useSelector((state) => state.loginReducer.loginKey);
     const exitPressed = useSelector((state) => state.commonReducer.exitPressed);
+    const isLink = useSelector((state) => state.commonReducer.isLink);
+    const params = useSelector((state) => state.commonReducer.params);
+    const isWeb = useSelector((state) => state.commonReducer.isWeb);
+    const logout = useSelector((state) => state.loginReducer.logout);
 
     let timeout = null;
 
@@ -76,21 +82,28 @@ const Contents = () => {
         console.log('== tab change ==');
         console.log(tab);
         console.log(token);
+
         if (tab == null) {
             store.dispatch(dispatchOne('SET_TAB', 'main'));
         } else {
             if (tab == 'web') {
-                store.dispatch(dispatchOne('SET_LOADING', true));
+                if (isLink && params.link !== 'push') {
+                    store.dispatch(dispatchOne('SET_TAB', params.link));
+                } else {
+                    store.dispatch(dispatchOne('SET_LOADING', true));
 
-                let timeout = setTimeout(() => {
-                    router.push(tab);
-                }, loadTime);
+                    let timeout = setTimeout(() => {
+                        store.dispatch(dispatchOne('SET_WEB', true));
+                    }, loadTime);
 
-                return () => {
-                    clearTimeout(timeout);
-                };
+                    return () => {
+                        clearTimeout(timeout);
+                    };
+                }
             } else {
+                store.dispatch(dispatchOne('SET_WEB', false));
                 router.push(tab);
+                store.dispatch(dispatchOne('SET_SPLASH', false));
             }
         }
     }, [tab]);
@@ -98,7 +111,8 @@ const Contents = () => {
     // 앱 상태 관리
     const handleAppStateChange = (nextAppState) => {
         console.log('App state :::::: ', nextAppState);
-        let resetFlag = false; // nextAppState === 'active' && exitFlag;
+        console.log(logout);
+        let resetFlag = nextAppState === 'active' && logout;
 
         if (!resetFlag && expire != null) {
             const now = moment();
@@ -107,7 +121,8 @@ const Contents = () => {
         }
 
         if (resetFlag) {
-            store.dispatch({ type: 'INIT_APP' });
+            Update.reloadAsync();
+            // store.dispatch({ type: 'INIT_APP' });
         }
     };
 
@@ -157,11 +172,18 @@ const Contents = () => {
     return (
         <>
             <StatusBar hidden={!statusBar} style="auto" />
-            <Stack screenOptions={commonOptions}>
-                <Stack.Screen name="(login)" options={commonOptions} />
-                <Stack.Screen name="(screens)" options={commonOptions} />
-                <Stack.Screen name="(utils)" />
-            </Stack>
+            {isWeb ? (
+                <Web />
+            ) : (
+                <Stack screenOptions={commonOptions}>
+                    <Stack.Screen name="(login)" options={commonOptions} />
+                    <Stack.Screen name="(screens)" options={commonOptions} />
+                    <Stack.Screen name="(utils)" options={commonOptions} />
+                </Stack>
+            )}
+            <Pressable onPress={() => Linking.openURL('ktgenius://link/checkin')}>
+                <Text>click</Text>
+            </Pressable>
         </>
     );
 };

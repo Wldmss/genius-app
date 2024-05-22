@@ -11,6 +11,8 @@ const initialState = {
     isLogin: false, // 로그인 여부
     resetLogin: false, // 로그인 리셋
     webPinFlag: false, // 웹에서 pin 변경
+    active: false, // 로그인 이후 web 활동 여부
+    logout: false, // 로그아웃 처리
 };
 
 const loginReducer = (state = initialState, action) => {
@@ -63,6 +65,8 @@ const loginReducer = (state = initialState, action) => {
                 exitFlag: false,
                 isLogin: false,
                 expire: null,
+                active: false,
+                logout: false,
             };
         case 'SET_EXPIRE':
             return {
@@ -84,6 +88,16 @@ const loginReducer = (state = initialState, action) => {
             return {
                 ...state,
                 webPinFlag: action.payload,
+            };
+        case 'SET_ACTIVE':
+            return {
+                ...state,
+                active: action.payload,
+            };
+        case 'SET_LOGOUT':
+            return {
+                ...state,
+                logout: action.payload,
             };
         default:
             return state;

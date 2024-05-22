@@ -23,20 +23,34 @@ import { apiStore } from 'api/Api';
 import * as Updates from 'expo-updates';
 import { checkVersion, loginApiStore } from 'api/LoginApi';
 
+import * as Linking from 'expo-linking';
+
 const splashTime = 2000;
 const { profile } = Constants.expoConfig.extra;
 
-/** layout (main) */
+const prefix = Linking.createURL('/');
+
+const linking = {
+    prefixes: [prefix],
+    config: {
+        screens: {
+            Checkin: 'checkin',
+        },
+    },
+};
+
+/** layout (main)
+ * 최초 로드
+ */
 const App = () => {
     const [fontsLoaded, setFontsLoaded] = useState(false);
     const [splashLoaded, setSplashLoaded] = useState(false);
-    const [hide, setHide] = useState(false);
     const [isUpdate, setIsUpdate] = useState(false);
     const [updateProgress, setUpdateProgress] = useState(0);
     const [version, setVersion] = useState(Constants.expoConfig.version);
 
+    console.log('------------------app--------------------');
     console.log('profile :: ', profile);
-    console.log(process.env.GOOGLE_SERVICES_JSON);
 
     // expo-notification
     useNotification();
@@ -62,22 +76,22 @@ const App = () => {
         });
     };
 
-    // splash
-    const prepare = async () => {
-        try {
-            loadFonts();
-            serverCheck();
-
-            if (profile != 'preview' && profile != 'development') {
-                await onFetchUpdateAsync(true);
-            } else {
-                await new Promise((resolve) => setTimeout(resolve, splashTime)).then(() => {
-                    setSplashLoaded(true);
-                });
+    // 서버 체크
+    const serverCheck = async () => {
+        return await checkVersion().then((result) => {
+            if (result) {
+                Alert.alert(process.env.EXPO_PUBLIC_NAME, '앱을 업데이트 합니다.', [
+                    {
+                        text: '예',
+                        onPress: async () => {
+                            // 앱 자동 업데이트 tODO
+                            Alert.alert('업데이트');
+                        },
+                    },
+                ]);
             }
-        } catch (e) {
-            console.warn(e);
-        }
+            return true;
+        });
     };
 
     // 앱 업데이트 체크
@@ -104,66 +118,38 @@ const App = () => {
         }
     }
 
-    // 서버 체크
-    const serverCheck = async () => {
-        return await checkVersion().then((result) => {
-            if (result) {
-                Alert.alert(process.env.EXPO_PUBLIC_NAME, '앱을 업데이트 합니다.', [
-                    {
-                        text: '예',
-                        onPress: async () => {
-                            // 앱 자동 업데이트 tODO
-                            Alert.alert('업데이트');
-                        },
-                    },
-                ]);
+    // splash
+    const prepare = async () => {
+        try {
+            loadFonts();
+            await serverCheck();
+
+            if (profile != 'preview' && profile != 'development') {
+                await onFetchUpdateAsync(true);
+            } else {
+                await new Promise((resolve) => setTimeout(resolve, splashTime)).then(() => {
+                    setSplashLoaded(true);
+                });
             }
-            return true;
-        });
+        } catch (e) {
+            console.warn(e);
+        }
     };
 
     useEffect(() => {
         prepare();
     }, []);
 
-    // 사용자 활동 감지 (사용 x)
-    const handleUserActivity = () => {
-        console.log('touch!!!!!!!!!!!!!!!!!!!!!!!!!');
-        // 사용자 활동이 감지되면 화면을 보여주는 타이머를 초기화하고 화면을 보여주도록 설정
-        setHide(false);
-    };
-
-    // 화면이 처음 렌더링될 때와 사용자 활동을 감지할 때마다 이벤트 핸들러를 등록 (사용 x)
-    useEffect(() => {
-        console.log('hide value!');
-        console.log(hide);
-        if (fontsLoaded && !hide) {
-            const activityListener = setInterval(() => {
-                // 일정 간격마다 사용자 활동을 확인
-                // 사용자 활동이 없는 경우 화면을 숨김
-                console.log('hide!!');
-                setHide(true);
-            }, 60000); // 60초 후에 화면을 숨김
-
-            return () => {
-                clearInterval(activityListener); // 컴포넌트가 언마운트될 때 타이머 제거
-            };
-        }
-    }, [hide, fontsLoaded]);
-
     return (
         <Try catch={ErrorBoundary}>
             <Provider store={store}>
-                {!splashLoaded ? (
-                    <Splash isUpdate={isUpdate} updateProgress={updateProgress} version={version} />
-                ) : (
-                    fontsLoaded && (
-                        <SafeAreaView style={styles.container}>
-                            <Contents />
-                            <PopModal />
-                            <Snackbar />
-                        </SafeAreaView>
-                    )
+                <Splash isUpdate={isUpdate} updateProgress={updateProgress} version={version} />
+                {splashLoaded && fontsLoaded && (
+                    <SafeAreaView style={styles.container}>
+                        <Contents />
+                        <PopModal />
+                        <Snackbar />
+                    </SafeAreaView>
                 )}
             </Provider>
         </Try>

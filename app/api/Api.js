@@ -42,7 +42,7 @@ AxiosMobile.interceptors.response.use(
 /** test */
 
 const AxiosTest = axios.create({
-    baseURL: 'http://192.168.31.254:8080', // 'http://192.168.50.254:8080', //`${EXPO_PUBLIC_TEST_SERVER_URL}`,
+    baseURL: 'http://192.168.1.77:8080', // 'http://192.168.50.254:8080', //`${EXPO_PUBLIC_TEST_SERVER_URL}`,
     timeout: 3000,
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     maxRedirects: 0,

@@ -9,7 +9,10 @@ const initialState = {
     test: null, // 테스트 값
     exitPressed: false, // 뒤로가기
     isFirst: false, // 최초 접속 여부
+    isWeb: false, // web 접속 여부
     webLink: null, // 웹 접속 링크
+    currentLink: null, // 현재 링크
+    splash: true, //splash 화면
 };
 
 const commonReducer = (state = initialState, action) => {
@@ -37,6 +40,10 @@ const commonReducer = (state = initialState, action) => {
                 camera: false,
                 snack: null,
                 exitPressed: false,
+                isWeb: false,
+                webLink: null,
+                currentLink: null,
+                splash: true,
             };
         case 'SET_LINK':
             return {
@@ -63,7 +70,6 @@ const commonReducer = (state = initialState, action) => {
                 ...state,
                 test: action.payload,
             };
-
         case 'SET_SNACK':
             return {
                 ...state,
@@ -79,11 +85,27 @@ const commonReducer = (state = initialState, action) => {
                 ...state,
                 isFirst: action.payload,
             };
+        case 'SET_WEB':
+            return {
+                ...state,
+                isWeb: action.payload,
+            };
         case 'SET_WEBLINK':
             return {
                 ...state,
                 webLink: action.payload,
             };
+        case 'SET_CURRENTLINK':
+            return {
+                ...state,
+                currentLink: action.payload,
+            };
+        case 'SET_SPLASH':
+            return {
+                ...state,
+                splash: action.payload,
+            };
+
         default:
             return state;
     }

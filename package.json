@@ -18,6 +18,7 @@
         "build:sta": "npx eas build -p android --profile staging --clear-cache",
         "build:prod": "npx eas build -p android --profile production --clear-cache",
         "build:ios:dev": "npx eas build -p ios --profile development --clear-cache",
+        "build:ios:test": "npx eas build -p ios --profile test --clear-cache",
         "build:ios:sta": "npx eas build -p ios --profile staging --clear-cache",
         "build:ios:prod": "npx eas build -p ios --profile production --clear-cache",
         "credentials": "npx eas credentials",

@@ -1,16 +1,27 @@
 import { useEffect } from 'react';
 import { Alert, Linking, Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
+import * as TaskManager from 'expo-task-manager';
 import * as Device from 'expo-device';
 import { dispatchOne } from 'utils/DispatchUtils';
 import { router } from 'expo-router';
-import * as StorageUtils from 'utils/StorageUtils';
 
 /** expo-notification 관련 코드 (사용 x) */
 
 export const pushStore = (_store) => {
     store = _store;
 };
+
+const BACKGROUND_NOTIFICATION_TASK = 'BACKGROUND-NOTIFICATION-TASK';
+TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, ({ data, error, executionInfo }) => {
+    // console.log('Received a notification in the background!');
+    // console.log(data);
+    if (error) {
+        console.log(error);
+    }
+});
+
+Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK);
 
 // foreground alert
 Notifications.setNotificationHandler({
@@ -102,8 +113,17 @@ async function checkPermission() {
     }
 }
 
+// web link 설정
+function setLink(response) {
+    const data = response?.notification?.request?.content?.data;
+    store.dispatch(dispatchOne('SET_PARAMS', data));
+    store.dispatch(dispatchOne('SET_LINK', true));
+}
+
 /** push 알림 설정 (expo-notification) */
 export function useNotification() {
+    const lastNotificationResponse = Notifications.useLastNotificationResponse();
+
     useEffect(() => {
         // 알림 권한 확인
         checkNotificationPermission();
@@ -111,17 +131,18 @@ export function useNotification() {
         // push 수신
         const receivePush = Notifications.addNotificationReceivedListener((response) => {});
 
-        // push 클릭 이벤트 (foreground는 되는데,..)
-        const clickPushEvent = Notifications.addNotificationResponseReceivedListener(async (response) => {
-            console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!');
-            const data = response?.notification?.request?.content?.data;
-            store.dispatch(dispatchOne('SET_PARAMS', data));
-            store.dispatch(dispatchOne('SET_LINK', true));
-            store.dispatch(dispatchOne('SET_WEBLINK', data?.url || '/main/portalMain.do'));
-            // store.dispatch(dispatchOne('SET_TAB', 'main'));
-
-            await StorageUtils.setDeviceData('link', data?.url);
+        // push 클릭 이벤트 (foreground)
+        const clickPushEvent = Notifications.addNotificationResponseReceivedListener((response) => {
+            // schedulePushNotification(response);
+            // const actionIdentifier = response.actionIdentifier;
+            // console.log(actionIdentifier);
+            // Linking.openURL(response.notification.request.content.data.url);
         });
+
+        // foreground 에서 받은 push fore/background 에서 클릭
+        if (lastNotificationResponse) {
+            setLink(lastNotificationResponse);
+        }
 
         // background로 받을 때 처리를... 어떻게 하냐 todo
 
@@ -129,7 +150,7 @@ export function useNotification() {
             receivePush.remove();
             clickPushEvent.remove();
         };
-    }, []);
+    }, [lastNotificationResponse]);
 }
 
 function redirect(notification) {

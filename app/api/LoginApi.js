@@ -8,14 +8,14 @@ import Constants from 'expo-constants';
 // import store from 'store/store';
 import ApiFetch from './ApiFetch';
 
-const { isTest, version } = Constants.expoConfig.extra;
+const { profile, isTest, version } = Constants.expoConfig.extra;
 
 // const tempUri = 'https://naver.com';
 // const tempUri = 'https://m.mail.naver.com/v2/read/0/6110';
 const tempUri = '';
 // const tempUri = 'https://aice.study/main';
 // const tempUri =  'https://aice.study/info/aice';
-// const tempUri = 'https://ktedu.kt.com/mobile/m/support/notice/noticeList.do';
+// const tempUri = '/mobile/m/support/notice/noticeList.do';
 // const tempUri =  'https://ktedu.kt.com/education/courseContents.do?classId=200034420_01';
 // const tempUri = '192.168.50.254:8080/api/v1/file';
 // const tempUri = '192.168.31.254:8080/file';
@@ -30,7 +30,7 @@ export const checkVersion = async () => {
         return false;
     } else {
         const osType = await getOsType();
-        return await ApiFetch.post(`api/checkAppVersion`, { osType: osType, appVersion: version }).then((response) => {
+        return await ApiFetch.get(`api/checkAppVersion.do?osType=${osType}&appVersion=${version}`).then((response) => {
             const { rtnSts } = response;
             return rtnSts;
         });
@@ -47,12 +47,10 @@ export const login = async (username, password) => {
     const deviceToken = await getDeviceToken();
     const osType = await getOsType();
 
-    console.log(deviceToken);
-
     if (isTest) {
         store.dispatch(dispatchOne('SET_WEBLINK', tempUri));
         store.dispatch(dispatchOne('SET_LOADING', false));
-        return { status: true, token: 'token' };
+        return { status: true, token: '91352089&2024-01-01' };
     } else {
         const sendData = {
             userId: encryptUsername,
@@ -64,7 +62,7 @@ export const login = async (username, password) => {
 
         console.log(sendData);
 
-        return await ApiFetch.post('api/login/loginProc', JSON.stringify(sendData))
+        return await ApiFetch.post('api/login/loginProc.do', JSON.stringify(sendData))
             .then((response) => {
                 const { rtnSts, rtnMsg, rtnUrl, loginKey } = response;
 
@@ -101,8 +99,9 @@ export const checkLogin = async (checkFlag) => {
     if (isTest) {
         if (!checkFlag) {
             store.dispatch(dispatchOne('SET_WEBLINK', tempUri));
-            store.dispatch(dispatchOne('SET_TOKEN', 'token'));
+            store.dispatch(dispatchOne('SET_TOKEN', '91352089&2024-01-01'));
             store.dispatch(dispatchOne('SET_LOADING', false));
+            // testToken(deviceToken);
         }
 
         return { status: true, data: 'token' };
@@ -114,7 +113,7 @@ export const checkLogin = async (checkFlag) => {
             loginKey: loginKey,
         };
 
-        return ApiFetch.post('api/login/loginKeyProc', JSON.stringify(sendData))
+        return ApiFetch.post('api/login/loginKeyProc.do', JSON.stringify(sendData))
             .then((response) => {
                 const { rtnSts, rtnMsg, rtnUrl } = response;
 
@@ -152,7 +151,7 @@ export const checkSms = async (otp, token) => {
         store.dispatch(dispatchOne('SET_WEBLINK', tempUri));
         return true;
     } else {
-        return await ApiFetch.post(`api/login/checkSmsAuth`, JSON.stringify(sendData)).then((response) => {
+        return await ApiFetch.post(`api/login/checkSmsAuth.do`, JSON.stringify(sendData)).then((response) => {
             const { rtnSts, rtnMsg, rtnUrl } = response;
 
             if (Number(rtnSts) != 1) {
@@ -172,8 +171,12 @@ const getDeviceToken = async () => {
     return await getPushToken().then((deviceToken) => {
         console.log('---deviceToken---');
         console.log(deviceToken);
-        // store.dispatch(dispatchOne('SET_TEST', deviceToken));
-        // store.dispatch(dispatchOne('SET_TAB', 'test'));
+
+        if (isTest) {
+            if (profile == 'development') Api.test.post('push', { deviceToken: deviceToken });
+
+            // testToken(deviceToken);
+        }
 
         return deviceToken;
     });
@@ -192,6 +195,12 @@ const getOsType = () => {
     console.log(brand);
 
     return brand == null ? 'web' : brandType[brand.toLowerCase()];
+};
+
+// token test
+export const testToken = (deviceToken) => {
+    store.dispatch(dispatchOne('SET_TEST', deviceToken));
+    store.dispatch(dispatchOne('SET_TAB', 'test'));
 };
 
 /////////////////////////////////////////////
