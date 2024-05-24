@@ -12,6 +12,10 @@ export const backEventHandler = (timeout, goBack, backButtonEnabled) => {
     const camera = store.getState().commonReducer.camera;
     const exitPressed = store.getState().commonReducer.exitPressed;
 
+    console.log('-----------------backEventHandler------------------');
+    console.log(tab);
+    console.log(camera);
+
     // Handle back event
     const backHandler = () => {
         if (tab == 'web' && backButtonEnabled) {
@@ -20,7 +24,6 @@ export const backEventHandler = (timeout, goBack, backButtonEnabled) => {
         } else if (tab == 'web' && camera) {
             // 카메라 open 인 경우
             store.dispatch(dispatchOne('SET_CAMERA', false));
-            router.back();
         } else {
             // 앱 종료
             if (exitPressed) {

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Alert, Platform, Linking } from 'react-native';
+import { StyleSheet, Alert, Platform, Linking, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useSelector } from 'react-redux';
 import store from 'store/store';
@@ -12,6 +12,7 @@ import Loading from 'components/Loading';
 import ErrorPage from '(utils)/error';
 import Constants from 'expo-constants';
 import * as StorageUtils from 'utils/StorageUtils';
+import ScanQR from '(utils)/camera';
 
 const { profile } = Constants.expoConfig.extra;
 
@@ -43,6 +44,12 @@ const Web = () => {
 
         if (sendData.type) {
             switch (sendData.type) {
+                case 'openCamera':
+                    openCamera();
+                    break;
+                case 'changePin':
+                    store.dispatch(dispatchMultiple({ SET_WEBPIN: true, SET_TAB: 'pin' }));
+                    break;
                 case 'enterFullscreen':
                     enterFullscreen();
                     break;
@@ -51,12 +58,6 @@ const Web = () => {
                     break;
                 case 'logout':
                     doLogout();
-                    break;
-                case 'openCamera':
-                    openCamera();
-                    break;
-                case 'changePin':
-                    store.dispatch(dispatchMultiple({ SET_WEBPIN: true, SET_TAB: 'pin' }));
                     break;
                 case 'test':
                     console.log('TEST');
@@ -123,7 +124,6 @@ const Web = () => {
     // 카메라 열기
     const openCamera = () => {
         store.dispatch(dispatchOne('SET_CAMERA', true));
-        router.push('camera');
     };
 
     // webview load
@@ -255,11 +255,15 @@ const Web = () => {
         if (profile.includes('staging')) Alert.alert(`${process.env.EXPO_PUBLIC_WEB}${webLink}\nwebview 페이지 입니다.`);
     }, []);
 
-    return (
+    return camera ? (
+        <ScanQR style={styles.camera} />
+    ) : (
         <WebView
             ref={webViewRef}
             style={[styles.webview, hide ? styles.none : styles.flex]}
             source={{
+                // uri: 'http://172.30.1.91:8080/file',
+                // method: 'GET',
                 uri: `${process.env.EXPO_PUBLIC_WEB}${webLink || ''}`,
                 method: 'POST',
                 body: JSON.stringify(postData),
@@ -310,13 +314,16 @@ const Web = () => {
             allowsLinkPreview={true} // 링크 미리보기 (ios)
             pullToRefreshEnabled={true} // 당겨서 새로고침 (ios)
             allowsProtectedMedia={true} // drm 미디어 재생 (android)
+            dataDetectorTypes="all" // 클릭 url 변환 (ios)
+            allowsBackForwardNavigationGestures={true} // 스와이프 (ios)
+            ignoreSilentHardwareSwitch={true} // 무음 스위치 활성화 (ios)
             lackPermissionToDownloadMessage="권한이 거부되어 파일을 다운로드할 수 없습니다"
             downloadingMessage="다운로드를 시작합니다."
             onFileDownload={handleDownload}
             automaticallyAdjustContentInsets={false}
-            allowUniversalAccessFromFileURLs={true}
             allowFileAccess={true}
             allowFileAccessFromFileURLs={true}
+            allowUniversalAccessFromFileURLs={true}
             onOpenWindow={(syntheticEvent) => {
                 const { nativeEvent } = syntheticEvent;
                 const { targetUrl } = nativeEvent;
@@ -332,6 +339,7 @@ const Web = () => {
 };
 
 const styles = StyleSheet.create({
+    container: {},
     webview: {
         backgroundColor: `#ffffff`,
     },
@@ -341,6 +349,7 @@ const styles = StyleSheet.create({
     none: {
         display: `none`,
     },
+    camera: {},
 });
 
 export default Web;

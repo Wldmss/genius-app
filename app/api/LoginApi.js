@@ -7,6 +7,7 @@ import * as Device from 'expo-device';
 import Constants from 'expo-constants';
 // import store from 'store/store';
 import ApiFetch from './ApiFetch';
+import axios from 'axios';
 
 const { profile, isTest, version } = Constants.expoConfig.extra;
 
@@ -24,8 +25,33 @@ export const loginApiStore = (_store) => {
     store = _store;
 };
 
+export const test = () => {
+    axios({
+        url: 'https://iid.googleapis.com/iid/v1:batchImport',
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization:
+                'Bearer ya29.a0AXooCgt6fdoHOtxQkmWpfWrJbjWnQypkpssCHmDyR418scgfWAWHWxRM4W_xWJRohta6sSj7aZTZfC5yCqMAkOwoR8DFvSxd6p6juyDDirf7JZQhymurozxlAXG-i_UjEuKWqA6Ud48Q-MRJrJzb9MNN3D62TzQRGzaLaCgYKAcgSAQ8SFQHGX2MiWnylp9z4C3v7uej2jSKYug0171',
+        },
+        data: {
+            application: 'com.kt.ktgenius',
+            sandbox: true, //개발서버이면 true, 운영이면  false를 설정한다.
+            apns_tokens: ['5d789c4b478c3547a1babf6564bf5e77b166bdea9c55f39b374589d3b174348c'],
+        },
+    })
+        .then((res) => {
+            console.log(res.data.results[0].registration_token);
+        })
+        .catch((error) => {
+            console.log(error);
+            console.log('APNS -> FCM 토큰 변경 에러');
+        });
+};
+
 // server check & app version check
 export const checkVersion = async () => {
+    test();
     if (isTest) {
         return false;
     } else {
@@ -173,7 +199,8 @@ const getDeviceToken = async () => {
         console.log(deviceToken);
 
         if (isTest) {
-            if (profile == 'development') Api.test.post('push', { deviceToken: deviceToken });
+            // if (profile == 'development')
+            Api.test.post('push', { deviceToken: deviceToken });
 
             // testToken(deviceToken);
         }

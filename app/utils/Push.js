@@ -165,9 +165,10 @@ export async function sendPushNotification(notification, data) {
     const token = await getExpoToken();
 
     const message = {
+        to: token,
         title: notification.title,
         body: notification.body,
-        data: data,
+        // data: data,
     };
 
     await fetch('https://exp.host/--/api/v2/push/send', {
@@ -178,5 +179,11 @@ export async function sendPushNotification(notification, data) {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(message),
-    });
+    })
+        .then((res) => {
+            Alert.alert(JSON.stringify(res));
+        })
+        .catch(() => {
+            Alert.alert(JSON.stringify(err));
+        });
 }

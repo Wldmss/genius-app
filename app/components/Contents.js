@@ -6,10 +6,12 @@ import moment from 'moment';
 import { Stack, router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { dispatchOne } from 'utils/DispatchUtils';
-import { checkLogin } from 'api/LoginApi';
+import { checkLogin, test } from 'api/LoginApi';
 import { backEventHandler } from 'utils/BackUtils';
 import Web from '(screens)/web';
 import * as Update from 'expo-updates';
+import { sendPushNotification } from 'utils/Push';
+import { commonInputStyles } from 'assets/styles';
 
 /** 페이지 router */
 const Contents = () => {
@@ -181,7 +183,7 @@ const Contents = () => {
                     <Stack.Screen name="(utils)" options={commonOptions} />
                 </Stack>
             )}
-            <Pressable onPress={() => Linking.openURL('ktgenius://link/checkin')}>
+            <Pressable style={commonInputStyles.button} onPress={() => test()}>
                 <Text>click</Text>
             </Pressable>
         </>

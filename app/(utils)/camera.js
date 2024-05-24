@@ -5,6 +5,7 @@ import { BarCodeScanner } from 'expo-barcode-scanner';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { FontText } from 'utils/TextUtils';
+import { dispatchOne } from 'utils/DispatchUtils';
 
 const arrow_img = require('assets/images/close.png');
 const qr_scan_img = require('assets/images/close.png');
@@ -24,7 +25,7 @@ const ScanQR = () => {
 
     // 웹 뷰로 돌아가기
     const backToWeb = () => {
-        router.back();
+        store.dispatch(dispatchOne('SET_CAMERA', false));
     };
 
     // QR 코드 스캔
@@ -104,12 +105,14 @@ const ScanQR = () => {
 
     return (
         <View style={styles.container}>
+            {/* header */}
             <View style={styles.header}>
                 <Pressable onPress={backToWeb}>
                     <Image source={arrow_img} style={styles.scanImg} resizeMode="contain" />
                 </Pressable>
                 <FontText style={styles.scanText}>코드스캔</FontText>
             </View>
+            {/* camera */}
             <View style={styles.imageContainer}>
                 {type == 'scan' ? (
                     permission ? (
@@ -132,17 +135,18 @@ const ScanQR = () => {
                     />
                 )}
             </View>
-
+            {/* footer */}
             <View style={styles.buttonContainer}>
                 <Pressable style={styles.button} onPress={() => setType('scan')}>
                     <Image source={qr_scan_img} style={styles.tabImg} resizeMode="contain" />
-                    <FontText style={type == 'scan' ? styles.boldText : ''}>코드스캔</FontText>
+                    <FontText style={type == 'scan' ? styles.boldText : ''}>QR 코드스캔</FontText>
                 </Pressable>
-                <Pressable style={styles.button} onPress={pickImage}>
+                {/* <Pressable style={styles.button} onPress={pickImage}>
                     <Image source={album_img} style={styles.tabImg} resizeMode="contain" />
                     <FontText style={type == 'library' ? styles.boldText : ''}>앨범</FontText>
-                </Pressable>
+                </Pressable> */}
             </View>
+            {/* url box */}
             <Modal visible={scan} transparent={true}>
                 <Pressable style={styles.modal} onPress={(event) => resetScan(event)}>
                     <Pressable style={styles.modalContent} onPress={(e) => e.stopPropagation()}>

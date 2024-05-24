@@ -35,22 +35,34 @@
             "autoIncrement": true,
             "ios": {
                 "credentialsSource": "local"
+            },
+            "env": {
+                ".env": "./.env.development"
             }
         },
         "test": {
             "extends": "base",
             "channel": "test",
-            "autoIncrement": true
+            "autoIncrement": true,
+            "env": {
+                ".env": "./.env.test"
+            }
         },
         "staging": {
             "extends": "base",
             "channel": "staging",
-            "autoIncrement": true
+            "autoIncrement": true,
+            "env": {
+                ".env": "./.env.staging"
+            }
         },
         "production": {
             "extends": "base",
             "channel": "production",
-            "autoIncrement": true
+            "autoIncrement": true,
+            "env": {
+                ".env": "./.env.production"
+            }
         }
     },
     "submit": {
