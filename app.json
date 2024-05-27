@@ -9,9 +9,9 @@
       "policy": "appVersion"
     },
     "orientation": "portrait",
-    "icon": "./app/assets/icons/push-icon.png",
+    "icon": "./app/assets/icons/app-icon.png",
     "notification": {
-      "icon": "./app/assets/icons/push-icon.png",
+      "icon": "./app/assets/icons/push-icon_white.png",
       "color": "#E65C19"
     },
     "updates": {
@@ -23,7 +23,7 @@
       "**/*"
     ],
     "ios": {
-      "buildNumber": "1.0.8",
+      "buildNumber": "1.0.10",
       "supportsTablet": true,
       "requireFullScreen": true,
       "bundleIdentifier": "com.kt.ktgenius",
@@ -45,7 +45,7 @@
       ]
     },
     "android": {
-      "versionCode": 21,
+      "versionCode": 24,
       "adaptiveIcon": {
         "foregroundImage": "./app/assets/icons/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -157,10 +157,12 @@
       [
         "expo-notifications",
         {
-          "icon": "./app/assets/icons/push-icon.png",
+          "icon": "./app/assets/icons/push-icon_white.png",
           "color": "#E65C19"
         }
-      ]
+      ],
+      "@react-native-firebase/app",
+      "@react-native-firebase/messaging"
     ]
   }
 }

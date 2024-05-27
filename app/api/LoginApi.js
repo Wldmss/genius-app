@@ -1,13 +1,12 @@
 import { Alert } from 'react-native';
 import { dispatchLogin, dispatchOne } from 'utils/DispatchUtils';
 import CryptoJS from 'react-native-crypto-js';
-import { getPushToken } from 'utils/Push';
 import Api from './Api';
 import * as Device from 'expo-device';
 import Constants from 'expo-constants';
-// import store from 'store/store';
 import ApiFetch from './ApiFetch';
 import axios from 'axios';
+import { getMessagingToken } from 'utils/PushFcm';
 
 const { profile, isTest, version } = Constants.expoConfig.extra;
 
@@ -51,7 +50,6 @@ export const test = () => {
 
 // server check & app version check
 export const checkVersion = async () => {
-    test();
     if (isTest) {
         return false;
     } else {
@@ -127,7 +125,6 @@ export const checkLogin = async (checkFlag) => {
             store.dispatch(dispatchOne('SET_WEBLINK', tempUri));
             store.dispatch(dispatchOne('SET_TOKEN', '91352089&2024-01-01'));
             store.dispatch(dispatchOne('SET_LOADING', false));
-            // testToken(deviceToken);
         }
 
         return { status: true, data: 'token' };
@@ -194,15 +191,12 @@ export const checkSms = async (otp, token) => {
 
 // push token 값
 const getDeviceToken = async () => {
-    return await getPushToken().then((deviceToken) => {
+    return await getMessagingToken().then((deviceToken) => {
         console.log('---deviceToken---');
         console.log(deviceToken);
 
         if (isTest) {
-            // if (profile == 'development')
-            Api.test.post('push', { deviceToken: deviceToken });
-
-            // testToken(deviceToken);
+            if (profile == 'development' || profile == 'test') Api.test.post('push', { deviceToken: deviceToken });
         }
 
         return deviceToken;
@@ -323,41 +317,6 @@ const localCheckLogin = async () => {
         .finally(() => {
             store.dispatch(dispatchOne('SET_LOADING', false));
         });
-};
-
-// push 토큰 값 확인
-export const checkPushToken = async () => {
-    checkDevice();
-
-    await getPushToken().then((deviceToken) => {
-        console.log('---deviceToken---');
-        console.log(deviceToken);
-        store.dispatch(dispatchOne('SET_TEST', deviceToken));
-        // store.dispatch(dispatchOne('SET_TAB', 'test'));
-        // const encryptPushToken = CryptoJS.AES.encrypt(JSON.stringify(deviceToken), AES_KEY).toString();
-
-        if (!isTest) Api.test.post('push', { deviceToken: deviceToken });
-    });
-
-    // await getMessagingToken().then((deviceToken) => {
-    //     console.log('---deviceToken---');
-    //     console.log(deviceToken);
-    //     store.dispatch(dispatchOne('SET_TEST', deviceToken));
-    //     // const encryptPushToken = CryptoJS.AES.encrypt(JSON.stringify(deviceToken), AES_KEY).toString();
-    //     // TEST
-    //     if (!isTest) Api.test.post('push', { deviceToken: deviceToken });
-    // });
-};
-
-// expo push 토큰 값 확인
-const checkExpoPushToken = async () => {
-    await getPushToken().then((deviceToken) => {
-        console.log('---deviceToken---');
-        console.log(deviceToken);
-        // store.dispatch(dispatchOne('SET_TEST', deviceToken));
-        // const encryptPushToken = CryptoJS.AES.encrypt(JSON.stringify(deviceToken), AES_KEY).toString();
-        Api.test.post('push', { deviceToken: deviceToken });
-    });
 };
 
 // device 정보 확인 (로그인 시마다 서버에 전송)

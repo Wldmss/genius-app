@@ -219,12 +219,10 @@ const Web = () => {
         }
 
         if (link != null) {
+            Alert.alert(link);
             console.log(link);
-            store.dispatch(dispatchOne('SET_WEBLINK', link));
+            store.dispatch(dispatchMultiple({ SET_LINK: false, SET_WEBLINK: link }));
         }
-
-        console.log(isLink ? '@@@@@@ is link @@@@@' : 'XXXXX not link xXXXXX');
-        // todo QR 로그인 후 뭔가 해야함
     }, [isLink]);
 
     useEffect(() => {

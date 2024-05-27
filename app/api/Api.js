@@ -42,7 +42,7 @@ AxiosMobile.interceptors.response.use(
 /** test */
 
 const AxiosTest = axios.create({
-    baseURL: 'https://7be2-220-70-19-87.ngrok-free.app', // 'http://172.30.1.91:8080', // 'http://192.168.50.254:8080', //`${EXPO_PUBLIC_TEST_SERVER_URL}`,
+    baseURL: 'https://ac3d-211-36-158-83.ngrok-free.app', // 'http://172.30.1.91:8080', // 'http://192.168.50.254:8080', //`${EXPO_PUBLIC_TEST_SERVER_URL}`,
     timeout: 3000,
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     maxRedirects: 0,

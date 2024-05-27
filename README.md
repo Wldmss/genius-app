@@ -198,6 +198,9 @@
     - 색상
         - android : was > androidconfig.color
     - icon
-        - foreground : app.json > plugins > expo-notifications > icon
-        - background : app.json > icon
-        - prebuild 시 : app.json > notification
+        - android
+            - foreground : app.json > plugins > expo-notifications > icon
+            - background : app.json > icon
+            - prebuild 시 : app.json > notification
+        - ios
+            - app icon

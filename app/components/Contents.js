@@ -1,17 +1,15 @@
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { Alert, AppState, BackHandler, Linking, Pressable, StyleSheet, Text } from 'react-native';
+import { Alert, AppState, BackHandler } from 'react-native';
 import store from 'store/store';
 import moment from 'moment';
 import { Stack, router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { dispatchOne } from 'utils/DispatchUtils';
-import { checkLogin, test } from 'api/LoginApi';
+import { checkLogin } from 'api/LoginApi';
 import { backEventHandler } from 'utils/BackUtils';
 import Web from '(screens)/web';
-import * as Update from 'expo-updates';
-import { sendPushNotification } from 'utils/Push';
-import { commonInputStyles } from 'assets/styles';
+import * as Updates from 'expo-updates';
 
 /** 페이지 router */
 const Contents = () => {
@@ -89,19 +87,15 @@ const Contents = () => {
             store.dispatch(dispatchOne('SET_TAB', 'main'));
         } else {
             if (tab == 'web') {
-                if (isLink && params.link !== 'push') {
-                    store.dispatch(dispatchOne('SET_TAB', params.link));
-                } else {
-                    store.dispatch(dispatchOne('SET_LOADING', true));
+                store.dispatch(dispatchOne('SET_LOADING', true));
 
-                    let timeout = setTimeout(() => {
-                        store.dispatch(dispatchOne('SET_WEB', true));
-                    }, loadTime);
+                let timeout = setTimeout(() => {
+                    store.dispatch(dispatchOne('SET_WEB', true));
+                }, loadTime);
 
-                    return () => {
-                        clearTimeout(timeout);
-                    };
-                }
+                return () => {
+                    clearTimeout(timeout);
+                };
             } else {
                 store.dispatch(dispatchOne('SET_WEB', false));
                 router.push(tab);
@@ -111,9 +105,14 @@ const Contents = () => {
     }, [tab]);
 
     // 앱 상태 관리
-    const handleAppStateChange = (nextAppState) => {
+    const handleAppStateChange = async (nextAppState) => {
         console.log('App state :::::: ', nextAppState);
         console.log(logout);
+
+        if (nextAppState === 'active') {
+            await checkUpdates();
+        }
+
         let resetFlag = nextAppState === 'active' && logout;
 
         if (!resetFlag && expire != null) {
@@ -123,8 +122,33 @@ const Contents = () => {
         }
 
         if (resetFlag) {
-            Update.reloadAsync();
+            Updates.reloadAsync();
             // store.dispatch({ type: 'INIT_APP' });
+        }
+    };
+
+    // 업데이트 확인
+    const checkUpdates = async () => {
+        try {
+            const update = await Updates.checkForUpdateAsync(); // 업데이트 확인
+
+            if (update.isAvailable) {
+                Alert.alert(process.env.EXPO_PUBLIC_NAME, '업데이트 내역이 있습니다. 지금 업데이트 하시겠습니까?', [
+                    {
+                        text: '아니요',
+                        onPress: () => null,
+                        style: 'cancel',
+                    },
+                    {
+                        text: '예',
+                        onPress: async () => {
+                            await Updates.reloadAsync();
+                        },
+                    },
+                ]);
+            }
+        } catch (error) {
+            console.log(error);
         }
     };
 
@@ -183,9 +207,6 @@ const Contents = () => {
                     <Stack.Screen name="(utils)" options={commonOptions} />
                 </Stack>
             )}
-            <Pressable style={commonInputStyles.button} onPress={() => test()}>
-                <Text>click</Text>
-            </Pressable>
         </>
     );
 };

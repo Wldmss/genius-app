@@ -31,7 +31,7 @@ export const commonInputStyles = StyleSheet.create({
     inputNumber: {
         borderWidth: 0,
         paddingHorizontal: 15,
-        paddingVertical: 5,
+        paddingVertical: 0,
         height: 36,
         lineHeight: 22,
         width: inputWidth,
@@ -40,6 +40,7 @@ export const commonInputStyles = StyleSheet.create({
         backgroundColor: `#E8F0FE`,
         fontSize: 13,
         textAlign: `center`,
+        textAlignVertical: `center`,
     },
     buttonRed: {
         alignItems: `center`,

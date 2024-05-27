@@ -34,7 +34,8 @@
             "distribution": "internal",
             "autoIncrement": true,
             "ios": {
-                "credentialsSource": "local"
+                "credentialsSource": "local",
+                "enterpriseProvisioning": "universal"
             },
             "env": {
                 ".env": "./.env.development"
@@ -46,6 +47,9 @@
             "autoIncrement": true,
             "env": {
                 ".env": "./.env.test"
+            },
+            "ios": {
+                "enterpriseProvisioning": "universal"
             }
         },
         "staging": {

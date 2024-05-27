@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Alert, Linking, Platform } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import * as TaskManager from 'expo-task-manager';
 import * as Device from 'expo-device';
@@ -27,6 +27,7 @@ Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK);
 Notifications.setNotificationHandler({
     handleNotification: async (notification) => {
         // trigger 가 있는 경우는 정상적으로 값이 들어오지 않아 다시 보내줘야 함.
+        Alert.alert(JSON.stringify(notification));
         const trigger = notification?.request?.trigger;
         const hasTrigger = trigger != null;
 
@@ -52,8 +53,8 @@ export async function schedulePushNotification(remoteMessage) {
 
     await Notifications.scheduleNotificationAsync({
         content: message,
-        trigger: null,
-        // trigger: { seconds: 1 },
+        // trigger: null,
+        trigger: { seconds: 10 },
     });
 }
 
@@ -75,7 +76,11 @@ export async function getPushToken() {
 
 // push 토큰 발급 (expo token)
 async function getExpoToken() {
-    return (await Notifications.getExpoPushTokenAsync()).data;
+    try {
+        return (await Notifications.getExpoPushTokenAsync()).data;
+    } catch (err) {
+        Alert.alert(JSON.stringify(err));
+    }
 }
 
 // push 권한 확인
@@ -128,7 +133,9 @@ export function useNotification() {
         checkNotificationPermission();
 
         // push 수신
-        const receivePush = Notifications.addNotificationReceivedListener((response) => {});
+        const receivePush = Notifications.addNotificationReceivedListener((response) => {
+            Alert.alert('received?!');
+        });
 
         // push 클릭 이벤트 (foreground)
         const clickPushEvent = Notifications.addNotificationResponseReceivedListener((response) => {
@@ -171,6 +178,8 @@ export async function sendPushNotification(notification, data) {
         // data: data,
     };
 
+    // Alert.alert(JSON.stringify(message));
+
     await fetch('https://exp.host/--/api/v2/push/send', {
         method: 'POST',
         headers: {
@@ -181,9 +190,9 @@ export async function sendPushNotification(notification, data) {
         body: JSON.stringify(message),
     })
         .then((res) => {
-            Alert.alert(JSON.stringify(res));
+            // Alert.alert(JSON.stringify(res));
         })
         .catch(() => {
-            Alert.alert(JSON.stringify(err));
+            // Alert.alert(JSON.stringify(err));
         });
 }

@@ -9,8 +9,8 @@ import { ErrorBoundary } from 'utils/ErrorBoundary';
 
 import Constants from 'expo-constants';
 
-import { pushStore, useNotification } from 'utils/Push';
-// import { pushFcmStore, useFirebase } from 'utils/PushFcm';
+// import { pushStore, useNotification } from 'utils/Push';
+import { pushFcmStore, useFirebase } from 'utils/PushFcm';
 import { backStore } from 'utils/BackUtils';
 
 import PopModal from 'modal/PopModal';
@@ -28,17 +28,6 @@ import * as Linking from 'expo-linking';
 const splashTime = 2000;
 const { profile } = Constants.expoConfig.extra;
 
-const prefix = Linking.createURL('/');
-
-const linking = {
-    prefixes: [prefix],
-    config: {
-        screens: {
-            Checkin: 'checkin',
-        },
-    },
-};
-
 /** layout (main)
  * 최초 로드
  */
@@ -52,13 +41,13 @@ const App = () => {
     console.log('------------------app--------------------');
     console.log('profile :: ', profile);
 
-    // expo-notification
-    useNotification();
-    pushStore(store);
+    // expo-notification (사용 x)
+    // useNotification();
+    // pushStore(store);
 
-    // firebase-messaging (사용 x : ios 빌드 안됨)
-    // useFirebase();
-    // pushFcmStore(store);
+    // firebase-messaging
+    useFirebase();
+    pushFcmStore(store);
 
     // api store
     apiStore(store);
@@ -96,11 +85,11 @@ const App = () => {
 
     // 앱 업데이트 체크
     /** runTimeVersion이 동일해야 업데이트가 가능함 */
-    async function onFetchUpdateAsync(flag) {
+    async function onFetchUpdateAsync() {
         try {
             const update = await Updates.checkForUpdateAsync(); // 업데이트 확인
 
-            if (flag && update.isAvailable) {
+            if (update.isAvailable) {
                 try {
                     setVersion(update.manifest.runtimeVersion);
                     setIsUpdate(true);
@@ -125,7 +114,7 @@ const App = () => {
             await serverCheck();
 
             if (profile != 'preview' && profile != 'development') {
-                await onFetchUpdateAsync(true);
+                await onFetchUpdateAsync();
             } else {
                 await new Promise((resolve) => setTimeout(resolve, splashTime)).then(() => {
                     setSplashLoaded(true);

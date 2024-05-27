@@ -1,179 +1,181 @@
-// import { useEffect } from 'react';
-// import { Alert, Platform, StyleSheet, View } from 'react-native';
-// import messaging from '@react-native-firebase/messaging';
-// import * as Notifications from 'expo-notifications';
-// import * as Device from 'expo-device';
-// import { dispatchOne } from './DispatchUtils';
-// import { FontText } from './TextUtils';
+import { useEffect } from 'react';
+import { Platform, StyleSheet, View } from 'react-native';
+import messaging from '@react-native-firebase/messaging';
+import * as Notifications from 'expo-notifications';
+import * as Device from 'expo-device';
+import { dispatchMultiple, dispatchOne } from './DispatchUtils';
+import { FontText } from './TextUtils';
 
-// // react-native-firebase/messaging (사용 x) - ios build가 안됨
+// react-native-firebase/messaging
 
-// export const pushFcmStore = (_store) => {
-//     store = _store;
-// };
+export const pushFcmStore = (_store) => {
+    store = _store;
+};
 
-// Notifications.setNotificationHandler({
-//     handleNotification: async () => ({
-//         shouldShowAlert: true,
-//         shouldPlaySound: true,
-//         shouldSetBadge: false,
-//     }),
-// });
+// foreground alert
+Notifications.setNotificationHandler({
+    handleNotification: async (notification) => {
+        return {
+            shouldShowAlert: true,
+            shouldPlaySound: true,
+            shouldSetBadge: true,
+        };
+    },
+});
 
-// // push 토큰 발급
-// export async function getMessagingToken() {
-//     const notification = store.getState().commonReducer.notification;
+// push 토큰 발급
+export async function getMessagingToken() {
+    const notification = store.getState().commonReducer.notification;
 
-//     if (notification) {
-//         return await messaging().getToken();
-//     }
+    if (notification) {
+        return await messaging().getToken();
+    }
 
-//     return null;
-// }
+    return null;
+}
 
-// // push 권한 확인 - 안됨
-// const requestUserPermission = async () => {
-//     const authStatus = await messaging().requestPermission();
-//     const enabled = authStatus === messaging.AuthorizationStatus.AUTHORIZED || authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+// push 권한 확인 (ios)
+const requestUserPermission = async () => {
+    const authStatus = await messaging().requestPermission({
+        badge: true,
+        carPlay: true,
+    });
+    const enabled = authStatus === messaging.AuthorizationStatus.AUTHORIZED || authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
-//     console.log('Authorization status:', enabled);
-//     store.dispatch(dispatchOne('SET_NOTIFICATION', enabled));
-// };
+    console.log('Authorization status:', enabled);
+    store.dispatch(dispatchOne('SET_NOTIFICATION', enabled));
+};
 
-// // push 권한 확인 (expo-notification)
-// export async function checkNotificationPermission() {
-//     // 채널 설정 (알림 카테고리)
-//     if (Platform.OS === 'android') {
-//         // Notifications.deleteNotificationChannelAsync('expo_notifications_fallback_notification_channel');    // 채널 삭제 (channelId)
+// push 권한 확인
+export async function checkNotificationPermission() {
+    // 채널 설정 (알림 카테고리)
+    if (Platform.OS === 'android') {
+        await Notifications.setNotificationChannelAsync('default', {
+            name: '알림',
+            importance: Notifications.AndroidImportance.MAX,
+        });
 
-//         await Notifications.setNotificationChannelAsync('default', {
-//             name: '알림',
-//             importance: Notifications.AndroidImportance.MAX,
-//             vibrationPattern: [0, 250, 250, 250],
-//             lightColor: `#000000`,
-//             // lightColor: '#FF231F7C',
-//         });
+        checkPermission();
+    }
 
-//         await Notifications.setNotificationChannelAsync('genius', {
-//             name: '공지',
-//             importance: Notifications.AndroidImportance.MAX,
-//             vibrationPattern: [0, 250, 250, 250],
-//             lightColor: `#000000`,
-//             // lightColor: '#FF231F7C',
-//         });
-//     }
+    if (Platform.OS == 'ios') {
+        requestUserPermission();
+    }
+}
 
-//     checkPermission();
-// }
+// 권한 설정 (expo-notification)
+async function checkPermission() {
+    if (Device.isDevice) {
+        const { status: existingStatus } = await Notifications.getPermissionsAsync();
+        let finalStatus = existingStatus;
 
-// // 권한 설정 (expo-notification)
-// async function checkPermission() {
-//     if (Device.isDevice) {
-//         const { status: existingStatus } = await Notifications.getPermissionsAsync();
-//         let finalStatus = existingStatus;
+        if (existingStatus !== 'granted') {
+            const { status } = await Notifications.requestPermissionsAsync();
+            finalStatus = status;
+        }
 
-//         if (existingStatus !== 'granted') {
-//             const { status } = await Notifications.requestPermissionsAsync();
-//             finalStatus = status;
-//         }
+        store.dispatch(dispatchOne('SET_NOTIFICATION', finalStatus == 'granted'));
+    }
+}
 
-//         store.dispatch(dispatchOne('SET_NOTIFICATION', finalStatus == 'granted'));
-//     }
-// }
+// foreground push snack
+const handleForegroundPush = () => {
+    const notification = remoteMessage.notification;
+    store.dispatch(
+        dispatchOne(
+            'SET_SNACK',
+            <View style={styles.snack}>
+                <FontText style={styles.title}>{notification.title}</FontText>
+                <FontText style={styles.body}>{notification.body}</FontText>
+            </View>
+        )
+    );
+};
 
-// // foreground push snack
-// const handleForegroundPush = () => {
-//     const notification = remoteMessage.notification;
-//     store.dispatch(
-//         dispatchOne(
-//             'SET_SNACK',
-//             <View style={styles.snack}>
-//                 <FontText style={styles.title}>{notification.title}</FontText>
-//                 <FontText style={styles.body}>{notification.body}</FontText>
-//             </View>
-//         )
-//     );
-// };
+// 기기별로 특정 토픽을 구독하는 함수
+async function subscribeToTopic(topic) {
+    await messaging().subscribeToTopic(topic);
+}
 
-// // 기기별로 특정 토픽을 구독하는 함수
-// async function subscribeToTopic(topic) {
-//     await messaging().subscribeToTopic(topic);
-// }
+// 기기별로 특정 토픽을 구독 해제하는 함수
+async function unsubscribeFromTopic(topic) {
+    await messaging().unsubscribeFromTopic(topic);
+}
 
-// // 기기별로 특정 토픽을 구독 해제하는 함수
-// async function unsubscribeFromTopic(topic) {
-//     await messaging().unsubscribeFromTopic(topic);
-// }
+// foreground 알림용 스케줄러
+async function schedulePushNotification(notification, data) {
+    const message = {
+        title: notification.title,
+        body: notification.body,
+        data: data,
+        color: process.env.EXPO_PUBLIC_PUSH_COLOR,
+    };
 
-// // foreground 알림용 스케줄러
-// async function schedulePushNotification(notification, data) {
-//     const message = {
-//         title: notification.title,
-//         body: notification.body,
-//         data: data,
-//     };
+    await Notifications.scheduleNotificationAsync({
+        content: message,
+        trigger: null,
+        // trigger: { seconds: 1 },
+    });
+}
 
-//     await Notifications.scheduleNotificationAsync({
-//         content: message,
-//         trigger: null,
-//         // trigger: { seconds: 1 },
-//     });
-// }
+// 메시지 링크 설정
+function clickMessage(data) {
+    if (Platform.OS === 'ios') {
+        Notifications.setBadgeCountAsync(0);
+    }
+    store.dispatch(dispatchMultiple({ SET_PARAMS: data, SET_LINK: true }));
+}
 
-// /** FCM push 알림 설정 */
-// export function useFirebase() {
-//     useEffect(() => {
-//         // 알림 권한 확인
-//         checkNotificationPermission();
+/** FCM push 알림 설정 */
+export function useFirebase() {
+    useEffect(() => {
+        // 알림 권한 확인
+        checkNotificationPermission();
 
-//         // 알림 topic 구독
-//         subscribeToTopic('snack');
+        // 알림 topic 구독
+        subscribeToTopic('snack');
 
-//         // Check if the app was opened from a notification (when the app was completely quit)
-//         messaging()
-//             .getInitialNotification()
-//             .then(async (remoteMessage) => {
-//                 if (remoteMessage) {
-//                     console.log('Notification caused app to open from quit state:', remoteMessage.notification);
-//                 }
-//             });
+        // (클릭) 앱 종료
+        messaging()
+            .getInitialNotification()
+            .then(async (remoteMessage) => {
+                if (remoteMessage) {
+                    clickMessage(remoteMessage?.data);
+                }
+            });
 
-//         // Handle user opening the app from a notification (when the app is in the background)
-//         messaging().onNotificationOpenedApp(async (remoteMessage) => {
-//             store.dispatch(dispatchOne('SET_LINK', true));
-//             store.dispatch(dispatchOne('SET_PARAMS', remoteMessage.data));
-//         });
+        // (클릭) background
+        messaging().onNotificationOpenedApp(async (remoteMessage) => {
+            clickMessage(remoteMessage?.data);
+        });
 
-//         // Handle push notifications when the app is in the background
-//         messaging().setBackgroundMessageHandler(async (remoteMessage) => {
-//             console.log('Message handled in the background!', remoteMessage);
-//         });
+        // (수신) background
+        messaging().setBackgroundMessageHandler(async (remoteMessage) => {
+            console.log(remoteMessage);
+            return false;
+        });
 
-//         // Listen for push notifications when the app is in the foreground
-//         const unsubscribe = messaging().onMessage(async (remoteMessage) => {
-//             // Alert.alert('new massage!!', JSON.stringify(remoteMessage));
-//             console.log('new massage!!', JSON.stringify(remoteMessage));
-//             schedulePushNotification(remoteMessage.notification, remoteMessage.data);
+        // (수신) foreground
+        const unsubscribe = messaging().onMessage(async (remoteMessage) => {
+            if (remoteMessage?.notification) schedulePushNotification(remoteMessage.notification, remoteMessage.data);
+        });
 
-//             // handleForegroundPush();
+        // (클릭) fore/background, quit
+        const clickPushEvent = Notifications.addNotificationResponseReceivedListener((response) => {
+            clickMessage(response?.notification?.request?.content?.data);
+        });
 
-//             // if (Platform.OS === 'ios') {
-//             //     PushNotificationIOS.presentLocalNotification({
-//             //         alertTitle: remoteMessage.notification.title,
-//             //         alertBody: remoteMessage.notification.body,
-//             //     });
-//             // }
-//         });
+        return () => {
+            unsubscribe;
+            clickPushEvent.remove();
+        };
+    }, []);
+}
 
-//         // Clean up the event listeners
-//         return unsubscribe;
-//     }, []);
-// }
-
-// const styles = StyleSheet.create({
-//     snack: {},
-//     title: {
-//         color: `#fff`,
-//     },
-//     body: { color: `#fff`, fontSize: 12 },
-// });
+const styles = StyleSheet.create({
+    snack: {},
+    title: {
+        color: `#fff`,
+    },
+    body: { color: `#fff`, fontSize: 12 },
+});
