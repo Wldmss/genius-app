@@ -7,7 +7,7 @@ import moment from 'moment';
 import { dispatchLogin, dispatchMultiple, dispatchOne } from 'utils/DispatchUtils';
 import * as StorageUtils from 'utils/StorageUtils';
 import { FontText } from 'utils/TextUtils';
-import { checkSms, login } from 'api/LoginApi';
+import { checkSms, login, sendSms } from 'api/LoginApi';
 import LoginInfo from 'modal/LoginInfo';
 
 /** LDAP 로그인 */
@@ -19,7 +19,6 @@ const LDAPLogin = () => {
     const [time, setTime] = useState(0);
     const [value, setValue] = useState({ username: '', password: '', otp: '' });
     const [isLogin, setIsLogin] = useState(false);
-    const [token, setToken] = useState(null);
 
     let interval = null;
 
@@ -44,9 +43,8 @@ const LDAPLogin = () => {
     // LDAP 인증
     const sendLDAP = () => {
         // LDAP 로그인
-        login(value.username, value.password).then(({ status, token }) => {
-            if (status) {
-                setToken(token);
+        login(value.username, value.password).then((response) => {
+            if (response) {
                 setIsLogin(true);
             } else {
                 resetUsers();
@@ -54,62 +52,49 @@ const LDAPLogin = () => {
         });
     };
 
-    // OTP 전송 (TODO)
+    // OTP 전송
     const sendOTP = () => {
-        Alert.alert('인증번호가 전송되었습니다.');
+        sendSms(value.username).then((response) => {
+            if (response) {
+                setValue({ ...value, otp: '' });
+                Alert.alert('인증번호가 전송되었습니다.');
 
-        if (otpRef.current) otpRef.current.focus();
-
-        setTime(maxTime);
+                if (otpRef.current) otpRef.current.focus();
+                setTime(maxTime);
+            }
+        });
     };
 
     // OTP 검증
     const checkOTP = async () => {
-        // 인증번호 확인 로직 추가
         if (value.otp == '') {
-            Alert.alert('인증번호가 일치하지 않습니다.');
+            Alert.alert('인증번호를 입력해주세요.');
             return;
         }
 
-        setTime(0);
-        await checkSms(value.otp, token).then((response) => {
-            if (response) saveUserData(true);
+        await checkSms(value).then((response) => {
+            if (response.status) {
+                Alert.alert(
+                    process.env.EXPO_PUBLIC_NAME,
+                    `인증되었습니다.`,
+                    [
+                        {
+                            text: '확인',
+                            onPress: () => {
+                                saveUserData(true, response.token);
+                                // checkUsers(response.token);
+                                setTime(0);
+                            },
+                        },
+                    ],
+                    { cancelable: false }
+                );
+            }
         });
-
-        // checkUsers();
-    };
-
-    // 사용자 정보 확인 (로그아웃이 가능하다면 saveUserData() 대신 사용)
-    const checkUsers = () => {
-        if (loginKey != null && loginKey !== value.username) {
-            Alert.alert(
-                process.env.EXPO_PUBLIC_NAME,
-                `기본 로그인 정보를 "${value.username}" 으로 변경하시겠습니까?`,
-                [
-                    {
-                        text: '아니요',
-                        onPress: async () => {
-                            resetUsers();
-                            saveUserData();
-                        },
-                        style: 'cancel',
-                    },
-                    {
-                        text: '예',
-                        onPress: async () => {
-                            saveUserData(true);
-                        },
-                    },
-                ],
-                { cancelable: false }
-            );
-        } else {
-            saveUserData(loginKey == null);
-        }
     };
 
     // 사용자 정보 저장
-    const saveUserData = async (changeFlag) => {
+    const saveUserData = async (changeFlag, token) => {
         if (changeFlag) {
             await StorageUtils.setDeviceData('loginKey', token);
         }
@@ -124,6 +109,36 @@ const LDAPLogin = () => {
         store.dispatch(dispatchOne('SET_TAB', 'web'));
     };
 
+    // 사용자 정보 확인 (로그아웃이 가능하다면 saveUserData() 대신 사용)
+    const checkUsers = (token) => {
+        if (loginKey != null && loginKey !== token) {
+            Alert.alert(
+                process.env.EXPO_PUBLIC_NAME,
+                `기본 로그인 정보를 "${value.username}" 으로 변경하시겠습니까?`,
+                [
+                    {
+                        text: '아니요',
+                        onPress: () => {
+                            resetUsers();
+                            saveUserData(false);
+                        },
+                        style: 'cancel',
+                    },
+                    {
+                        text: '예',
+                        onPress: () => {
+                            saveUserData(true, token);
+                        },
+                    },
+                ],
+                { cancelable: false }
+            );
+        } else {
+            saveUserData(loginKey == null, token);
+        }
+    };
+
+    // 문의 및 연락처 modal
     const showInfo = () => {
         store.dispatch({ type: 'OPEN_MODAL', element: <LoginInfo />, title: '문의 및 연락처' });
     };
@@ -182,13 +197,16 @@ const LDAPLogin = () => {
                         onChangeText={(input) => changeValue('password', input)}
                     />
                 </View>
-                <Pressable style={[isLogin ? commonInputStyles.buttonGray : commonInputStyles.buttonRed]} onPress={doLogin}>
+                <Pressable style={[isLogin ? commonInputStyles.buttonDisable : commonInputStyles.buttonRed]} onPress={doLogin}>
                     <FontText style={commonTextStyles.white}>로그인</FontText>
                 </Pressable>
             </View>
 
             {isLogin && (
                 <View style={styles.inputBox}>
+                    <Pressable style={[commonInputStyles.buttonGray, styles.otpRetry]} onPress={sendOTP}>
+                        <FontText style={commonTextStyles.white}>인증번호 재전송</FontText>
+                    </Pressable>
                     <View style={styles.otpBox}>
                         <TextInput
                             id="otp"
@@ -235,6 +253,10 @@ const styles = StyleSheet.create({
     },
     otpBox: {
         gap: 12,
+    },
+    otpRetry: {
+        width: 176,
+        height: 36,
     },
     infoBox: {
         gap: 10,

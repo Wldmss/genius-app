@@ -23,8 +23,6 @@ import { apiStore } from 'api/Api';
 import * as Updates from 'expo-updates';
 import { checkVersion, loginApiStore } from 'api/LoginApi';
 
-import * as Linking from 'expo-linking';
-
 const splashTime = 2000;
 const { profile } = Constants.expoConfig.extra;
 
@@ -72,7 +70,7 @@ const App = () => {
                 Alert.alert(process.env.EXPO_PUBLIC_NAME, '앱을 업데이트 합니다.', [
                     {
                         text: '예',
-                        onPress: async () => {
+                        onPress: () => {
                             // 앱 자동 업데이트 tODO
                             Alert.alert('업데이트');
                         },

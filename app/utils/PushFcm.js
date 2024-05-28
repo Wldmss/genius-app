@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import { Alert, Platform, StyleSheet, View } from 'react-native';
 import messaging from '@react-native-firebase/messaging';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
@@ -118,11 +118,24 @@ async function schedulePushNotification(notification, data) {
     });
 }
 
+// badge 설정 : background 일때는 설정 불가, 알림센터에서 '지우기' 하는 경우 catch 불가
+function setBadge(clickFlag) {
+    if (Platform.OS === 'ios') {
+        Notifications.getBadgeCountAsync().then((response) => {
+            const nowBadge = Number(response || 0);
+            const badgeCount = nowBadge + (clickFlag ? -1 : 1);
+
+            Notifications.setBadgeCountAsync(Math.max(badgeCount, 0));
+        });
+    }
+}
+
 // 메시지 링크 설정
 function clickMessage(data) {
     if (Platform.OS === 'ios') {
-        Notifications.setBadgeCountAsync(0);
+        setBadge(true);
     }
+
     store.dispatch(dispatchMultiple({ SET_PARAMS: data, SET_LINK: true }));
 }
 
@@ -149,20 +162,26 @@ export function useFirebase() {
             clickMessage(remoteMessage?.data);
         });
 
+        // (클릭) fore/background, quit
+        const clickPushEvent = Notifications.addNotificationResponseReceivedListener((response) => {
+            clickMessage(response?.notification?.request?.content?.data);
+        });
+
         // (수신) background
         messaging().setBackgroundMessageHandler(async (remoteMessage) => {
-            console.log(remoteMessage);
-            return false;
+            // setBadge();
         });
 
         // (수신) foreground
         const unsubscribe = messaging().onMessage(async (remoteMessage) => {
-            if (remoteMessage?.notification) schedulePushNotification(remoteMessage.notification, remoteMessage.data);
-        });
+            // foreground 일때 메시지 수신 시 기본적으로 알림을 띄우지 않기 때문에 자체적으로 보냄
+            if (remoteMessage?.notification) {
+                if (Platform.OS === 'ios' && !remoteMessage.notification.ios?.badge) {
+                    setBadge();
+                }
 
-        // (클릭) fore/background, quit
-        const clickPushEvent = Notifications.addNotificationResponseReceivedListener((response) => {
-            clickMessage(response?.notification?.request?.content?.data);
+                schedulePushNotification(remoteMessage.notification, remoteMessage.data);
+            }
         });
 
         return () => {

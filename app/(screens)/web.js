@@ -109,7 +109,7 @@ const Web = () => {
 
     // 로그 아웃
     const doLogout = () => {
-        Alert.alert('로그아웃', '로그아웃 하시겠습니까?', [
+        Alert.alert(process.env.EXPO_PUBLIC_NAME, '로그아웃 하시겠습니까?', [
             { text: '아니요', onPress: () => null, style: 'cancel' },
             {
                 text: '예',
@@ -219,7 +219,7 @@ const Web = () => {
         }
 
         if (link != null) {
-            Alert.alert(link);
+            if (!profile.includes('staging')) Alert.alert(link);
             console.log(link);
             store.dispatch(dispatchMultiple({ SET_LINK: false, SET_WEBLINK: link }));
         }
@@ -250,7 +250,7 @@ const Web = () => {
 
     useEffect(() => {
         // if (profile.includes('test') || profile.includes('development')) Alert.alert(`${profile}\n${process.env.EXPO_PUBLIC_WEB}${webLink}`);
-        if (profile.includes('staging')) Alert.alert(`${process.env.EXPO_PUBLIC_WEB}${webLink}\nwebview 페이지 입니다.`);
+        // if (profile.includes('staging')) Alert.alert(`${process.env.EXPO_PUBLIC_WEB}${webLink}\nwebview 페이지 입니다.`);
     }, []);
 
     return camera ? (

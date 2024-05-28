@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Image, Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import store from 'store/store';
 import { dispatchOne } from 'utils/DispatchUtils';
 import { useSelector } from 'react-redux';
@@ -42,64 +42,63 @@ const OtherLogin = () => {
     }, [tab, pin, bio]);
 
     return (
-        <View style={styles.container}>
-            {(type.pin || type.ldap || type.bio || type.bioRegister || type.changePin) && !webPinFlag && (
-                <View style={styles.otherContainer}>
-                    <FontTextG style={styles.otherTitle}>다른 방법으로 로그인</FontTextG>
-                    <View style={styles.otherLoginBox}>
-                        {type.pin && (
-                            <Pressable style={styles.otherBox} onPress={() => otherLogin('pin')}>
-                                <View style={styles.iconBox}>
-                                    <PinIcon />
-                                </View>
-                                <FontTextG style={styles.otherText}>PIN</FontTextG>
-                            </Pressable>
-                        )}
-                        {type.ldap && (
-                            <Pressable style={styles.otherBox} onPress={() => otherLogin('ldap')}>
-                                <View style={styles.iconBox}>
-                                    <IdIcon />
-                                </View>
-                                <FontTextG style={styles.otherText}>아이디/비밀번호</FontTextG>
-                            </Pressable>
-                        )}
-                        {type.bio && (
-                            <Pressable style={styles.otherBox} onPress={() => otherLogin('bio')}>
-                                <View style={styles.iconBox}>
-                                    <BioIcon />
-                                </View>
-                                <FontTextG style={styles.otherText}>생체 인증</FontTextG>
-                            </Pressable>
-                        )}
-                        {type.bioRegister && (
-                            <Pressable style={styles.otherBox} onPress={() => otherLogin('bio', true)}>
-                                <View style={styles.iconBox}>
-                                    <BioIcon />
-                                </View>
-                                <FontTextG style={styles.otherText}>생체 인증 등록</FontTextG>
-                            </Pressable>
-                        )}
-                        {type.changePin && (
-                            <Pressable style={styles.otherBox} onPress={() => otherLogin('pin', true)}>
-                                <View style={styles.iconBox}>
-                                    <PinIcon />
-                                </View>
-                                <FontTextG style={styles.otherText}>PIN 변경</FontTextG>
-                            </Pressable>
-                        )}
-                    </View>
+        (type.pin || type.ldap || type.bio || type.bioRegister || type.changePin) &&
+        !webPinFlag && (
+            // <View style={styles.container}>
+            <View style={styles.otherContainer}>
+                <FontTextG style={styles.otherTitle}>다른 방법으로 로그인</FontTextG>
+                <View style={styles.otherLoginBox}>
+                    {type.pin && (
+                        <Pressable style={styles.otherBox} onPress={() => otherLogin('pin')}>
+                            <View style={styles.iconBox}>
+                                <PinIcon />
+                            </View>
+                            <FontTextG style={styles.otherText}>PIN</FontTextG>
+                        </Pressable>
+                    )}
+                    {type.ldap && (
+                        <Pressable style={styles.otherBox} onPress={() => otherLogin('ldap')}>
+                            <View style={styles.iconBox}>
+                                <IdIcon />
+                            </View>
+                            <FontTextG style={styles.otherText}>아이디/비밀번호</FontTextG>
+                        </Pressable>
+                    )}
+                    {type.bio && (
+                        <Pressable style={styles.otherBox} onPress={() => otherLogin('bio')}>
+                            <View style={styles.iconBox}>
+                                <BioIcon />
+                            </View>
+                            <FontTextG style={styles.otherText}>생체 인증</FontTextG>
+                        </Pressable>
+                    )}
+                    {type.bioRegister && (
+                        <Pressable style={styles.otherBox} onPress={() => otherLogin('bio', true)}>
+                            <View style={styles.iconBox}>
+                                <BioIcon />
+                            </View>
+                            <FontTextG style={styles.otherText}>생체 인증 등록</FontTextG>
+                        </Pressable>
+                    )}
+                    {type.changePin && (
+                        <Pressable style={styles.otherBox} onPress={() => otherLogin('pin', true)}>
+                            <View style={styles.iconBox}>
+                                <PinIcon />
+                            </View>
+                            <FontTextG style={styles.otherText}>PIN 변경</FontTextG>
+                        </Pressable>
+                    )}
                 </View>
-            )}
-        </View>
+            </View>
+        )
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        marginTop: 10,
-    },
+    container: {},
     otherContainer: {
         gap: 10,
+        marginTop: 10,
         alignItems: `center`,
     },
     otherLoginBox: {

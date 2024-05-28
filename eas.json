@@ -6,7 +6,7 @@
         "base": {
             "node": "20.11.1",
             "env": {
-                "EXPO_PUBLIC_NAME": "지니어스",
+                "EXPO_PUBLIC_NAME": "KT그룹교육",
                 "EXPO_PUBLIC_WEB": "https://ktedu.kt.com",
                 "EXPO_PUBLIC_TEST_SERVER_URL": "http://192.168.50.254:8080",
                 "EXPO_PUBLIC_TEST_API_URL": "/api/v1/",

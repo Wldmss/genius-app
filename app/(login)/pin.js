@@ -175,14 +175,14 @@ const PinLogin = () => {
 
     // pin 체크 시 token 검증
     const checkLoginInfo = async () => {
-        await checkLogin(true).then(async (res) => {
-            if (res.status) {
+        await checkLogin(true).then(async (response) => {
+            if (response) {
                 await registChangePin();
             } else {
                 Alert.alert(process.env.EXPO_PUBLIC_NAME, `PIN 변경 권한이 없습니다.`, [
                     {
                         text: '확인',
-                        onPress: async () => {
+                        onPress: () => {
                             store.dispatch(
                                 dispatchMultiple({
                                     SET_PIN: { ...pin, modFlag: false },

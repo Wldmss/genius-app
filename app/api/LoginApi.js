@@ -24,87 +24,65 @@ export const loginApiStore = (_store) => {
     store = _store;
 };
 
-export const test = () => {
-    axios({
-        url: 'https://iid.googleapis.com/iid/v1:batchImport',
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization:
-                'Bearer ya29.a0AXooCgt6fdoHOtxQkmWpfWrJbjWnQypkpssCHmDyR418scgfWAWHWxRM4W_xWJRohta6sSj7aZTZfC5yCqMAkOwoR8DFvSxd6p6juyDDirf7JZQhymurozxlAXG-i_UjEuKWqA6Ud48Q-MRJrJzb9MNN3D62TzQRGzaLaCgYKAcgSAQ8SFQHGX2MiWnylp9z4C3v7uej2jSKYug0171',
-        },
-        data: {
-            application: 'com.kt.ktgenius',
-            sandbox: true, //개발서버이면 true, 운영이면  false를 설정한다.
-            apns_tokens: ['5d789c4b478c3547a1babf6564bf5e77b166bdea9c55f39b374589d3b174348c'],
-        },
-    })
-        .then((res) => {
-            console.log(res.data.results[0].registration_token);
-        })
-        .catch((error) => {
-            console.log(error);
-            console.log('APNS -> FCM 토큰 변경 에러');
-        });
-};
-
-// server check & app version check
+/** server check & app version check
+ * @return boolean : true = 앱 업데이트 필요
+ */
 export const checkVersion = async () => {
     if (isTest) {
         return false;
     } else {
         const osType = await getOsType();
         return await ApiFetch.get(`api/checkAppVersion.do?osType=${osType}&appVersion=${version}`).then((response) => {
-            const { rtnSts } = response;
-            return rtnSts;
+            const { rtnSts } = response; // F: 기준정보 버전보다 낮거나 높음, T: 동일, E: 값 없음.
+            return rtnSts == 'F';
         });
     }
 };
 
-// LDAP login
+/** LDAP login
+ * @param username : 로그인 사번
+ * @param password : 로그인 비번
+ * @return boolean
+ */
 export const login = async (username, password) => {
     store.dispatch(dispatchOne('SET_LOADING', true));
 
     const encryptUsername = CryptoJS.AES.encrypt(JSON.stringify(username), process.env.AES_KEY).toString();
     const encryptPassword = password ? CryptoJS.AES.encrypt(JSON.stringify(password), process.env.AES_KEY).toString() : null;
 
-    const deviceToken = await getDeviceToken();
-    const osType = await getOsType();
-
     if (isTest) {
         store.dispatch(dispatchOne('SET_WEBLINK', tempUri));
         store.dispatch(dispatchOne('SET_LOADING', false));
-        return { status: true, token: '91352089&2024-01-01' };
+        return true;
     } else {
         const sendData = {
             userId: encryptUsername,
             pwd: encryptPassword,
-            deviceToken: deviceToken,
-            osType: osType,
-            appVersion: version,
         };
 
         console.log(sendData);
 
         return await ApiFetch.post('api/login/loginProc.do', JSON.stringify(sendData))
             .then((response) => {
-                const { rtnSts, rtnMsg, rtnUrl, loginKey } = response;
+                const { rtnSts, rtnMsg, rtnUrl, expDueDt } = response;
 
-                if (rtnSts == 'E') {
-                    let msg = rtnMsg;
-                    if (rtnMsg == null) msg = '로그인에 실패했습니다.\n다시 시도해주세요.';
-                    Alert.alert(msg);
-                    return { status: false };
+                // 상태 (S: 성공, E: 실패)
+                if (rtnSts == 'S') {
+                    store.dispatch(dispatchOne('SET_WEBLINK', rtnUrl));
+                    // expDueDt todo 어디에 저장해야 함.
+
+                    return true;
+                } else {
+                    handleRtnMsg(rtnMsg);
+
+                    return false;
                 }
-
-                store.dispatch(dispatchOne('SET_WEBLINK', rtnUrl));
-
-                return { status: rtnSts == 200, token: loginKey || null };
             })
             .catch(async (err) => {
                 console.log(err);
                 store.dispatch(dispatchLogin(false, null));
-                return { status: false };
+
+                return false;
             })
             .finally(() => {
                 store.dispatch(dispatchOne('SET_LOADING', false));
@@ -112,7 +90,10 @@ export const login = async (username, password) => {
     }
 };
 
-// pin/bio 로그인 검증
+/** 로그인 key 검증 (pin, bio)
+ * @param checkFlag : pin 변경 시 loginKey 체크
+ * @return boolean
+ *  */
 export const checkLogin = async (checkFlag) => {
     if (!checkFlag) store.dispatch(dispatchOne('SET_LOADING', true));
 
@@ -127,7 +108,7 @@ export const checkLogin = async (checkFlag) => {
             store.dispatch(dispatchOne('SET_LOADING', false));
         }
 
-        return { status: true, data: 'token' };
+        return true;
     } else {
         const sendData = {
             deviceToken: deviceToken,
@@ -140,22 +121,22 @@ export const checkLogin = async (checkFlag) => {
             .then((response) => {
                 const { rtnSts, rtnMsg, rtnUrl } = response;
 
-                if (rtnSts == 'E') {
-                    let msg = rtnMsg;
-                    if (rtnMsg == null) msg = '로그인에 실패했습니다.\n다시 시도해주세요.';
-                    Alert.alert(msg);
-                    return { status: false };
+                // 상태 (S: 성공, E: 실패)
+                if (rtnSts == 'S') {
+                    store.dispatch(dispatchOne('SET_WEBLINK', rtnUrl));
+                    store.dispatch(dispatchOne('SET_TOKEN', loginKey || null));
+
+                    return true;
+                } else {
+                    handleRtnMsg(rtnMsg);
+
+                    return false;
                 }
-
-                store.dispatch(dispatchOne('SET_WEBLINK', rtnUrl));
-                store.dispatch(dispatchOne('SET_TOKEN', loginKey || null));
-
-                return { status: rtnSts == 200, data: loginKey != null };
             })
             .catch(async (err) => {
                 console.log(err);
                 if (!checkFlag) store.dispatch(dispatchLogin(false, null));
-                return { status: false };
+                return false;
             })
             .finally(() => {
                 store.dispatch(dispatchOne('SET_LOADING', false));
@@ -163,30 +144,82 @@ export const checkLogin = async (checkFlag) => {
     }
 };
 
-// 인증번호 확인
-export const checkSms = async (otp, token) => {
+/** 인증번호 전송
+ * @param username : 로그인 사번
+ * @return boolean
+ */
+export const sendSms = async (username) => {
+    const encryptUsername = CryptoJS.AES.encrypt(JSON.stringify(username), process.env.AES_KEY).toString();
+    const deviceToken = await getDeviceToken();
+    const osType = await getOsType();
+
     const sendData = {
-        serial: String(otp) || '',
-        loginKey: token,
+        userId: encryptUsername,
+        deviceToken: deviceToken,
+        osType: osType,
+        appVersion: version,
     };
 
     if (isTest) {
-        store.dispatch(dispatchOne('SET_WEBLINK', tempUri));
         return true;
     } else {
-        return await ApiFetch.post(`api/login/checkSmsAuth.do`, JSON.stringify(sendData)).then((response) => {
-            const { rtnSts, rtnMsg, rtnUrl } = response;
+        return await ApiFetch.post(`api/login/sendSmsOpt.do`, JSON.stringify(sendData)).then((response) => {
+            const { rtnSts, rtnMsg } = response;
 
-            if (Number(rtnSts) != 1) {
-                Alert.alert(rtnMsg);
+            // 상태 (S: 성공, E: 실패)
+            if (rtnSts == 'E') {
+                if (rtnMsg && rtnMsg != '') Alert.alert(JSON.stringify(rtnMsg));
                 return false;
             }
-
-            store.dispatch(dispatchOne('SET_WEBLINK', rtnUrl));
 
             return true;
         });
     }
+};
+
+/** 인증번호 확인
+ * @param loginInfo { username: '', password: '', otp: '' }
+ * @return { status: boolean, token: string }
+ */
+export const checkSms = async (loginInfo) => {
+    const encryptUsername = CryptoJS.AES.encrypt(JSON.stringify(loginInfo.username), process.env.AES_KEY).toString();
+    const deviceToken = await getDeviceToken();
+    const osType = await getOsType();
+
+    const sendData = {
+        userId: encryptUsername,
+        serial: String(loginInfo.otp) || '',
+        expDueDt: '', // todo 어디에 저장한거 가져와야 함
+        deviceToken: deviceToken,
+        osType: osType,
+        appVersion: version,
+    };
+
+    if (isTest) {
+        store.dispatch(dispatchOne('SET_WEBLINK', tempUri));
+        return { status: true, token: '91352089&2024-01-01' };
+    } else {
+        return await ApiFetch.post(`api/login/checkSmsAuth.do`, JSON.stringify(sendData)).then((response) => {
+            const { rtnSts, rtnMsg, rtnUrl, token } = response;
+
+            // 상태 (S: 성공, E: 실패)
+            if (rtnSts == 'S') {
+                store.dispatch(dispatchOne('SET_WEBLINK', rtnUrl));
+
+                return { status: true, token: loginKey };
+            } else {
+                handleRtnMsg(rtnMsg);
+
+                return { status: false, token: null };
+            }
+        });
+    }
+};
+
+// rtnMsg 처리
+const handleRtnMsg = (message) => {
+    if (message == null || message == '') message = '로그인에 실패했습니다.\n다시 시도해주세요.';
+    Alert.alert(message);
 };
 
 // push token 값
@@ -213,7 +246,6 @@ const getOsType = () => {
     };
 
     const brand = Device.brand;
-    console.log(brand);
 
     return brand == null ? 'web' : brandType[brand.toLowerCase()];
 };
@@ -345,4 +377,28 @@ const checkDevice = () => {
     console.log(deviceInfo);
 
     return deviceInfo;
+};
+
+export const test = () => {
+    axios({
+        url: 'https://iid.googleapis.com/iid/v1:batchImport',
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization:
+                'Bearer ya29.a0AXooCgt6fdoHOtxQkmWpfWrJbjWnQypkpssCHmDyR418scgfWAWHWxRM4W_xWJRohta6sSj7aZTZfC5yCqMAkOwoR8DFvSxd6p6juyDDirf7JZQhymurozxlAXG-i_UjEuKWqA6Ud48Q-MRJrJzb9MNN3D62TzQRGzaLaCgYKAcgSAQ8SFQHGX2MiWnylp9z4C3v7uej2jSKYug0171',
+        },
+        data: {
+            application: 'com.kt.ktgenius',
+            sandbox: true, //개발서버이면 true, 운영이면  false를 설정한다.
+            apns_tokens: ['5d789c4b478c3547a1babf6564bf5e77b166bdea9c55f39b374589d3b174348c'],
+        },
+    })
+        .then((res) => {
+            console.log(res.data.results[0].registration_token);
+        })
+        .catch((error) => {
+            console.log(error);
+            console.log('APNS -> FCM 토큰 변경 에러');
+        });
 };

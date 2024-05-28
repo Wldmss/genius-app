@@ -47,8 +47,8 @@ const Contents = () => {
                 }
 
                 // ldap 인증
-                checkLogin().then(({ status, data }) => {
-                    if (status && !data) {
+                checkLogin().then((response) => {
+                    if (!response) {
                         noUsers();
                     }
                 });
@@ -69,7 +69,7 @@ const Contents = () => {
             [
                 {
                     text: '확인',
-                    onPress: async () => {
+                    onPress: () => {
                         store.dispatch(dispatchOne('SET_TAB', 'ldap'));
                     },
                 },
@@ -178,7 +178,7 @@ const Contents = () => {
 
     // 앱 종료 alert
     const exitAlert = () => {
-        Alert.alert('앱 종료', `${process.env.EXPO_PUBLIC_NAME}를 종료하시겠습니까?`, [
+        Alert.alert(process.env.EXPO_PUBLIC_NAME, `${process.env.EXPO_PUBLIC_NAME}를 종료하시겠습니까?`, [
             {
                 text: '아니요',
                 onPress: () => {
