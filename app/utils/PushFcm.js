@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Alert, Platform, StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import messaging from '@react-native-firebase/messaging';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
@@ -42,7 +42,6 @@ const requestUserPermission = async () => {
     });
     const enabled = authStatus === messaging.AuthorizationStatus.AUTHORIZED || authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
-    console.log('Authorization status:', enabled);
     store.dispatch(dispatchOne('SET_NOTIFICATION', enabled));
 };
 
@@ -118,7 +117,7 @@ async function schedulePushNotification(notification, data) {
     });
 }
 
-// badge 설정 : background 일때는 설정 불가, 알림센터에서 '지우기' 하는 경우 catch 불가
+// badge 설정 : background 일때는 설정 불가, 알림센터에서 '지우기' 하는 경우 catch 불가 => 한개라도 click 시 reset
 function setBadge(clickFlag) {
     if (Platform.OS === 'ios') {
         Notifications.getBadgeCountAsync().then((response) => {
@@ -133,7 +132,8 @@ function setBadge(clickFlag) {
 // 메시지 링크 설정
 function clickMessage(data) {
     if (Platform.OS === 'ios') {
-        setBadge(true);
+        Notifications.setBadgeCountAsync(0);
+        // setBadge(true);
     }
 
     store.dispatch(dispatchMultiple({ SET_PARAMS: data, SET_LINK: true }));
@@ -168,9 +168,7 @@ export function useFirebase() {
         });
 
         // (수신) background
-        messaging().setBackgroundMessageHandler(async (remoteMessage) => {
-            // setBadge();
-        });
+        messaging().setBackgroundMessageHandler(async (remoteMessage) => {});
 
         // (수신) foreground
         const unsubscribe = messaging().onMessage(async (remoteMessage) => {

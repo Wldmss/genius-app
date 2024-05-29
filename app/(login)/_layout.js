@@ -1,18 +1,54 @@
 import React from 'react';
-import { ImageBackground, StyleSheet, View } from 'react-native';
+import { Alert, ImageBackground, Pressable, StyleSheet, View } from 'react-native';
 import { Slot } from 'expo-router';
 import OtherLogin from 'components/OtherLogin';
+import Constants from 'expo-constants';
+import store from 'store/store';
+import { dispatchOne } from 'utils/DispatchUtils';
+import * as StorageUtils from 'utils/StorageUtils';
+import * as Updates from 'expo-updates';
 
 import TopLogo from 'assets/images/login-top.svg';
 const genius_background = require('assets/images/login-bg.png');
 import { GeniusLogo } from 'utils/ImageUtils';
+
+const { isTest } = Constants.expoConfig.extra;
+
+export const setDevelopment = () => {
+    if (isTest) {
+        Alert.alert(`개발자 모드`, '모드를 선택해주세요.', [
+            {
+                text: '취소',
+                onPress: () => null,
+            },
+            {
+                text: '운영',
+                onPress: async () => {
+                    await StorageUtils.setDeviceData('isDev', 'false');
+                    store.dispatch(dispatchOne('SET_DEV', false));
+                    await Updates.reloadAsync();
+                },
+            },
+            {
+                text: '개발',
+                onPress: async () => {
+                    await StorageUtils.setDeviceData('isDev', 'true');
+                    store.dispatch(dispatchOne('SET_DEV', true));
+                    await Updates.reloadAsync();
+                },
+            },
+        ]);
+    }
+};
 
 /** 로그인 페이지 (공통) */
 const LoginLayout = () => {
     return (
         <View style={styles.container} id="content">
             <ImageBackground source={genius_background} style={styles.loginBackground}>
-                <TopLogo style={styles.title} />
+                <Pressable onLongPress={setDevelopment}>
+                    <TopLogo style={styles.title} />
+                </Pressable>
                 <View style={styles.enterBox}>
                     <GeniusLogo style={styles.logo} />
                     <View style={styles.loginContainer}>

@@ -13,6 +13,7 @@ const initialState = {
     webLink: null, // 웹 접속 링크
     currentLink: null, // 현재 링크
     splash: true, //splash 화면
+    isDev: false, // 개발 사이트용
 };
 
 const commonReducer = (state = initialState, action) => {
@@ -105,7 +106,11 @@ const commonReducer = (state = initialState, action) => {
                 ...state,
                 splash: action.payload,
             };
-
+        case 'SET_DEV':
+            return {
+                ...state,
+                isDev: action.payload,
+            };
         default:
             return state;
     }

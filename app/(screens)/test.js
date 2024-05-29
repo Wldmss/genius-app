@@ -5,7 +5,7 @@ import { FontText } from 'utils/TextUtils';
 import { commonInputStyles } from 'assets/styles';
 import { loginTest } from 'api/LoginApi';
 import axios from 'axios';
-import ApiFetch from 'api/ApiFetch';
+import * as ApiFetch from 'api/ApiFetch';
 
 export default function Test() {
     const test = useSelector((state) => state.commonReducer.test);

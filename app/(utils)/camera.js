@@ -3,20 +3,15 @@ import { Alert, Image, Linking, Modal, Pressable, StyleSheet, View } from 'react
 import { Camera, CameraType } from 'expo-camera';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import * as ImagePicker from 'expo-image-picker';
-import { useRouter } from 'expo-router';
 import { FontText } from 'utils/TextUtils';
 import { dispatchOne } from 'utils/DispatchUtils';
 
-const arrow_img = require('assets/images/close.png');
-const qr_scan_img = require('assets/images/close.png');
-const album_img = require('assets/images/close.png');
 const cancel_img = require('assets/images/close.png');
 const no_img = require('assets/images/close.png');
 const no_camera = require('assets/images/close.png');
 
 /** QR 스캐너 */
 const ScanQR = () => {
-    const router = useRouter();
     const [urlText, setUrlText] = useState('');
     const [permission, setPermission] = useState(null);
     const [scan, setScan] = useState(false);
@@ -53,7 +48,7 @@ const ScanQR = () => {
         Linking.openURL(urlText);
         resetScan();
         backToWeb();
-        e.stopPropagation();
+        if (e) e.stopPropagation();
     };
 
     const pickImage = async () => {
@@ -103,14 +98,21 @@ const ScanQR = () => {
         resetScan();
     }, [type]);
 
+    useEffect(() => {
+        if (scan) goToLink();
+    }, [scan]);
+
     return (
         <View style={styles.container}>
             {/* header */}
             <View style={styles.header}>
-                <Pressable onPress={backToWeb}>
-                    <Image source={arrow_img} style={styles.scanImg} resizeMode="contain" />
-                </Pressable>
-                <FontText style={styles.scanText}>코드스캔</FontText>
+                <View style={styles.headerItem}>
+                    <Pressable onPress={backToWeb}>
+                        <FontText style={styles.scanText}>←</FontText>
+                        {/* <Image source={arrow_img} style={styles.scanImg} resizeMode="contain" /> */}
+                    </Pressable>
+                    <FontText style={styles.scanText}>코드스캔</FontText>
+                </View>
             </View>
             {/* camera */}
             <View style={styles.imageContainer}>
@@ -121,6 +123,7 @@ const ScanQR = () => {
                             type={CameraType.back}
                             barCodeScannerSettings={{ barCodeRypes: [BarCodeScanner.Constants.BarCodeType.qr] }}
                             onBarCodeScanned={scanCode}
+                            zoom={0.0}
                         />
                     ) : (
                         <Pressable onPress={checkPermission}>
@@ -134,17 +137,6 @@ const ScanQR = () => {
                         resizeMode="contain"
                     />
                 )}
-            </View>
-            {/* footer */}
-            <View style={styles.buttonContainer}>
-                <Pressable style={styles.button} onPress={() => setType('scan')}>
-                    <Image source={qr_scan_img} style={styles.tabImg} resizeMode="contain" />
-                    <FontText style={type == 'scan' ? styles.boldText : ''}>QR 코드스캔</FontText>
-                </Pressable>
-                {/* <Pressable style={styles.button} onPress={pickImage}>
-                    <Image source={album_img} style={styles.tabImg} resizeMode="contain" />
-                    <FontText style={type == 'library' ? styles.boldText : ''}>앨범</FontText>
-                </Pressable> */}
             </View>
             {/* url box */}
             <Modal visible={scan} transparent={true}>
@@ -171,21 +163,21 @@ const ScanQR = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
     },
     header: {
         height: 60,
+        paddingHorizontal: 15,
+        justifyContent: `center`,
+    },
+    headerItem: {
         gap: 10,
-        backgroundColor: `white`,
-        paddingTop: 15,
-        paddingLeft: 15,
         flexDirection: `row`,
     },
     scanImg: {
         height: 25,
     },
     scanText: {
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: `bold`,
     },
     tabImg: {
@@ -193,7 +185,7 @@ const styles = StyleSheet.create({
         height: 50,
     },
     imageContainer: {
-        height: `60%`,
+        // height: `60%`,
         alignItems: `center`,
         justifyContent: `center`,
     },
@@ -208,29 +200,6 @@ const styles = StyleSheet.create({
     noImage: {
         width: 100,
         height: 100,
-    },
-    buttonContainer: {
-        flex: 1,
-        backgroundColor: 'white',
-        justifyContent: `center`,
-        alignItems: `center`,
-        flexDirection: `row`,
-        gap: 30,
-    },
-    button: {
-        justifyContent: `center`,
-        alignItems: `center`,
-        flexDirection: `column`,
-        gap: 5,
-    },
-    text: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: 'white',
-    },
-    pressContainer: {
-        flex: 1,
-        backgroundColor: `transparent`,
     },
     modal: {
         flex: 1,

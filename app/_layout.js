@@ -23,6 +23,10 @@ import { apiStore } from 'api/Api';
 import * as Updates from 'expo-updates';
 import { checkVersion, loginApiStore } from 'api/LoginApi';
 
+import * as StorageUtils from 'utils/StorageUtils';
+import { dispatchOne } from 'utils/DispatchUtils';
+import { apiFetchStore } from 'api/ApiFetch';
+
 const splashTime = 2000;
 const { profile } = Constants.expoConfig.extra;
 
@@ -36,7 +40,6 @@ const App = () => {
     const [updateProgress, setUpdateProgress] = useState(0);
     const [version, setVersion] = useState(Constants.expoConfig.version);
 
-    console.log('------------------app--------------------');
     console.log('profile :: ', profile);
 
     // expo-notification (사용 x)
@@ -48,6 +51,7 @@ const App = () => {
     pushFcmStore(store);
 
     // api store
+    apiFetchStore(store);
     apiStore(store);
     loginApiStore(store);
 
@@ -61,6 +65,12 @@ const App = () => {
         }).finally(() => {
             setFontsLoaded(true);
         });
+    };
+
+    // 개발자 모드 체크
+    const checkDevelopment = async () => {
+        const isDev = await StorageUtils.getDeviceData('isDev');
+        if (isDev != null && isDev == 'true') store.dispatch(dispatchOne('SET_DEV', true));
     };
 
     // 서버 체크
@@ -109,6 +119,7 @@ const App = () => {
     const prepare = async () => {
         try {
             loadFonts();
+            await checkDevelopment();
             await serverCheck();
 
             if (profile != 'preview' && profile != 'development') {

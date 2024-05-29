@@ -28,7 +28,7 @@ module.exports = ({ config }) => {
         extra: {
             ...config.extra,
             profile: profile,
-            isTest: profile != 'production', // && profile != 'staging',
+            isTest: profile != 'production',
         },
     };
 };

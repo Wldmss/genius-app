@@ -1,18 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Alert, Platform, Linking, View } from 'react-native';
+import { StyleSheet, Alert, Platform, Linking } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useSelector } from 'react-redux';
 import store from 'store/store';
 import { dispatchMultiple, dispatchOne } from 'utils/DispatchUtils';
 import * as ScreenOrientation from 'expo-screen-orientation';
-import { router } from 'expo-router';
 import { backEventHandler } from 'utils/BackUtils';
-import * as FileUtils from 'utils/FileUtils';
 import Loading from 'components/Loading';
 import ErrorPage from '(utils)/error';
 import Constants from 'expo-constants';
-import * as StorageUtils from 'utils/StorageUtils';
 import ScanQR from '(utils)/camera';
+import { commonStyles } from 'assets/styles';
 
 const { profile } = Constants.expoConfig.extra;
 
@@ -128,8 +126,6 @@ const Web = () => {
 
     // webview load
     const webViewLoaded = ({ nativeEvent }) => {
-        console.log('webViewLoaded');
-        console.log(nativeEvent);
         clearTimeout(timeout);
         store.dispatch(dispatchOne('SET_LOADING', false));
         setBackButtonEnabled(true);
@@ -177,7 +173,7 @@ const Web = () => {
     // for ios download
     const handleDownload = ({ nativeEvent }) => {
         const { downloadUrl } = nativeEvent;
-        console.log(downloadUrl);
+        Alert.alert('다운로드 기능 준비중입니다.');
     };
 
     // onShouldStartLoadWithRequest
@@ -219,8 +215,6 @@ const Web = () => {
         }
 
         if (link != null) {
-            if (!profile.includes('staging')) Alert.alert(link);
-            console.log(link);
             store.dispatch(dispatchMultiple({ SET_LINK: false, SET_WEBLINK: link }));
         }
     }, [isLink]);
@@ -245,22 +239,29 @@ const Web = () => {
     }, []);
 
     useEffect(() => {
-        // Alert.alert(webLink);
+        if (!profile.includes('staging') && webLink != null && webLink != '') Alert.alert(webLink);
     }, [webLink]);
 
     useEffect(() => {
         // if (profile.includes('test') || profile.includes('development')) Alert.alert(`${profile}\n${process.env.EXPO_PUBLIC_WEB}${webLink}`);
-        // if (profile.includes('staging')) Alert.alert(`${process.env.EXPO_PUBLIC_WEB}${webLink}\nwebview 페이지 입니다.`);
+        if (profile.includes('staging')) {
+            Alert.alert(`${process.env.EXPO_PUBLIC_WEB}${webLink} 접속`, `로그인 연동 준비중입니다.\n로그인 페이지 로드 시 다시 로그인 해주세요.`, [
+                {
+                    text: '확인',
+                    onPress: () => null,
+                },
+            ]);
+        }
     }, []);
 
     return camera ? (
-        <ScanQR style={styles.camera} />
+        <ScanQR />
     ) : (
         <WebView
             ref={webViewRef}
-            style={[styles.webview, hide ? styles.none : styles.flex]}
+            style={[styles.webview, hide ? commonStyles.none : commonStyles.container]}
             source={{
-                // uri: 'http://172.30.1.91:8080/file',
+                // uri: 'http://192.168.1.77:8080/file',
                 // method: 'GET',
                 uri: `${process.env.EXPO_PUBLIC_WEB}${webLink || ''}`,
                 method: 'POST',
@@ -283,14 +284,8 @@ const Web = () => {
             `}
             injectedJavaScript={`
                 window.addEventListener('click', function (event) {
-                    if (event.target.tagName === 'A') {
-                        const url = event.target.href;
-                        window.ReactNativeWebView.postMessage(JSON.stringify({type : 'download', url: url}));
-                        // event.preventDefault();
-                    } else {
-                        window.ReactNativeWebView.postMessage(JSON.stringify({type : event.target.id}));
-                        // event.preventDefault();
-                    }
+                    window.ReactNativeWebView.postMessage(JSON.stringify({ type : event.target.id }));
+                    // event.preventDefault();
                 });
             `}
             startInLoadingState={true}
@@ -337,17 +332,9 @@ const Web = () => {
 };
 
 const styles = StyleSheet.create({
-    container: {},
     webview: {
         backgroundColor: `#ffffff`,
     },
-    flex: {
-        flex: 1,
-    },
-    none: {
-        display: `none`,
-    },
-    camera: {},
 });
 
 export default Web;

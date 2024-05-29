@@ -7,6 +7,9 @@ export const commonStyles = StyleSheet.create({
     hidden: {
         opacity: 0,
     },
+    none: {
+        display: `none`,
+    },
     geniusLogo: {
         width: 200,
         height: 200,

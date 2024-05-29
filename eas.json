@@ -6,9 +6,9 @@
         "base": {
             "node": "20.11.1",
             "env": {
-                "EXPO_PUBLIC_NAME": "KT그룹교육",
+                "EXPO_PUBLIC_NAME": "KT 그룹교육",
                 "EXPO_PUBLIC_WEB": "https://ktedu.kt.com",
-                "EXPO_PUBLIC_TEST_SERVER_URL": "http://192.168.50.254:8080",
+                "EXPO_PUBLIC_DEV_SERVER_URL": "https://dev.ktedu.kt.com:2443",
                 "EXPO_PUBLIC_TEST_API_URL": "/api/v1/",
                 "EXPO_PUBLIC_SERVER_URL": "https://ktedu.kt.com",
                 "EXPO_PUBLIC_API_URL": "/"
@@ -38,18 +38,18 @@
                 "enterpriseProvisioning": "universal"
             },
             "env": {
-                ".env": "./.env.development"
+                "EXPO_PUBLIC_PROFILE": "development"
             }
         },
         "test": {
             "extends": "base",
             "channel": "test",
             "autoIncrement": true,
-            "env": {
-                ".env": "./.env.test"
-            },
             "ios": {
                 "enterpriseProvisioning": "universal"
+            },
+            "env": {
+                "EXPO_PUBLIC_PROFILE": "test"
             }
         },
         "staging": {
@@ -57,7 +57,7 @@
             "channel": "staging",
             "autoIncrement": true,
             "env": {
-                ".env": "./.env.staging"
+                "EXPO_PUBLIC_PROFILE": "staging"
             }
         },
         "production": {
@@ -65,7 +65,7 @@
             "channel": "production",
             "autoIncrement": true,
             "env": {
-                ".env": "./.env.production"
+                "EXPO_PUBLIC_PROFILE": "production"
             }
         }
     },

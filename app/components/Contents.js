@@ -29,15 +29,13 @@ const Contents = () => {
     const params = useSelector((state) => state.commonReducer.params);
     const isWeb = useSelector((state) => state.commonReducer.isWeb);
     const logout = useSelector((state) => state.loginReducer.logout);
+    const isDev = useSelector((state) => state.commonReducer.isDev);
 
     let timeout = null;
 
     // 로그인
     useEffect(() => {
         console.log('----------login----------');
-        console.log(isLogin);
-        console.log(token);
-        console.log(loginKey);
 
         if (token == null) {
             if (isLogin) {
@@ -79,10 +77,6 @@ const Contents = () => {
 
     // tab 변경 이벤트
     useEffect(() => {
-        console.log('== tab change ==');
-        console.log(tab);
-        console.log(token);
-
         if (tab == null) {
             store.dispatch(dispatchOne('SET_TAB', 'main'));
         } else {
@@ -107,7 +101,6 @@ const Contents = () => {
     // 앱 상태 관리
     const handleAppStateChange = async (nextAppState) => {
         console.log('App state :::::: ', nextAppState);
-        console.log(logout);
 
         if (nextAppState === 'active') {
             await checkUpdates();
@@ -115,11 +108,12 @@ const Contents = () => {
 
         let resetFlag = nextAppState === 'active' && logout;
 
-        if (!resetFlag && expire != null) {
-            const now = moment();
-            const diff = now.diff(expire, 'minutes');
-            resetFlag = diff > sessionTime; // TODO 세션의 기준을 정해야 함
-        }
+        // 세션 만료 체크 TODO 세션의 기준을 정해야 함
+        // if (!resetFlag && expire != null) {
+        //     const now = moment();
+        //     const diff = now.diff(expire, 'minutes');
+        //     resetFlag = diff > sessionTime;
+        // }
 
         if (resetFlag) {
             Updates.reloadAsync();
@@ -133,7 +127,7 @@ const Contents = () => {
             const update = await Updates.checkForUpdateAsync(); // 업데이트 확인
 
             if (update.isAvailable) {
-                Alert.alert(process.env.EXPO_PUBLIC_NAME, '업데이트 내역이 있습니다. 지금 업데이트 하시겠습니까?', [
+                Alert.alert(process.env.EXPO_PUBLIC_NAME, '업데이트 내역이 있습니다.\n지금 업데이트 하시겠습니까?', [
                     {
                         text: '아니요',
                         onPress: () => null,
@@ -157,7 +151,7 @@ const Contents = () => {
         return () => {
             appState.remove();
         };
-    }, [exitFlag]);
+    }, [exitFlag, expire]);
 
     // 뒤로가기
     useEffect(() => {
@@ -166,9 +160,6 @@ const Contents = () => {
 
     // 앱 종료
     useEffect(() => {
-        console.log('== exit flag ==');
-        console.log(exitFlag);
-        console.log(exitPressed);
         if (exitFlag && exitPressed) {
             store.dispatch(dispatchOne('SET_EXIT_PRESSED', false));
             BackHandler.exitApp();

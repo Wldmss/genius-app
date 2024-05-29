@@ -159,8 +159,6 @@ const LDAPLogin = () => {
                         return prevTime;
                     }
 
-                    console.log(prevTime - 1);
-
                     return prevTime - 1;
                 });
             }, 1000);

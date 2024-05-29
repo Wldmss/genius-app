@@ -1,3 +1,5 @@
+import { Alert } from 'react-native';
+
 // 다중 dispatch
 export const dispatchMultiple = (value) => (dispatch) => {
     Object.keys(value).forEach((key) => {

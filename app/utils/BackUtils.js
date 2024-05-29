@@ -12,10 +12,6 @@ export const backEventHandler = (timeout, goBack, backButtonEnabled) => {
     const camera = store.getState().commonReducer.camera;
     const exitPressed = store.getState().commonReducer.exitPressed;
 
-    console.log('-----------------backEventHandler------------------');
-    console.log(tab);
-    console.log(camera);
-
     // Handle back event
     const backHandler = () => {
         if (tab == 'web' && backButtonEnabled) {

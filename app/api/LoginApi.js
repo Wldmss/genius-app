@@ -1,47 +1,59 @@
 import { Alert } from 'react-native';
-import { dispatchLogin, dispatchOne } from 'utils/DispatchUtils';
-import CryptoJS from 'react-native-crypto-js';
-import Api from './Api';
+import axios from 'axios';
 import * as Device from 'expo-device';
 import Constants from 'expo-constants';
-import ApiFetch from './ApiFetch';
-import axios from 'axios';
+import { dispatchLogin, dispatchMultiple, dispatchOne } from 'utils/DispatchUtils';
+import CryptoJS from 'react-native-crypto-js';
+import Api from './Api';
 import { getMessagingToken } from 'utils/PushFcm';
+import * as ApiFetch from './ApiFetch';
 
 const { profile, isTest, version } = Constants.expoConfig.extra;
 
-// const tempUri = 'https://naver.com';
-// const tempUri = 'https://m.mail.naver.com/v2/read/0/6110';
-const tempUri = '';
-// const tempUri = 'https://aice.study/main';
-// const tempUri =  'https://aice.study/info/aice';
-// const tempUri = '/mobile/m/support/notice/noticeList.do';
-// const tempUri =  'https://ktedu.kt.com/education/courseContents.do?classId=200034420_01';
-// const tempUri = '192.168.50.254:8080/api/v1/file';
-// const tempUri = '192.168.31.254:8080/file';
+// const testUrl = 'https://naver.com';
+// const testUrl = 'https://m.mail.naver.com/v2/read/0/6110';
+const testUrl = '';
+// const testUrl = 'https://aice.study/main';
+// const testUrl =  'https://aice.study/info/aice';
+// const testUrl = '/mobile/m/support/notice/noticeList.do';
+// const testUrl =  'https://ktedu.kt.com/education/courseContents.do?classId=200034420_01';
+// const testUrl = '192.168.50.254:8080/api/v1/file';
+// const testUrl = '192.168.31.254:8080/file';
 
 export const loginApiStore = (_store) => {
     store = _store;
+};
+
+const checkIsTest = () => {
+    const isDev = store.getState().commonReducer.isDev;
+    return isTest && !isDev;
 };
 
 /** server check & app version check
  * @return boolean : true = 앱 업데이트 필요
  */
 export const checkVersion = async () => {
-    if (isTest) {
+    if (checkIsTest()) {
         return false;
     } else {
         const osType = await getOsType();
+
+        /** 앱 버전 체크
+         * @method GET
+         * @param osType : os 종류
+         * @param appVersion : 앱 버전
+         * @return { rtnSts } : F: 기준정보 버전보다 낮거나 높음, T: 동일, E: 값 없음.
+         */
         return await ApiFetch.get(`api/checkAppVersion.do?osType=${osType}&appVersion=${version}`).then((response) => {
-            const { rtnSts } = response; // F: 기준정보 버전보다 낮거나 높음, T: 동일, E: 값 없음.
+            const { rtnSts } = response;
             return rtnSts == 'F';
         });
     }
 };
 
 /** LDAP login
- * @param username : 로그인 사번
- * @param password : 로그인 비번
+ * @param username string : 로그인 사번
+ * @param password string : 로그인 비번
  * @return boolean
  */
 export const login = async (username, password) => {
@@ -50,9 +62,8 @@ export const login = async (username, password) => {
     const encryptUsername = CryptoJS.AES.encrypt(JSON.stringify(username), process.env.AES_KEY).toString();
     const encryptPassword = password ? CryptoJS.AES.encrypt(JSON.stringify(password), process.env.AES_KEY).toString() : null;
 
-    if (isTest) {
-        store.dispatch(dispatchOne('SET_WEBLINK', tempUri));
-        store.dispatch(dispatchOne('SET_LOADING', false));
+    if (checkIsTest()) {
+        store.dispatch(dispatchMultiple({ SET_WEBLINK: testUrl, SET_EXPDUEDT: 'expDueDt', SET_LOADING: false }));
         return true;
     } else {
         const sendData = {
@@ -62,14 +73,17 @@ export const login = async (username, password) => {
 
         console.log(sendData);
 
+        /** 로그인 (LDAP)
+         * @method POST
+         * @param { userId : 로그인 사번 (AES256), pwd : 비밀번호 (AES256) }
+         * @return { rtnSts : 상태 (S: 성공, E: 실패), rtnMsg : 메시지, rtnUrl : 이동 url, expDueDt : 비밀번호 만료일 }
+         */
         return await ApiFetch.post('api/login/loginProc.do', JSON.stringify(sendData))
             .then((response) => {
                 const { rtnSts, rtnMsg, rtnUrl, expDueDt } = response;
 
-                // 상태 (S: 성공, E: 실패)
                 if (rtnSts == 'S') {
-                    store.dispatch(dispatchOne('SET_WEBLINK', rtnUrl));
-                    // expDueDt todo 어디에 저장해야 함.
+                    store.dispatch(dispatchMultiple({ SET_WEBLINK: rtnUrl, SET_EXPDUEDT: expDueDt }));
 
                     return true;
                 } else {
@@ -91,7 +105,7 @@ export const login = async (username, password) => {
 };
 
 /** 로그인 key 검증 (pin, bio)
- * @param checkFlag : pin 변경 시 loginKey 체크
+ * @param checkFlag boolean : pin 변경 시 loginKey 체크
  * @return boolean
  *  */
 export const checkLogin = async (checkFlag) => {
@@ -101,11 +115,9 @@ export const checkLogin = async (checkFlag) => {
     const osType = await getOsType();
     const loginKey = store.getState().loginReducer.loginKey;
 
-    if (isTest) {
+    if (checkIsTest()) {
         if (!checkFlag) {
-            store.dispatch(dispatchOne('SET_WEBLINK', tempUri));
-            store.dispatch(dispatchOne('SET_TOKEN', '91352089&2024-01-01'));
-            store.dispatch(dispatchOne('SET_LOADING', false));
+            store.dispatch(dispatchMultiple({ SET_WEBLINK: testUrl, SET_TOKEN: '91352089&2024-01-01', SET_LOADING: false }));
         }
 
         return true;
@@ -117,14 +129,18 @@ export const checkLogin = async (checkFlag) => {
             loginKey: loginKey,
         };
 
+        /** 로그인 (loginKey)
+         * @method POST
+         * @param { deviceToken: push token, osType: os 종류, appVersion: 앱 버전, loginKey: 로그인 키 }
+         * @return { rtnSts : 상태 (S: 성공, E: 실패), rtnMsg : 메시지, rtnUrl : 이동 url }
+         */
         return ApiFetch.post('api/login/loginKeyProc.do', JSON.stringify(sendData))
             .then((response) => {
                 const { rtnSts, rtnMsg, rtnUrl } = response;
 
                 // 상태 (S: 성공, E: 실패)
                 if (rtnSts == 'S') {
-                    store.dispatch(dispatchOne('SET_WEBLINK', rtnUrl));
-                    store.dispatch(dispatchOne('SET_TOKEN', loginKey || null));
+                    store.dispatch(dispatchMultiple({ SET_WEBLINK: rtnUrl, SET_TOKEN: loginKey || null }));
 
                     return true;
                 } else {
@@ -145,7 +161,7 @@ export const checkLogin = async (checkFlag) => {
 };
 
 /** 인증번호 전송
- * @param username : 로그인 사번
+ * @param username string : 로그인 사번
  * @return boolean
  */
 export const sendSms = async (username) => {
@@ -160,9 +176,14 @@ export const sendSms = async (username) => {
         appVersion: version,
     };
 
-    if (isTest) {
+    if (checkIsTest()) {
         return true;
     } else {
+        /** sms 인증(otp) 요청
+         * @method POST
+         * @param { userId : 로그인 사번 (AES256), deviceToken: push token, osType: os 종류, appVersion: 앱 버전 }
+         * @return { rtnSts : 상태 (S: 성공, E: 실패), rtnMsg : 메시지 }
+         */
         return await ApiFetch.post(`api/login/sendSmsOpt.do`, JSON.stringify(sendData)).then((response) => {
             const { rtnSts, rtnMsg } = response;
 
@@ -185,22 +206,28 @@ export const checkSms = async (loginInfo) => {
     const encryptUsername = CryptoJS.AES.encrypt(JSON.stringify(loginInfo.username), process.env.AES_KEY).toString();
     const deviceToken = await getDeviceToken();
     const osType = await getOsType();
+    const expDueDt = store.getState().loginReducer.expDueDt;
 
     const sendData = {
         userId: encryptUsername,
         serial: String(loginInfo.otp) || '',
-        expDueDt: '', // todo 어디에 저장한거 가져와야 함
+        expDueDt: expDueDt,
         deviceToken: deviceToken,
         osType: osType,
         appVersion: version,
     };
 
-    if (isTest) {
-        store.dispatch(dispatchOne('SET_WEBLINK', tempUri));
+    if (checkIsTest()) {
+        store.dispatch(dispatchOne('SET_WEBLINK', testUrl));
         return { status: true, token: '91352089&2024-01-01' };
     } else {
+        /** sms 인증(otp) 확인
+         * @method POST
+         * @param { userId : 로그인 사번 (AES256), serial: otp 인증번호, expDueDt : 비밀번호 만료일, deviceToken: push token, osType: os 종류, appVersion: 앱 버전 }
+         * @return { rtnSts : 상태 (S: 성공, E: 실패), rtnMsg : 메시지, rtnUrl : 이동 url, loginKey : 로그인 키 }
+         */
         return await ApiFetch.post(`api/login/checkSmsAuth.do`, JSON.stringify(sendData)).then((response) => {
-            const { rtnSts, rtnMsg, rtnUrl, token } = response;
+            const { rtnSts, rtnMsg, rtnUrl, loginKey } = response;
 
             // 상태 (S: 성공, E: 실패)
             if (rtnSts == 'S') {
@@ -224,16 +251,21 @@ const handleRtnMsg = (message) => {
 
 // push token 값
 const getDeviceToken = async () => {
-    return await getMessagingToken().then((deviceToken) => {
-        console.log('---deviceToken---');
-        console.log(deviceToken);
+    const storeDeviceToken = store.getState().loginReducer.deviceToken;
 
-        if (isTest) {
+    if (storeDeviceToken == null) {
+        return await getMessagingToken().then((deviceToken) => {
+            console.log('---deviceToken---');
+            console.log(deviceToken);
+            store.dispatch(dispatchOne('SET_DEVICETOKEN', deviceToken));
+
             if (profile == 'development' || profile == 'test') Api.test.post('push', { deviceToken: deviceToken });
-        }
 
-        return deviceToken;
-    });
+            return deviceToken;
+        });
+    }
+
+    return storeDeviceToken;
 };
 
 // os type
@@ -256,7 +288,7 @@ export const testToken = (deviceToken) => {
     store.dispatch(dispatchOne('SET_TAB', 'test'));
 };
 
-/////////////////////////////////////////////
+//////////////////// test code /////////////////////////
 
 const checkServer = async () => {
     return Api.test
@@ -280,13 +312,9 @@ const localLogin = async () => {
         encryptPassword: 'encryptPassword',
     };
 
-    console.log(sendData);
-
     return Api.test
         .post('login', sendData)
         .then(({ status, data }) => {
-            console.log(status);
-
             return { status: status == 200, token: data ? data.token : null };
         })
         .catch(async (err) => {
@@ -305,8 +333,6 @@ export const loginTest = async (userid, pwd, url) => {
         .post('loginProcAjax.do', { userid: userid, pwd: pwd, url: url })
         .then((response) => {
             const data = response.data;
-            console.log(data);
-            console.log(response.config.url);
         })
         .catch(async (err) => {
             console.log(err);
@@ -326,8 +352,6 @@ const localCheckLogin = async () => {
     return Api.test
         .post('login/check', sendData)
         .then(({ status, data }) => {
-            console.log(status);
-
             if (data && data['noUser']) {
                 Alert.alert('계정이 존재하지 않습니다.');
                 return { status: false };
@@ -364,8 +388,6 @@ const checkDevice = () => {
 
     const brand = Device.brand;
 
-    console.log(brand);
-
     const deviceInfo = {
         deviceType: Device.deviceType <= 6 ? deviceType[Device.deviceType] : 'UNKNOWN',
         brand: brand == null ? 'web' : brandType[brand.toLowerCase()],
@@ -373,8 +395,6 @@ const checkDevice = () => {
         osVersion: Device.osVersion,
         appVersion: Constants.expoConfig.version,
     };
-
-    console.log(deviceInfo);
 
     return deviceInfo;
 };

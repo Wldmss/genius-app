@@ -6,6 +6,7 @@ import * as SecureStore from 'expo-secure-store';
 import * as Authentication from 'expo-local-authentication';
 import { dispatchMultiple, dispatchOne } from 'utils/DispatchUtils';
 import * as StorageUtils from 'utils/StorageUtils';
+
 /** genius main */
 const Main = () => {
     const [doneBio, setDoneBio] = useState(false);

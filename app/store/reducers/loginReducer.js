@@ -1,6 +1,7 @@
 const initialState = {
     loginKey: null, // storage loginKey token
     token: null, // login token (loginKey)
+    expDueDt: null, // login token 만료일
     pin: null, // { isRegistered: true, value: '', modFlag: false }
     bio: null, // { isRegistered: true, modFlag: false }
     tab: null, // web, ldap, pin, bio, test ..
@@ -13,14 +14,25 @@ const initialState = {
     webPinFlag: false, // 웹에서 pin 변경
     active: false, // 로그인 이후 web 활동 여부
     logout: false, // 로그아웃 처리
+    deviceToken: null, // push device token
 };
 
 const loginReducer = (state = initialState, action) => {
     switch (action.type) {
+        case 'SET_LOGINKEY':
+            return {
+                ...state,
+                loginKey: action.payload,
+            };
         case 'SET_TOKEN':
             return {
                 ...state,
                 token: action.payload,
+            };
+        case 'SET_EXPDUEDT':
+            return {
+                ...state,
+                expDueDt: action.payload,
             };
         case 'SET_PIN':
             return {
@@ -31,11 +43,6 @@ const loginReducer = (state = initialState, action) => {
             return {
                 ...state,
                 bio: action.payload,
-            };
-        case 'SET_LOGINKEY':
-            return {
-                ...state,
-                loginKey: action.payload,
             };
         case 'SET_TAB':
             return {
@@ -98,6 +105,11 @@ const loginReducer = (state = initialState, action) => {
             return {
                 ...state,
                 logout: action.payload,
+            };
+        case 'SET_DEVICETOKEN':
+            return {
+                ...state,
+                deviceToken: action.payload,
             };
         default:
             return state;

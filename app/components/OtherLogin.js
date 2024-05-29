@@ -31,14 +31,18 @@ const OtherLogin = () => {
     };
 
     useEffect(() => {
-        setType({
-            ...type,
-            pin: (tab != 'pin' && loginKey) || (tab == 'pin' && pin?.isRegistered && pin?.modFlag),
-            ldap: false, // tab != 'ldap' && pin?.isRegistered, // 다른 사번으로 로그인 차단 요청
-            bio: bioSupported && bioRecords && tab != 'bio' && loginKey && bio?.isRegistered && pin?.isRegistered,
-            bioRegister: bioSupported && bioRecords && tab != 'bio' && loginKey && !bio?.isRegistered && pin?.isRegistered,
-            changePin: false, // tab == 'pin' && loginKey && !pin?.modFlag,  // 웹에서만 PIN 변경
-        });
+        if (tab != 'web') {
+            const accessBio = bioSupported && bioRecords && tab != 'bio' && loginKey && pin?.isRegistered;
+
+            setType({
+                ...type,
+                pin: (tab != 'pin' && loginKey) || (tab == 'pin' && pin?.isRegistered && pin?.modFlag),
+                ldap: false, // tab != 'ldap' && pin?.isRegistered, // 다른 사번으로 로그인 차단 요청
+                bio: accessBio && bio?.isRegistered,
+                bioRegister: accessBio && !bio?.isRegistered,
+                changePin: false, // tab == 'pin' && loginKey && !pin?.modFlag,  // 웹에서만 PIN 변경
+            });
+        }
     }, [tab, pin, bio]);
 
     return (

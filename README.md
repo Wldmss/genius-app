@@ -204,3 +204,7 @@
             - prebuild 시 : app.json > notification
         - ios
             - app icon
+
+## ip가 안맞는 경우
+
+-   > powershell (관리자 권한) > setx /M REACT_NATIVE_PACKAGER_HOSTNAME 192.168.7.71 > vsCode 재시작
