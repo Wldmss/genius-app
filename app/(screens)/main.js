@@ -11,6 +11,7 @@ import * as StorageUtils from 'utils/StorageUtils';
 const Main = () => {
     const [doneBio, setDoneBio] = useState(false);
     const resetLogin = useSelector((state) => state.loginReducer.resetLogin);
+    const bioRecords = useSelector((state) => state.loginReducer.bioRecords);
 
     // 테스트 용 (storage delete)
     const storeStorageData = async () => {
@@ -45,7 +46,14 @@ const Main = () => {
         let pin = { isRegistered: false, value: '', modFlag: true };
 
         // 생체인증 등록 여부
-        const hasBio = bioData != null && bioData == 'true';
+        let hasBio = bioData != null && bioData == 'true';
+
+        // 생체 인증 등록 후 단말에서 삭제한 경우
+        if (hasBio && !bioRecords) {
+            hasBio = false;
+            await SecureStore.deleteItemAsync('bio');
+        }
+
         bio.isRegistered = hasBio;
         bio.modFlag = false;
 

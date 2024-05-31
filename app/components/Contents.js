@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { Alert, AppState, BackHandler } from 'react-native';
+import { Alert, AppState, BackHandler, Linking, Pressable, Text } from 'react-native';
 import store from 'store/store';
 import moment from 'moment';
 import { Stack, router } from 'expo-router';
@@ -10,6 +10,9 @@ import { checkLogin } from 'api/LoginApi';
 import { backEventHandler } from 'utils/BackUtils';
 import Web from '(screens)/web';
 import * as Updates from 'expo-updates';
+import Constants from 'expo-constants';
+
+const { profile } = Constants.expoConfig.extra;
 
 /** 페이지 router */
 const Contents = () => {
@@ -102,7 +105,7 @@ const Contents = () => {
     const handleAppStateChange = async (nextAppState) => {
         console.log('App state :::::: ', nextAppState);
 
-        if (nextAppState === 'active') {
+        if (nextAppState === 'active' && profile != 'preview' && profile != 'development') {
             await checkUpdates();
         }
 

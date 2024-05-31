@@ -27,7 +27,7 @@ import * as StorageUtils from 'utils/StorageUtils';
 import { dispatchOne } from 'utils/DispatchUtils';
 import { apiFetchStore } from 'api/ApiFetch';
 
-const splashTime = 2000;
+const splashTime = 4000;
 const { profile } = Constants.expoConfig.extra;
 
 /** layout (main)
@@ -122,13 +122,13 @@ const App = () => {
             await checkDevelopment();
             await serverCheck();
 
-            if (profile != 'preview' && profile != 'development') {
-                await onFetchUpdateAsync();
-            } else {
-                await new Promise((resolve) => setTimeout(resolve, splashTime)).then(() => {
+            await new Promise((resolve) => setTimeout(resolve, splashTime)).then(async () => {
+                if (profile != 'preview' && profile != 'development') {
+                    await onFetchUpdateAsync();
+                } else {
                     setSplashLoaded(true);
-                });
-            }
+                }
+            });
         } catch (e) {
             console.warn(e);
         }

@@ -22,6 +22,7 @@ const Web = () => {
     const exitPressed = useSelector((state) => state.commonReducer.exitPressed);
     const webLink = useSelector((state) => state.commonReducer.webLink);
     const currentLink = useSelector((state) => state.commonReducer.currentLink);
+    const isDev = useSelector((state) => state.commonReducer.isDev);
 
     const webViewRef = useRef(null);
 
@@ -29,6 +30,7 @@ const Web = () => {
     const [hide, setHide] = useState(false);
     const [postData, setPostData] = useState({});
     const [init, setInit] = useState(false);
+    const [webUrl, setWebUrl] = useState(process.env.EXPO_PUBLIC_WEB);
 
     let timeout = null;
 
@@ -158,7 +160,18 @@ const Web = () => {
 
     // webview 뒤로가기
     const goBack = () => {
-        webViewRef.current.goBack();
+        if (backButtonEnabled) {
+            webViewRef.current.goBack();
+        } else {
+            Alert.alert(process.env.EXPO_PUBLIC_NAME, `로그아웃 됩니다.`, [
+                {
+                    text: '확인',
+                    onPress: () => {
+                        store.dispatch({ type: 'INIT_APP' });
+                    },
+                },
+            ]);
+        }
     };
 
     // webview 앞으로 가기
@@ -209,7 +222,7 @@ const Web = () => {
                 }
 
                 if (params.link == 'checkIn') {
-                    link = currentLink != null ? currentLink.replace(process.env.EXPO_PUBLIC_WEB, '') || '/main/portalMain.do' : '';
+                    link = currentLink != null ? currentLink.replace(webUrl, '') || '/main/portalMain.do' : '';
                 }
             }
         }
@@ -243,9 +256,9 @@ const Web = () => {
     }, [webLink]);
 
     useEffect(() => {
-        // if (profile.includes('test') || profile.includes('development')) Alert.alert(`${profile}\n${process.env.EXPO_PUBLIC_WEB}${webLink}`);
+        // if (profile.includes('test') || profile.includes('development')) Alert.alert(`${profile}\n${webUrl}${webLink}`);
         if (profile.includes('staging')) {
-            Alert.alert(`${process.env.EXPO_PUBLIC_WEB}${webLink} 접속`, `로그인 연동 준비중입니다.\n로그인 페이지 로드 시 다시 로그인 해주세요.`, [
+            Alert.alert(`${webUrl}${webLink} 접속`, `로그인 연동 준비중입니다.\n로그인 페이지 로드 시 다시 로그인 해주세요.`, [
                 {
                     text: '확인',
                     onPress: () => null,
@@ -253,6 +266,10 @@ const Web = () => {
             ]);
         }
     }, []);
+
+    useEffect(() => {
+        setWebUrl(profile != 'production' && isDev ? process.env.EXPO_PUBLIC_DEV_SERVER_URL : process.env.EXPO_PUBLIC_WEB);
+    }, [isDev]);
 
     return camera ? (
         <ScanQR />
@@ -263,7 +280,7 @@ const Web = () => {
             source={{
                 // uri: 'http://192.168.1.77:8080/file',
                 // method: 'GET',
-                uri: `${process.env.EXPO_PUBLIC_WEB}${webLink || ''}`,
+                uri: `${webUrl}${webLink || ''}`,
                 method: 'POST',
                 body: JSON.stringify(postData),
             }}
@@ -315,6 +332,7 @@ const Web = () => {
             onFileDownload={handleDownload}
             automaticallyAdjustContentInsets={false}
             allowFileAccess={true}
+            // setSupportMultipleWindows={false}
             allowFileAccessFromFileURLs={true}
             allowUniversalAccessFromFileURLs={true}
             onOpenWindow={(syntheticEvent) => {

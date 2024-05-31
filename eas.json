@@ -8,10 +8,10 @@
             "env": {
                 "EXPO_PUBLIC_NAME": "KT 그룹교육",
                 "EXPO_PUBLIC_WEB": "https://ktedu.kt.com",
-                "EXPO_PUBLIC_DEV_SERVER_URL": "https://dev.ktedu.kt.com:2443",
-                "EXPO_PUBLIC_TEST_API_URL": "/api/v1/",
                 "EXPO_PUBLIC_SERVER_URL": "https://ktedu.kt.com",
-                "EXPO_PUBLIC_API_URL": "/"
+                "EXPO_PUBLIC_DEV_SERVER_URL": "https://dev.ktedu.kt.com:2443",
+                "EXPO_PUBLIC_API_URL": "/",
+                "EXPO_PUBLIC_TEST_API_URL": "/api/v1/"
             },
             "android": {
                 "image": "latest",

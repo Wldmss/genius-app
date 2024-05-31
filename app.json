@@ -9,7 +9,7 @@
       "policy": "appVersion"
     },
     "orientation": "portrait",
-    "icon": "./app/assets/icons/app-icon.png",
+    "icon": "./app/assets/icons/icon-ios.png",
     "notification": {
       "icon": "./app/assets/icons/push-icon_white.png",
       "color": "#E65C19"
@@ -23,7 +23,7 @@
       "**/*"
     ],
     "ios": {
-      "buildNumber": "1.0.11",
+      "buildNumber": "1.0.12",
       "supportsTablet": true,
       "requireFullScreen": true,
       "bundleIdentifier": "com.kt.ktgenius",
@@ -45,9 +45,9 @@
       ]
     },
     "android": {
-      "versionCode": 25,
+      "versionCode": 26,
       "adaptiveIcon": {
-        "foregroundImage": "./app/assets/icons/adaptive-icon.png",
+        "foregroundImage": "./app/assets/icons/icon-android.png",
         "backgroundColor": "#ffffff"
       },
       "permissions": [
@@ -86,7 +86,7 @@
       ]
     },
     "web": {
-      "favicon": "./app/assets/icons/app-icon.png"
+      "favicon": "./app/assets/icons/icon-ios.png"
     },
     "extra": {
       "eas": {

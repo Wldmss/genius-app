@@ -7,6 +7,8 @@ export const apiFetchStore = (_store) => {
     store = _store;
 };
 
+const server = null;
+
 const checkDevelopment = () => {
     const isDev = store.getState().commonReducer.isDev;
     const url = isDev ? process.env.EXPO_PUBLIC_DEV_SERVER_URL : process.env.EXPO_PUBLIC_SERVER_URL;
@@ -15,7 +17,7 @@ const checkDevelopment = () => {
 };
 
 export async function postForm(url, body) {
-    const serverInfo = checkDevelopment();
+    const serverInfo = server == null ? checkDevelopment() : server;
 
     const response = await fetch(`${serverInfo.url}/${url}`, {
         method: 'POST',
@@ -36,7 +38,7 @@ export async function postForm(url, body) {
 }
 
 export async function post(url, body) {
-    const serverInfo = checkDevelopment();
+    const serverInfo = server == null ? checkDevelopment() : server;
 
     const response = await fetch(`${serverInfo.url}/${url}`, {
         method: 'POST',
@@ -57,7 +59,7 @@ export async function post(url, body) {
 }
 
 export async function get(url) {
-    const serverInfo = checkDevelopment();
+    const serverInfo = server == null ? checkDevelopment() : server;
 
     const response = await fetch(`${serverInfo.url}/${url}`, {
         method: 'GET',
@@ -74,6 +76,10 @@ export async function get(url) {
 
 const catchError = (error) => {
     Alert.alert(`개발자 모드`, `${error}`, [
+        {
+            text: '무시하고 계속',
+            onPress: () => null,
+        },
         {
             text: '모드 변경',
             onPress: async () => {

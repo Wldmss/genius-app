@@ -1,8 +1,10 @@
 import { View, StyleSheet, Text } from 'react-native';
 import Constants from 'expo-constants';
-import { GeniusLogo } from 'utils/ImageUtils';
+import { GeniusLogo, GeniusLottie } from 'utils/ImageUtils';
 import ProgressBar from 'utils/ProgressBar';
 import { useSelector } from 'react-redux';
+
+const { profile } = Constants.expoConfig.extra;
 
 /** splash screen */
 const Splash = ({ isUpdate, updateProgress, version }) => {
@@ -12,7 +14,7 @@ const Splash = ({ isUpdate, updateProgress, version }) => {
         splash && (
             <View style={styles.container}>
                 <View style={styles.center}>
-                    <GeniusLogo style={styles.logoBox} />
+                    {profile != 'staging' ? <GeniusLottie /> : <GeniusLogo style={styles.logoBox} />}
                     {isUpdate && <ProgressBar percent={updateProgress} version={version} />}
                     <Text style={styles.versionText}>{version ? `v.${version}` : ''}</Text>
                 </View>
@@ -46,6 +48,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         paddingVertical: 5,
         marginBottom: 10,
+        color: `#8a8a8a`,
     },
 });
 
