@@ -1,8 +1,9 @@
 import { View, StyleSheet, Text } from 'react-native';
 import Constants from 'expo-constants';
-import { GeniusLogo, GeniusLottie } from 'utils/ImageUtils';
+import { GeniusLogo } from 'utils/ImageUtils';
 import ProgressBar from 'utils/ProgressBar';
 import { useSelector } from 'react-redux';
+import { GeniusLottie } from 'utils/Lottie';
 
 const { profile } = Constants.expoConfig.extra;
 
@@ -25,7 +26,6 @@ const Splash = ({ isUpdate, updateProgress, version }) => {
 
 const styles = StyleSheet.create({
     container: {
-        // flex: 1,
         paddingTop: Constants.statusBarHeight,
         justifyContent: `center`,
         alignItems: `center`,

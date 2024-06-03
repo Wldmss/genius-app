@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { Alert, AppState, BackHandler, Linking, Pressable, Text } from 'react-native';
+import { Alert, AppState, BackHandler } from 'react-native';
 import store from 'store/store';
 import moment from 'moment';
 import { Stack, router } from 'expo-router';
@@ -28,11 +28,8 @@ const Contents = () => {
     const isLogin = useSelector((state) => state.loginReducer.isLogin);
     const loginKey = useSelector((state) => state.loginReducer.loginKey);
     const exitPressed = useSelector((state) => state.commonReducer.exitPressed);
-    const isLink = useSelector((state) => state.commonReducer.isLink);
-    const params = useSelector((state) => state.commonReducer.params);
     const isWeb = useSelector((state) => state.commonReducer.isWeb);
     const logout = useSelector((state) => state.loginReducer.logout);
-    const isDev = useSelector((state) => state.commonReducer.isDev);
 
     let timeout = null;
 

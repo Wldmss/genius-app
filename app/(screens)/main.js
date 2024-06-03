@@ -6,25 +6,28 @@ import * as SecureStore from 'expo-secure-store';
 import * as Authentication from 'expo-local-authentication';
 import { dispatchMultiple, dispatchOne } from 'utils/DispatchUtils';
 import * as StorageUtils from 'utils/StorageUtils';
+import Constants from 'expo-constants';
+// import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const { profile } = Constants.expoConfig.extra;
+
+// secure storage delete
+export const deleteSecureStore = async (isDev) => {
+    try {
+        await SecureStore.deleteItemAsync('bio');
+        await SecureStore.deleteItemAsync('pin');
+        await SecureStore.deleteItemAsync('loginKey');
+        if (!isDev) await SecureStore.deleteItemAsync('isDev');
+    } catch (err) {
+        console.log(err);
+    }
+};
 
 /** genius main */
 const Main = () => {
     const [doneBio, setDoneBio] = useState(false);
     const resetLogin = useSelector((state) => state.loginReducer.resetLogin);
     const bioRecords = useSelector((state) => state.loginReducer.bioRecords);
-
-    // 테스트 용 (storage delete)
-    const storeStorageData = async () => {
-        try {
-            await SecureStore.deleteItemAsync('bio');
-            await SecureStore.deleteItemAsync('pin');
-            await SecureStore.deleteItemAsync('loginKey');
-            await SecureStore.deleteItemAsync('hasVisit');
-            // await SecureStore.setItemAsync('loginKey', '');
-        } catch (err) {
-            console.log(err);
-        }
-    };
 
     // 로그인 리셋
     const resetStorageData = async () => {
@@ -102,11 +105,16 @@ const Main = () => {
         setDoneBio(true);
     };
 
-    // 최초 접속 확인
+    // 최초 접속 확인 : ios는 키체인에 저장되어 앱 삭제 시 storage reset이 안됨
     const checkFirst = async () => {
         try {
-            const hasVisit = await StorageUtils.getDeviceData('hasVisit');
-            return hasVisit == null || hasVisit != 'true';
+            // TODO 빌드 후에 다시 설정하기
+            // const isFirst = await AsyncStorage.getItem('isFirst');
+            // if (isFirst == null || isFirst != 'true') {
+            //     // 최초 설치
+            //     deleteSecureStore();
+            //     await AsyncStorage.setItem('isFirst', 'true');
+            // }
         } catch (err) {
             return false;
         }
@@ -124,9 +132,9 @@ const Main = () => {
     };
 
     useEffect(() => {
-        // storeStorageData();
+        // deleteSecureStore();
 
-        checkFirst().then((isFirst) => {
+        checkFirst().then(() => {
             checkStorage();
         });
     }, []);

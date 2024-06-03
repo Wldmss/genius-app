@@ -1,14 +1,15 @@
 import { Alert } from 'react-native';
 import axios from 'axios';
+import { dispatchLogin, dispatchMultiple, dispatchOne } from 'utils/DispatchUtils';
+import Api from './Api';
+import * as ApiFetch from './ApiFetch';
+import { getMessagingToken } from 'utils/PushFcm';
+import { encrypt } from 'utils/CipherUtils';
 import * as Device from 'expo-device';
 import Constants from 'expo-constants';
-import { dispatchLogin, dispatchMultiple, dispatchOne } from 'utils/DispatchUtils';
-import CryptoJS from 'react-native-crypto-js';
-import Api from './Api';
-import { getMessagingToken } from 'utils/PushFcm';
-import * as ApiFetch from './ApiFetch';
 
-const { profile, isTest, version } = Constants.expoConfig.extra;
+const { profile, isTest } = Constants.expoConfig.extra;
+const { version } = Constants.expoConfig;
 
 // const testUrl = 'https://naver.com';
 // const testUrl = 'https://m.mail.naver.com/v2/read/0/6110';
@@ -65,11 +66,11 @@ export const checkVersion = async () => {
 export const login = async (username, password) => {
     store.dispatch(dispatchOne('SET_LOADING', true));
 
-    const encryptUsername = CryptoJS.AES.encrypt(JSON.stringify(username), process.env.AES_KEY).toString();
-    const encryptPassword = password ? CryptoJS.AES.encrypt(JSON.stringify(password), process.env.AES_KEY).toString() : null;
+    const encryptUsername = encrypt(username);
+    const encryptPassword = password ? encrypt(password) : null;
 
     if (checkIsTest()) {
-        store.dispatch(dispatchMultiple({ SET_WEBLINK: testUrl, SET_EXPDUEDT: 'expDueDt', SET_LOADING: false }));
+        store.dispatch(dispatchMultiple({ SET_WEBLINK: testUrl, SET_LOADING: false }));
         return true;
     } else {
         const sendData = {
@@ -82,14 +83,14 @@ export const login = async (username, password) => {
         /** 로그인 (LDAP)
          * @method POST
          * @param { userId : 로그인 사번 (AES256), pwd : 비밀번호 (AES256) }
-         * @return { rtnSts : 상태 (S: 성공, E: 실패), rtnMsg : 메시지, rtnUrl : 이동 url, expDueDt : 비밀번호 만료일 }
+         * @return { rtnSts : 상태 (S: 성공, E: 실패), rtnMsg : 메시지, rtnUrl : 이동 url }
          */
         return await ApiFetch.post('api/login/loginProc.do', JSON.stringify(sendData))
             .then((response) => {
-                const { rtnSts, rtnMsg, rtnUrl, expDueDt } = response;
+                const { rtnSts, rtnMsg, rtnUrl } = response;
 
                 if (rtnSts == 'S') {
-                    store.dispatch(dispatchMultiple({ SET_WEBLINK: rtnUrl, SET_EXPDUEDT: expDueDt }));
+                    store.dispatch(dispatchOne('SET_WEBLINK', rtnUrl));
 
                     return true;
                 } else {
@@ -100,7 +101,7 @@ export const login = async (username, password) => {
                 }
             })
             .catch(async (err) => {
-                if (isDev) store.dispatch(dispatchMultiple({ SET_WEBLINK: testUrl, SET_EXPDUEDT: 'expDueDt', SET_LOADING: false }));
+                if (isDev) store.dispatch(dispatchMultiple({ SET_WEBLINK: testUrl, SET_LOADING: false }));
                 return isDev;
             })
             .finally(() => {
@@ -143,7 +144,6 @@ export const checkLogin = async (checkFlag) => {
             .then((response) => {
                 const { rtnSts, rtnMsg, rtnUrl } = response;
 
-                // 상태 (S: 성공, E: 실패)
                 if (rtnSts == 'S') {
                     store.dispatch(dispatchMultiple({ SET_WEBLINK: rtnUrl, SET_TOKEN: loginKey || null }));
 
@@ -170,7 +170,7 @@ export const checkLogin = async (checkFlag) => {
  * @return boolean
  */
 export const sendSms = async (username) => {
-    const encryptUsername = CryptoJS.AES.encrypt(JSON.stringify(username), process.env.AES_KEY).toString();
+    const encryptUsername = encrypt(username);
     const deviceToken = await getDeviceToken();
     const osType = await getOsType();
 
@@ -193,7 +193,6 @@ export const sendSms = async (username) => {
             .then((response) => {
                 const { rtnSts, rtnMsg } = response;
 
-                // 상태 (S: 성공, E: 실패)
                 if (rtnSts == 'E') {
                     if (rtnMsg && rtnMsg != '') Alert.alert(JSON.stringify(rtnMsg));
                     return false;
@@ -213,15 +212,13 @@ export const sendSms = async (username) => {
  * @return { status: boolean, token: string }
  */
 export const checkSms = async (loginInfo) => {
-    const encryptUsername = CryptoJS.AES.encrypt(JSON.stringify(loginInfo.username), process.env.AES_KEY).toString();
+    const encryptUsername = encrypt(loginInfo.username);
     const deviceToken = await getDeviceToken();
     const osType = await getOsType();
-    const expDueDt = store.getState().loginReducer.expDueDt;
 
     const sendData = {
         userId: encryptUsername,
         serial: String(loginInfo.otp) || '',
-        expDueDt: expDueDt,
         deviceToken: deviceToken,
         osType: osType,
         appVersion: version,
@@ -233,7 +230,7 @@ export const checkSms = async (loginInfo) => {
     } else {
         /** sms 인증(otp) 확인
          * @method POST
-         * @param { userId : 로그인 사번 (AES256), serial: otp 인증번호, expDueDt : 비밀번호 만료일, deviceToken: push token, osType: os 종류, appVersion: 앱 버전 }
+         * @param { userId : 로그인 사번 (AES256), serial: otp 인증번호, deviceToken: push token, osType: os 종류, appVersion: 앱 버전 }
          * @return { rtnSts : 상태 (S: 성공, E: 실패), rtnMsg : 메시지, rtnUrl : 이동 url, loginKey : 로그인 키 }
          */
         return await ApiFetch.post(`api/login/checkSmsAuth.do`, JSON.stringify(sendData))

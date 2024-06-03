@@ -27,7 +27,7 @@ export async function postForm(url, body) {
         },
         body: JSON.stringify(body),
     }).catch((error) => {
-        if (serverInfo.isDev) catchError(error);
+        if (serverInfo.isDev) catchError(`${serverInfo.url}/${url}`, error);
     });
 
     if (!response.ok) {
@@ -48,7 +48,7 @@ export async function post(url, body) {
         },
         body: JSON.stringify(body),
     }).catch((error) => {
-        if (serverInfo.isDev) catchError(error);
+        if (serverInfo.isDev) catchError(`${serverInfo.url}/${url}`, error);
     });
 
     if (!response.ok) {
@@ -64,7 +64,7 @@ export async function get(url) {
     const response = await fetch(`${serverInfo.url}/${url}`, {
         method: 'GET',
     }).catch((error) => {
-        if (serverInfo.isDev) catchError(error);
+        if (serverInfo.isDev) catchError(`${serverInfo.url}/${url}`, error);
     });
 
     if (!response.ok) {
@@ -74,8 +74,8 @@ export async function get(url) {
     return await response.json();
 }
 
-const catchError = (error) => {
-    Alert.alert(`개발자 모드`, `${error}`, [
+const catchError = (url, error) => {
+    Alert.alert(`개발자 모드`, `${url}\n${error}`, [
         {
             text: '무시하고 계속',
             onPress: () => null,
@@ -89,7 +89,7 @@ const catchError = (error) => {
         {
             text: '복사 및 재시작',
             onPress: async () => {
-                await Clipboard.setStringAsync(`${error}`);
+                await Clipboard.setStringAsync(`${url}\n\n${error}`);
                 await Updates.reloadAsync();
             },
         },

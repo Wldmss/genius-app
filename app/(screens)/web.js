@@ -11,6 +11,7 @@ import ErrorPage from '(utils)/error';
 import Constants from 'expo-constants';
 import ScanQR from '(utils)/camera';
 import { commonStyles } from 'assets/styles';
+import * as WebBrowser from 'expo-web-browser';
 
 const { profile } = Constants.expoConfig.extra;
 
@@ -153,9 +154,7 @@ const Web = () => {
         if (!url) return;
 
         let goBack = url.includes('portalMain.do') || url.includes('login.do') ? false : canGoBack;
-
         setBackButtonEnabled(goBack);
-        changeUrl(url);
     };
 
     // webview 뒤로가기
@@ -192,12 +191,39 @@ const Web = () => {
     // onShouldStartLoadWithRequest
     const handleStartLoadWithRequest = (request) => {
         const { url } = request;
-        changeUrl(url);
-        return true;
+
+        if (checkUrl(url)) {
+            changeUrl(url);
+            return true;
+        } else {
+            return false;
+        }
     };
 
+    // url 확인
+    const checkUrl = (url) => {
+        console.log(url);
+        if (url.includes('popupKyobo.do')) {
+            // openWindow(url);
+
+            return false;
+        }
+
+        return true;
+    };
     const changeUrl = (url) => {
         if (url != currentLink) store.dispatch(dispatchOne('SET_CURRENTLINK', url));
+    };
+
+    // window.open intercept
+    const openWindow = async (targetUrl) => {
+        const canOpen = Linking.canOpenURL(targetUrl);
+
+        if (canOpen) {
+            Linking.openURL(targetUrl);
+        } else {
+            await WebBrowser.openBrowserAsync(targetUrl);
+        }
     };
 
     useEffect(() => {
@@ -256,19 +282,18 @@ const Web = () => {
     }, [webLink]);
 
     useEffect(() => {
+        const web_url = profile != 'production' && isDev ? process.env.EXPO_PUBLIC_DEV_SERVER_URL : process.env.EXPO_PUBLIC_WEB;
+        setWebUrl(web_url);
+
         // if (profile.includes('test') || profile.includes('development')) Alert.alert(`${profile}\n${webUrl}${webLink}`);
         if (profile.includes('staging')) {
-            Alert.alert(`${webUrl}${webLink} 접속`, `로그인 연동 준비중입니다.\n로그인 페이지 로드 시 다시 로그인 해주세요.`, [
+            Alert.alert(`${web_url}${webLink} 접속`, `로그인 연동 준비중입니다.\n로그인 페이지 로드 시 다시 로그인 해주세요.`, [
                 {
                     text: '확인',
                     onPress: () => null,
                 },
             ]);
         }
-    }, []);
-
-    useEffect(() => {
-        setWebUrl(profile != 'production' && isDev ? process.env.EXPO_PUBLIC_DEV_SERVER_URL : process.env.EXPO_PUBLIC_WEB);
     }, [isDev]);
 
     return camera ? (
@@ -339,6 +364,7 @@ const Web = () => {
                 const { nativeEvent } = syntheticEvent;
                 const { targetUrl } = nativeEvent;
                 console.log('Intercepted OpenWindow for', targetUrl);
+                openWindow(targetUrl);
             }}
             onContentProcessDidTerminate={(syntheticEvent) => {
                 const { nativeEvent } = syntheticEvent;

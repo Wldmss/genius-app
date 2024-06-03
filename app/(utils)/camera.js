@@ -99,6 +99,7 @@ const ScanQR = () => {
     }, [type]);
 
     useEffect(() => {
+        // 코드 스캔 시 바로 이동
         if (scan) goToLink();
     }, [scan]);
 

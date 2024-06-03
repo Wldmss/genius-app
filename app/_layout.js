@@ -26,6 +26,7 @@ import { checkVersion, loginApiStore } from 'api/LoginApi';
 import * as StorageUtils from 'utils/StorageUtils';
 import { dispatchOne } from 'utils/DispatchUtils';
 import { apiFetchStore } from 'api/ApiFetch';
+import Development from '(utils)/development';
 
 const splashTime = 4000;
 const { profile } = Constants.expoConfig.extra;
@@ -39,6 +40,7 @@ const App = () => {
     const [isUpdate, setIsUpdate] = useState(false);
     const [updateProgress, setUpdateProgress] = useState(0);
     const [version, setVersion] = useState(Constants.expoConfig.version);
+    const [dev, setDev] = useState(false);
 
     console.log('profile :: ', profile);
 
@@ -70,7 +72,10 @@ const App = () => {
     // 개발자 모드 체크
     const checkDevelopment = async () => {
         const isDev = await StorageUtils.getDeviceData('isDev');
-        if (isDev != null && isDev == 'true') store.dispatch(dispatchOne('SET_DEV', true));
+        const devFlag = isDev != null && isDev == 'true';
+
+        setDev(devFlag);
+        store.dispatch(dispatchOne('SET_DEV', devFlag));
     };
 
     // 서버 체크
@@ -105,6 +110,14 @@ const App = () => {
                     setSplashLoaded(true);
                 } finally {
                     setIsUpdate(false);
+                    // Alert.alert(process.env.EXPO_PUBLIC_NAME, '업데이트 되었습니다.\n앱을 다시 시작합니다.', [
+                    //     {
+                    //         text: '확인',
+                    //         onPress: async () => {
+                    //             await Updates.reloadAsync();
+                    //         },
+                    //     },
+                    // ]);
                     await Updates.reloadAsync();
                 }
             }
@@ -144,6 +157,7 @@ const App = () => {
                 <Splash isUpdate={isUpdate} updateProgress={updateProgress} version={version} />
                 {splashLoaded && fontsLoaded && (
                     <SafeAreaView style={styles.container}>
+                        <Development isDev={dev} />
                         <Contents />
                         <PopModal />
                         <Snackbar />

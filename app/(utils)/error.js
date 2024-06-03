@@ -1,11 +1,16 @@
+import { setDevelopment } from '(login)/_layout';
 import { commonInputStyles } from 'assets/styles';
+import { useEffect } from 'react';
 import { Image, Pressable, StyleSheet, View } from 'react-native';
+import { useSelector } from 'react-redux';
 import store from 'store/store';
 import { FontText } from 'utils/TextUtils';
 
 const error_img = require('assets/images/error.png');
 
 const ErrorPage = ({ goBack }) => {
+    const isDev = useSelector((state) => state.commonReducer.isDev);
+
     const retry = () => {
         if (goBack) {
             goBack();
@@ -13,6 +18,10 @@ const ErrorPage = ({ goBack }) => {
             store.dispatch({ type: 'INIT_APP' });
         }
     };
+
+    useEffect(() => {
+        // if (isDev) setDevelopment();
+    }, []);
 
     return (
         <View style={styles.container}>

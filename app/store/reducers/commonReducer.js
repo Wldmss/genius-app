@@ -8,7 +8,6 @@ const initialState = {
     snack: null, // snack bar 값
     test: null, // 테스트 값
     exitPressed: false, // 뒤로가기
-    isFirst: false, // 최초 접속 여부
     isWeb: false, // web 접속 여부
     webLink: null, // 웹 접속 링크
     currentLink: null, // 현재 링크
@@ -80,11 +79,6 @@ const commonReducer = (state = initialState, action) => {
             return {
                 ...state,
                 exitPressed: action.payload,
-            };
-        case 'SET_FIRST':
-            return {
-                ...state,
-                isFirst: action.payload,
             };
         case 'SET_WEB':
             return {

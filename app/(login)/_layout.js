@@ -7,10 +7,13 @@ import store from 'store/store';
 import { dispatchOne } from 'utils/DispatchUtils';
 import * as StorageUtils from 'utils/StorageUtils';
 import * as Updates from 'expo-updates';
+import * as WebBrowser from 'expo-web-browser';
 
 import TopLogo from 'assets/images/login-top.svg';
 const genius_background = require('assets/images/login-bg.png');
 import { GeniusLogo } from 'utils/ImageUtils';
+import { deleteSecureStore } from '(screens)/main';
+import { useSelector } from 'react-redux';
 
 const { isTest } = Constants.expoConfig.extra;
 
@@ -41,12 +44,33 @@ export const setDevelopment = () => {
     }
 };
 
+const test = async () => {
+    if (isTest) {
+        Alert.alert(`개발자 모드`, '로그인 정보를 초기화 합니다.', [
+            {
+                text: '취소',
+                onPress: () => null,
+            },
+            {
+                text: '확인',
+                onPress: async () => {
+                    await deleteSecureStore(true);
+                    await Updates.reloadAsync();
+                },
+            },
+        ]);
+    }
+    // await WebBrowser.openBrowserAsync('https://www.naver.com');
+};
+
 /** 로그인 페이지 (공통) */
 const LoginLayout = () => {
+    const isDev = useSelector((state) => state.commonReducer.isDev);
+
     return (
         <View style={styles.container} id="content">
             <ImageBackground source={genius_background} style={styles.loginBackground}>
-                <Pressable onLongPress={setDevelopment}>
+                <Pressable onLongPress={setDevelopment} onPress={() => isDev && test()}>
                     <TopLogo style={styles.title} />
                 </Pressable>
                 <View style={styles.enterBox}>

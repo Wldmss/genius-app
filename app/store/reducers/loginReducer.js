@@ -1,7 +1,6 @@
 const initialState = {
     loginKey: null, // storage loginKey token
     token: null, // login token (loginKey)
-    expDueDt: null, // login token 만료일
     pin: null, // { isRegistered: true, value: '', modFlag: false }
     bio: null, // { isRegistered: true, modFlag: false }
     tab: null, // web, ldap, pin, bio, test ..
@@ -28,11 +27,6 @@ const loginReducer = (state = initialState, action) => {
             return {
                 ...state,
                 token: action.payload,
-            };
-        case 'SET_EXPDUEDT':
-            return {
-                ...state,
-                expDueDt: action.payload,
             };
         case 'SET_PIN':
             return {
