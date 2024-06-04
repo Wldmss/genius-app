@@ -27,6 +27,7 @@ import * as StorageUtils from 'utils/StorageUtils';
 import { dispatchOne } from 'utils/DispatchUtils';
 import { apiFetchStore } from 'api/ApiFetch';
 import Development from '(utils)/development';
+import Test from '(screens)/test';
 
 const splashTime = 4000;
 const { profile } = Constants.expoConfig.extra;
@@ -110,15 +111,15 @@ const App = () => {
                     setSplashLoaded(true);
                 } finally {
                     setIsUpdate(false);
-                    // Alert.alert(process.env.EXPO_PUBLIC_NAME, '업데이트 되었습니다.\n앱을 다시 시작합니다.', [
-                    //     {
-                    //         text: '확인',
-                    //         onPress: async () => {
-                    //             await Updates.reloadAsync();
-                    //         },
-                    //     },
-                    // ]);
-                    await Updates.reloadAsync();
+                    Alert.alert(process.env.EXPO_PUBLIC_NAME, '업데이트 되었습니다.\n앱을 다시 시작합니다.', [
+                        {
+                            text: '확인',
+                            onPress: async () => {
+                                await Updates.reloadAsync();
+                            },
+                        },
+                    ]);
+                    // await Updates.reloadAsync();
                 }
             }
         } catch (error) {
@@ -159,6 +160,7 @@ const App = () => {
                     <SafeAreaView style={styles.container}>
                         <Development isDev={dev} />
                         <Contents />
+                        {/* <Test /> */}
                         <PopModal />
                         <Snackbar />
                     </SafeAreaView>

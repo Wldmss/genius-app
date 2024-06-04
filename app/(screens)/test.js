@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Linking, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { useSelector } from 'react-redux';
 import * as Clipboard from 'expo-clipboard';
 import { FontText } from 'utils/TextUtils';
@@ -6,8 +6,12 @@ import { commonInputStyles } from 'assets/styles';
 import { loginTest } from 'api/LoginApi';
 import axios from 'axios';
 import * as ApiFetch from 'api/ApiFetch';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { encrypt } from 'utils/CipherUtils';
+import * as FileSystem from 'expo-file-system';
+import { dispatchOne } from 'utils/DispatchUtils';
+import { WebView } from 'react-native-webview';
+import * as WebBrowser from 'expo-web-browser';
 
 export default function Test() {
     const test = useSelector((state) => state.commonReducer.test);
@@ -30,6 +34,7 @@ export default function Test() {
     };
 
     const testCipher = async () => {
+        console.log('&&&&&&&&&&&&&&&& aes test &&&&&&&&&&&&&&&&&');
         const valueArr = [82047550, 82047551, 82047552, 82047553, 82047554, 91260490, 91352089, 'new1234!'];
         // const valueArr = ['82047550', '82047551', '82047552', '82047553', '82047554', '91260490', '91352089'];
         // const valueArr = ['rlawldms1!', 'rlarla!@#$rla'];
@@ -39,40 +44,97 @@ export default function Test() {
         }
     };
 
+    const [web, setWeb] = useState(null);
+    const [progress, setProgress] = useState(0);
+    const url = 'https://85a4-117-111-17-91.ngrok-free.app/file/download/test.txt';
+    const fileArr = url.split('/');
+    const fileName = fileArr[fileArr.length - 1];
+    console.log(fileName);
+    const downloadPath = FileSystem.documentDirectory + '';
+
+    const downloadCallback = (downloadProgress) => {
+        const progress = downloadProgress.totalBytesWritten / downloadProgress.totalBytesExpectedToWrite;
+        console.log(progress);
+        setProgress(progress);
+    };
+
+    const downloadResumable = FileSystem.createDownloadResumable(url, downloadPath + fileName, {}, downloadCallback);
+
+    const download = async () => {
+        await downloadResumable
+            .downloadAsync()
+            .then((result) => {
+                console.log(result);
+
+                if (result.status === 200) {
+                    console.log('Download Complete!', `File saved at: ${result.uri}`);
+                    setWeb(result.uri);
+                    moveFile(result.uri);
+                } else {
+                    console.log('Download Failed!', 'Unable to download the file.');
+                }
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    };
+
+    const moveFile = async (downloadUri) => {
+        if (downloadUri) {
+            const newLocation = FileSystem.documentDirectory + 'KTedu/' + downloadUri.split('/').pop();
+            console.log(newLocation);
+            try {
+                await FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'KTedu/', { intermediates: true });
+                await FileSystem.moveAsync({
+                    from: downloadUri,
+                    to: newLocation,
+                });
+                console.log('File moved to:', newLocation);
+                // setNewUri(newLocation);
+            } catch (e) {
+                console.error('Error moving file:', e);
+            }
+        } else {
+            console.error('No file to move');
+        }
+    };
+
+    const webTest = async () => {
+        await WebBrowser.openBrowserAsync(url, {
+            toolbarColor: 'white', // 안드로이드 옵션
+            controlsColor: 'white', // iOS 옵션
+            dismissButtonStyle: 'close', // iOS 옵션
+            readerMode: false, // iOS 옵션
+            enableBarCollapsing: true, // iOS 옵션
+        });
+    };
+
+    const callbackLink = (url) => {
+        console.log(url);
+    };
+
+    const linkTest = () => {
+        // Linking.addEventListener('url', callbackLink);
+    };
     useEffect(() => {
-        console.log('&&&&&&&&&&&&&&&& aes test &&&&&&&&&&&&&&&&&');
-        testCipher();
+        store.dispatch(dispatchOne('SET_SPLASH', false));
 
-        // const encryptUsername = CryptoJS.AES.encrypt(value, key).toString();
-        // console.log(encryptUsername);
-
-        // Api.test.post('cipher', { encrypt: encryptUsername, key: key, iv: ivString }).then((result) => {
-        //     console.log('decrypt ::: ', result);
-        // });
-
-        // // var decrypted = CryptoJS.AES.decrypt(encryptUsername, key);
-        // // console.log('js :: ', decrypted.toString(CryptoJS.enc.Utf8));
-
-        // console.log('----');
-
-        // const decrypted2 = CryptoJS.AES.decrypt(test.toString(), key, {
-        //     iv: iv,
-        //     mode: CryptoJS.mode.CBC,
-        //     padding: CryptoJS.pad.Pkcs7,
-        // });
-
-        // console.log('js :: ', decrypted2.toString(CryptoJS.enc.Utf8));
+        // webTest();
+        // download();
+        // testCipher();
     }, []);
 
     return (
         <View style={styles.container}>
-            <FontText style={styles.text} onPress={copy}>
+            {/* <FontText style={styles.text} onPress={copy}>
                 {test}
-            </FontText>
+            </FontText> */}
 
-            {/* <Pressable style={commonInputStyles.buttonWhite} onPress={click}>
+            <Pressable style={commonInputStyles.buttonWhite} onPress={linkTest}>
                 <FontText>테스트</FontText>
-            </Pressable> */}
+            </Pressable>
+
+            {/* {web && <WebView source={{ uri: web }} />} */}
         </View>
     );
 }

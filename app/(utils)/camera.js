@@ -5,6 +5,7 @@ import { BarCodeScanner } from 'expo-barcode-scanner';
 import * as ImagePicker from 'expo-image-picker';
 import { FontText } from 'utils/TextUtils';
 import { dispatchOne } from 'utils/DispatchUtils';
+import { checkIn } from 'api/LoginApi';
 
 const cancel_img = require('assets/images/close.png');
 const no_img = require('assets/images/close.png');
@@ -43,11 +44,25 @@ const ScanQR = () => {
     };
 
     // 링크 이동
-    const goToLink = (e) => {
-        // deep linking으로 변경해야 함 (TODO)
-        Linking.openURL(urlText);
-        resetScan();
-        backToWeb();
+    const goToLink = async (e) => {
+        const urlParam = urlText == null || urlText == '' || !(urlText.startsWith('{') && urlText.endsWith('}')) ? {} : JSON.parse(urlText);
+
+        await checkIn(urlParam).then(({ status, message }) => {
+            const msgText = message == null || message == '' ? '다시 시도해주세요.' : message;
+            Alert.alert(process.env.EXPO_PUBLIC_NAME, msgText, [
+                {
+                    text: '확인',
+                    onPress: () => {
+                        resetScan();
+
+                        if (status) {
+                            backToWeb();
+                        }
+                    },
+                },
+            ]);
+        });
+
         if (e) e.stopPropagation();
     };
 
@@ -128,10 +143,12 @@ const ScanQR = () => {
                         />
                     ) : (
                         <Pressable onPress={checkPermission}>
-                            <Image source={no_camera} style={styles.noImage} resizeMode="contain" />
+                            <FontText>카메라 권한을 허용해주세요.</FontText>
+                            {/* <Image source={no_camera} style={styles.noImage} resizeMode="contain" /> */}
                         </Pressable>
                     )
                 ) : (
+                    // )
                     <Image
                         style={selectedImage != null ? styles.image : styles.noImage}
                         source={selectedImage != null ? { uri: selectedImage } : no_img}
@@ -140,7 +157,7 @@ const ScanQR = () => {
                 )}
             </View>
             {/* url box */}
-            <Modal visible={scan} transparent={true}>
+            <Modal visible={false /**scan*/} transparent={true}>
                 <Pressable style={styles.modal} onPress={(event) => resetScan(event)}>
                     <Pressable style={styles.modalContent} onPress={(e) => e.stopPropagation()}>
                         <View style={styles.modalUrlContainer}>
@@ -199,8 +216,8 @@ const styles = StyleSheet.create({
         height: `100%`,
     },
     noImage: {
-        width: 100,
-        height: 100,
+        // width: 100,
+        // height: 100,
     },
     modal: {
         flex: 1,

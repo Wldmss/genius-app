@@ -237,7 +237,6 @@ export const checkSms = async (loginInfo) => {
             .then((response) => {
                 const { rtnSts, rtnMsg, rtnUrl, loginKey } = response;
 
-                // 상태 (S: 성공, E: 실패)
                 if (rtnSts == 'S') {
                     store.dispatch(dispatchOne('SET_WEBLINK', rtnUrl));
 
@@ -257,6 +256,36 @@ export const checkSms = async (loginInfo) => {
                 }
 
                 return { status: false, token: null };
+            });
+    }
+};
+
+/** QR 체크인
+ * @param params : 전달할 값
+ */
+export const checkIn = async (params) => {
+    if (checkIsTest()) {
+        return { status: true, message: 'QR 체크인 pass' };
+    } else {
+        const loginKey = store.getState().loginReducer.loginKey;
+
+        const sendData = {
+            ...params,
+            loginKey: loginKey,
+        };
+
+        /** 체크인 정보 전송
+         * @method POST
+         * @param { loginKey : 로그인 key }
+         * @returns { rtnSts : 상태 (S: 성공, E: 실패), rtnMsg : 메시지 }
+         */
+        return await ApiFetch.post(`api/common/qrChkIn.do`, JSON.stringify(sendData))
+            .then((response) => {
+                const { rtnSts, rtnMsg } = response;
+                return { status: rtnSts == 'S', message: rtnMsg };
+            })
+            .catch((error) => {
+                return { status: false, message: null };
             });
     }
 };

@@ -45,10 +45,10 @@ const Web = () => {
 
         if (sendData.type) {
             switch (sendData.type) {
-                case 'openCamera':
+                case 'openCamera': // QR 체크인
                     openCamera();
                     break;
-                case 'changePin':
+                case 'changePin': // PIN 변경
                     store.dispatch(dispatchMultiple({ SET_WEBPIN: true, SET_TAB: 'pin' }));
                     break;
                 case 'enterFullscreen':
@@ -59,24 +59,6 @@ const Web = () => {
                     break;
                 case 'logout':
                     doLogout();
-                    break;
-                case 'test':
-                    console.log('TEST');
-                    break;
-                case 'download':
-                    // webViewRef.current.stopLoading();
-                    // window.location.href = sendData.url;
-                    // Linking.openURL(sendData.url);
-                    // FileUtils.handleDownloadRequest(sendData.url, webViewRef);
-                    break;
-                case 'downloadBtn':
-                    webViewRef.current.stopLoading();
-                    const url = 'http://192.168.50.254:8080/api/v1/file';
-                    if (Linking.canOpenURL(url)) {
-                        Linking.openURL(url);
-                    } else {
-                        Linking.addEventListener('url', url);
-                    }
                     break;
                 default:
                     break;
@@ -204,7 +186,7 @@ const Web = () => {
     const checkUrl = (url) => {
         console.log(url);
         if (url.includes('popupKyobo.do')) {
-            // openWindow(url);
+            openWindow(url);
 
             return false;
         }
@@ -216,33 +198,27 @@ const Web = () => {
     };
 
     // window.open intercept
-    const openWindow = async (targetUrl) => {
+    const openWindow = async (targetUrl, inAppFlag) => {
         const canOpen = Linking.canOpenURL(targetUrl);
 
-        if (canOpen) {
+        if (!inAppFlag && canOpen) {
             Linking.openURL(targetUrl);
         } else {
-            await WebBrowser.openBrowserAsync(targetUrl);
+            await WebBrowser.openBrowserAsync(targetUrl, {
+                toolbarColor: 'white', // 안드로이드 옵션
+                controlsColor: 'white', // iOS 옵션
+                dismissButtonStyle: 'close', // iOS 옵션
+                readerMode: false, // iOS 옵션
+                enableBarCollapsing: true, // iOS 옵션
+            });
         }
     };
 
     useEffect(() => {
-        console.log('is link :: ', isLink);
-        let sendData = {
-            // userid: 'test1001',
-            // pwd: 'test100!',
-            // url: '',
-        };
-
         let link = null;
 
         if (isLink) {
-            console.log(params);
-
             if (params && Object.keys(params).length > 0) {
-                sendData = { ...sendData, ...params };
-                // setPostData(sendData);
-
                 if (Object.keys(params).includes('url')) {
                     link = params.url || '/main/portalMain.do';
                 }
@@ -303,7 +279,7 @@ const Web = () => {
             ref={webViewRef}
             style={[styles.webview, hide ? commonStyles.none : commonStyles.container]}
             source={{
-                // uri: 'http://192.168.1.77:8080/file',
+                // uri: 'https://85a4-117-111-17-91.ngrok-free.app/file',
                 // method: 'GET',
                 uri: `${webUrl}${webLink || ''}`,
                 method: 'POST',
@@ -364,7 +340,7 @@ const Web = () => {
                 const { nativeEvent } = syntheticEvent;
                 const { targetUrl } = nativeEvent;
                 console.log('Intercepted OpenWindow for', targetUrl);
-                openWindow(targetUrl);
+                openWindow(targetUrl, true);
             }}
             onContentProcessDidTerminate={(syntheticEvent) => {
                 const { nativeEvent } = syntheticEvent;
