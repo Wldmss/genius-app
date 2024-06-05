@@ -2,11 +2,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { useSelector } from 'react-redux';
 import { commonInputStyles, commonTextStyles } from 'assets/styles';
-import store from 'store/store';
 import moment from 'moment';
 import { dispatchLogin, dispatchMultiple, dispatchOne } from 'utils/DispatchUtils';
 import * as StorageUtils from 'utils/StorageUtils';
-import { FontText } from 'utils/TextUtils';
+import { FontDefault, FontText } from 'utils/TextUtils';
 import { checkSms, login, sendSms } from 'api/LoginApi';
 import LoginInfo from 'modal/LoginInfo';
 
@@ -228,7 +227,7 @@ const LDAPLogin = () => {
             )}
 
             <View style={styles.infoBox}>
-                <FontText style={styles.desc}>{`* 로그인 아이디, 비밀번호는\nKATE/KTalk 아이디(사번), 비밀번호와 동일합니다.`}</FontText>
+                <FontDefault style={styles.desc}>{`* 로그인 아이디, 비밀번호는\nKATE/KTalk 아이디(사번), 비밀번호와 동일합니다.`}</FontDefault>
                 <Pressable style={styles.infoButton} onPress={showInfo}>
                     <FontText style={styles.infoText}>문의 및 연락처</FontText>
                 </Pressable>
@@ -276,6 +275,7 @@ const styles = StyleSheet.create({
     },
     infoText: {
         textAlign: `center`,
+        textAlignVertical: `center`,
         color: `#222`,
         fontSize: 12,
     },

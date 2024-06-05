@@ -1,10 +1,9 @@
 import { Modal, StyleSheet, View } from 'react-native';
-import { useSelector } from 'react-redux';
 import { GeniusLogo } from 'utils/ImageUtils';
 
 /** 로딩 화면 */
 const Loading = () => {
-    const loading = useSelector((state) => state.commonReducer.loading);
+    // const loading = useSelector((state) => state.commonReducer.loading);
 
     return (
         <Modal visible={true} transparent={true} animationType="fade">

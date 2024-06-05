@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, View, TextInput, Pressable, Alert, Keyboard } from 'react-native';
 import { commonInputStyles, commonTextStyles } from 'assets/styles';
 import { useSelector } from 'react-redux';
-import store from 'store/store';
 import { dispatchLogin, dispatchMultiple, dispatchOne } from 'utils/DispatchUtils';
 import * as StorageUtils from 'utils/StorageUtils';
 import moment from 'moment';
@@ -259,7 +258,7 @@ const PinLogin = () => {
     }, []);
 
     return (
-        <View style={styles.container} id="pin">
+        <View style={styles.container}>
             <View style={styles.inputBox}>
                 {isMod && (
                     <TextInput

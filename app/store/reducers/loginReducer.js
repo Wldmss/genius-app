@@ -11,6 +11,7 @@ const initialState = {
     isLogin: false, // 로그인 여부
     resetLogin: false, // 로그인 리셋
     webPinFlag: false, // 웹에서 pin 변경
+    webBioFlag: false, // 웹에서 bio 변경
     active: false, // 로그인 이후 web 활동 여부
     logout: false, // 로그아웃 처리
     deviceToken: null, // push device token
@@ -69,6 +70,11 @@ const loginReducer = (state = initialState, action) => {
                 active: false,
                 logout: false,
             };
+        case 'BACKGROUND':
+            return {
+                ...state,
+                exitFlag: false,
+            };
         case 'SET_EXPIRE':
             return {
                 ...state,
@@ -89,6 +95,11 @@ const loginReducer = (state = initialState, action) => {
             return {
                 ...state,
                 webPinFlag: action.payload,
+            };
+        case 'SET_WEBBIO':
+            return {
+                ...state,
+                webBioFlag: action.payload,
             };
         case 'SET_ACTIVE':
             return {

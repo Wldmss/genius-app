@@ -8,7 +8,7 @@ export const apiStore = (_store) => {
 /** ktedu */
 
 const AxiosMobile = axios.create({
-    baseURL: `${process.env.EXPO_PUBLIC_SERVER_URL}/`,
+    baseURL: `${process.env.SERVER_URL}/`,
     timeout: 3000,
     headers: { 'Content-Type': 'application/x-www-form-urlencoded', Accept: 'application/json' },
     maxRedirects: 0,

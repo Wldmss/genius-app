@@ -7,9 +7,6 @@
             "node": "20.11.1",
             "env": {
                 "EXPO_PUBLIC_NAME": "KT 그룹교육",
-                "EXPO_PUBLIC_WEB": "https://ktedu.kt.com",
-                "EXPO_PUBLIC_SERVER_URL": "https://ktedu.kt.com",
-                "EXPO_PUBLIC_DEV_SERVER_URL": "https://dev.ktedu.kt.com:2443",
                 "EXPO_PUBLIC_API_URL": "/",
                 "EXPO_PUBLIC_TEST_API_URL": "/api/v1/",
                 "EXPO_PUBLIC_PUSH_COLOR": "#FF4F55"
@@ -21,12 +18,16 @@
             "ios": {
                 "image": "latest"
             },
-            "channel": "base"
+            "channel": "base",
+            "resourceClass": "medium"
         },
         "preview": {
             "extends": "base",
             "channel": "preview",
-            "distribution": "internal"
+            "distribution": "internal",
+            "env": {
+                "EXPO_PUBLIC_PROFILE": "preview"
+            }
         },
         "development": {
             "extends": "base",

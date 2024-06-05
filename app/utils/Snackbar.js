@@ -2,9 +2,7 @@ import React, { useEffect } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 import { useSelector } from 'react-redux';
 import { Snackbar as Snack } from 'react-native-paper';
-import store from 'store/store';
 import { dispatchOne } from './DispatchUtils';
-import Constants from 'expo-constants';
 import { FontText } from './TextUtils';
 
 const app_icon = require('assets/icons/app-icon.png');

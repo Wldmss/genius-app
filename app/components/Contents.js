@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Alert, AppState, BackHandler } from 'react-native';
-import store from 'store/store';
 import moment from 'moment';
 import { Stack, router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -77,6 +76,8 @@ const Contents = () => {
 
     // tab 변경 이벤트
     useEffect(() => {
+        console.log(`change tab :: ${tab}`);
+
         if (tab == null) {
             store.dispatch(dispatchOne('SET_TAB', 'main'));
         } else {
@@ -92,11 +93,16 @@ const Contents = () => {
                 };
             } else {
                 store.dispatch(dispatchOne('SET_WEB', false));
-                router.push(tab);
-                store.dispatch(dispatchOne('SET_SPLASH', false));
             }
         }
     }, [tab]);
+
+    useEffect(() => {
+        if (!isWeb && tab != null) {
+            router.push(tab);
+            store.dispatch(dispatchOne('SET_SPLASH', false));
+        }
+    }, [isWeb, tab]);
 
     // 앱 상태 관리
     const handleAppStateChange = async (nextAppState) => {
@@ -106,9 +112,13 @@ const Contents = () => {
             await checkUpdates();
         }
 
+        if (nextAppState == 'background') {
+            store.dispatch({ type: 'BACKGROUND' });
+        }
+
         let resetFlag = nextAppState === 'active' && logout;
 
-        // 세션 만료 체크 TODO 세션의 기준을 정해야 함
+        // 세션 만료 체크 => 웹에서 전달해주기로
         // if (!resetFlag && expire != null) {
         //     const now = moment();
         //     const diff = now.diff(expire, 'minutes');

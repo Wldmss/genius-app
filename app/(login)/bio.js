@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, View, Pressable, Alert, TextInput, Keyboard } from 'react-native';
 import { useSelector } from 'react-redux';
 import { commonInputStyles, commonTextStyles } from 'assets/styles';
-import store from 'store/store';
 import moment from 'moment';
 import * as Authentication from 'expo-local-authentication';
 import * as StorageUtils from 'utils/StorageUtils';
@@ -15,6 +14,7 @@ const BioLogin = () => {
     const bioStore = useSelector((state) => state.loginReducer.bio);
     const bioRecords = useSelector((state) => state.loginReducer.bioRecords);
     const bioSupported = useSelector((state) => state.loginReducer.bioSupported);
+    const webBioFlag = useSelector((state) => state.loginReducer.webBioFlag);
 
     const pinLength = 6;
     const pinCount = 5;

@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { Alert, BackHandler, View } from 'react-native';
 import { useSelector } from 'react-redux';
-import store from 'store/store';
 import { dispatchMultiple } from 'utils/DispatchUtils';
 
 /** QR 출석 체크 */

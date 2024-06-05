@@ -3,7 +3,6 @@ import { commonInputStyles } from 'assets/styles';
 import { useEffect } from 'react';
 import { Image, Pressable, StyleSheet, View } from 'react-native';
 import { useSelector } from 'react-redux';
-import store from 'store/store';
 import { FontText } from 'utils/TextUtils';
 
 const error_img = require('assets/images/error.png');

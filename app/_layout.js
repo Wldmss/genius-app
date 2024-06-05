@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, SafeAreaView, Alert } from 'react-native';
+import { StyleSheet, SafeAreaView, Alert, Linking } from 'react-native';
 import { Provider } from 'react-redux';
 import store from 'store/store';
 
@@ -28,6 +28,7 @@ import { dispatchOne } from 'utils/DispatchUtils';
 import { apiFetchStore } from 'api/ApiFetch';
 import Development from '(utils)/development';
 import Test from '(screens)/test';
+import BackHeader from '(utils)/back';
 
 const splashTime = 4000;
 const { profile } = Constants.expoConfig.extra;
@@ -63,11 +64,15 @@ const App = () => {
 
     // font load
     const loadFonts = async () => {
-        await loadAsync({
-            NotoSans: require('assets/fonts/NotoSansKR-Regular.ttf'),
-        }).finally(() => {
-            setFontsLoaded(true);
-        });
+        try {
+            await loadAsync({
+                NotoSans: require('assets/fonts/NotoSansKR-Regular.ttf'),
+            }).finally(() => {
+                setFontsLoaded(true);
+            });
+        } catch (error) {
+            console.log(error);
+        }
     };
 
     // 개발자 모드 체크
@@ -81,20 +86,34 @@ const App = () => {
 
     // 서버 체크
     const serverCheck = async () => {
-        return await checkVersion().then((result) => {
-            if (result) {
-                Alert.alert(process.env.EXPO_PUBLIC_NAME, '앱을 업데이트 합니다.', [
+        if (profile != 'production') {
+            // 테스트 용 앱 업그레이드
+            const update = false;
+            if (update) {
+                Alert.alert(process.env.EXPO_PUBLIC_NAME, '업데이트가 있습니다.\n다운로드 페이지로 이동합니다.', [
                     {
-                        text: '예',
+                        text: '확인',
                         onPress: () => {
-                            // 앱 자동 업데이트 tODO
-                            Alert.alert('업데이트');
+                            Linking.openURL('https://85a4-117-111-17-91.ngrok-free.app/download');
                         },
                     },
                 ]);
             }
-            return true;
-        });
+        } else {
+            await checkVersion().then((result) => {
+                if (result) {
+                    Alert.alert(process.env.EXPO_PUBLIC_NAME, '앱을 업데이트 합니다.', [
+                        {
+                            text: '예',
+                            onPress: () => {
+                                // 앱 자동 업데이트 tODO
+                                Alert.alert('업데이트');
+                            },
+                        },
+                    ]);
+                }
+            });
+        }
     };
 
     // 앱 업데이트 체크
@@ -132,7 +151,7 @@ const App = () => {
     // splash
     const prepare = async () => {
         try {
-            loadFonts();
+            await loadFonts();
             await checkDevelopment();
             await serverCheck();
 
@@ -158,6 +177,7 @@ const App = () => {
                 <Splash isUpdate={isUpdate} updateProgress={updateProgress} version={version} />
                 {splashLoaded && fontsLoaded && (
                     <SafeAreaView style={styles.container}>
+                        <BackHeader />
                         <Development isDev={dev} />
                         <Contents />
                         {/* <Test /> */}

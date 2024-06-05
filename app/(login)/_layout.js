@@ -3,11 +3,9 @@ import { Alert, ImageBackground, Pressable, StyleSheet, View } from 'react-nativ
 import { Slot } from 'expo-router';
 import OtherLogin from 'components/OtherLogin';
 import Constants from 'expo-constants';
-import store from 'store/store';
 import { dispatchOne } from 'utils/DispatchUtils';
 import * as StorageUtils from 'utils/StorageUtils';
 import * as Updates from 'expo-updates';
-import * as WebBrowser from 'expo-web-browser';
 
 import TopLogo from 'assets/images/login-top.svg';
 const genius_background = require('assets/images/login-bg.png');
@@ -68,7 +66,7 @@ const LoginLayout = () => {
     const isDev = useSelector((state) => state.commonReducer.isDev);
 
     return (
-        <View style={styles.container} id="content">
+        <View style={styles.container}>
             <ImageBackground source={genius_background} style={styles.loginBackground}>
                 <Pressable onLongPress={setDevelopment} onPress={() => isDev && test()}>
                     <TopLogo style={styles.title} />

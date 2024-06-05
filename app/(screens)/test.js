@@ -1,16 +1,13 @@
-import { Linking, Platform, Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { useSelector } from 'react-redux';
 import * as Clipboard from 'expo-clipboard';
 import { FontText } from 'utils/TextUtils';
 import { commonInputStyles } from 'assets/styles';
-import { loginTest } from 'api/LoginApi';
-import axios from 'axios';
 import * as ApiFetch from 'api/ApiFetch';
 import { useEffect, useState } from 'react';
 import { encrypt } from 'utils/CipherUtils';
 import * as FileSystem from 'expo-file-system';
 import { dispatchOne } from 'utils/DispatchUtils';
-import { WebView } from 'react-native-webview';
 import * as WebBrowser from 'expo-web-browser';
 
 export default function Test() {
@@ -47,6 +44,7 @@ export default function Test() {
     const [web, setWeb] = useState(null);
     const [progress, setProgress] = useState(0);
     const url = 'https://85a4-117-111-17-91.ngrok-free.app/file/download/test.txt';
+    // const url = 'https://expo.dev/artifacts/eas/skcuKXwqy65NwwVP7CRyje.apk';
     const fileArr = url.split('/');
     const fileName = fileArr[fileArr.length - 1];
     console.log(fileName);
@@ -109,13 +107,6 @@ export default function Test() {
         });
     };
 
-    const callbackLink = (url) => {
-        console.log(url);
-    };
-
-    const linkTest = () => {
-        // Linking.addEventListener('url', callbackLink);
-    };
     useEffect(() => {
         store.dispatch(dispatchOne('SET_SPLASH', false));
 
@@ -130,11 +121,9 @@ export default function Test() {
                 {test}
             </FontText> */}
 
-            <Pressable style={commonInputStyles.buttonWhite} onPress={linkTest}>
+            <Pressable style={commonInputStyles.buttonWhite} onPress={download}>
                 <FontText>테스트</FontText>
             </Pressable>
-
-            {/* {web && <WebView source={{ uri: web }} />} */}
         </View>
     );
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Alert, Image, Linking, Modal, Pressable, StyleSheet, View } from 'react-native';
-import { Camera, CameraType } from 'expo-camera';
+import { Alert, Image, Modal, Pressable, StyleSheet, View } from 'react-native';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import * as ImagePicker from 'expo-image-picker';
 import { FontText } from 'utils/TextUtils';
@@ -9,15 +9,15 @@ import { checkIn } from 'api/LoginApi';
 
 const cancel_img = require('assets/images/close.png');
 const no_img = require('assets/images/close.png');
-const no_camera = require('assets/images/close.png');
+import BackIcon from 'assets/icons/icon-back.svg';
 
 /** QR 스캐너 */
-const ScanQR = () => {
+const Camera = () => {
     const [urlText, setUrlText] = useState('');
-    const [permission, setPermission] = useState(null);
     const [scan, setScan] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
-    const [type, setType] = useState('');
+    const [type, setType] = useState('scan');
+    const [status, requestPermission] = useCameraPermissions();
 
     // 웹 뷰로 돌아가기
     const backToWeb = () => {
@@ -46,22 +46,34 @@ const ScanQR = () => {
     // 링크 이동
     const goToLink = async (e) => {
         const urlParam = urlText == null || urlText == '' || !(urlText.startsWith('{') && urlText.endsWith('}')) ? {} : JSON.parse(urlText);
+        const urlKey = Object.keys(urlParam);
 
-        await checkIn(urlParam).then(({ status, message }) => {
-            const msgText = message == null || message == '' ? '다시 시도해주세요.' : message;
-            Alert.alert(process.env.EXPO_PUBLIC_NAME, msgText, [
+        if (urlKey.length > 0 && urlKey.includes('educId') && urlKey.includes('role')) {
+            await checkIn(urlParam).then(({ status, message }) => {
+                const msgText = message == null || message == '' ? '다시 시도해주세요.' : message;
+                Alert.alert(process.env.EXPO_PUBLIC_NAME, msgText, [
+                    {
+                        text: '확인',
+                        onPress: () => {
+                            resetScan();
+
+                            if (status) {
+                                backToWeb();
+                            }
+                        },
+                    },
+                ]);
+            });
+        } else {
+            Alert.alert(process.env.EXPO_PUBLIC_NAME, '올바르지 않은 링크입니다.', [
                 {
                     text: '확인',
                     onPress: () => {
                         resetScan();
-
-                        if (status) {
-                            backToWeb();
-                        }
                     },
                 },
             ]);
-        });
+        }
 
         if (e) e.stopPropagation();
     };
@@ -98,17 +110,6 @@ const ScanQR = () => {
         }
     };
 
-    // 카메라 권한 설정
-    const checkPermission = async () => {
-        const { status } = await Camera.requestCameraPermissionsAsync();
-        setPermission(status === 'granted');
-    };
-
-    useEffect(() => {
-        checkPermission();
-        setType('scan');
-    }, []);
-
     useEffect(() => {
         resetScan();
     }, [type]);
@@ -122,33 +123,30 @@ const ScanQR = () => {
         <View style={styles.container}>
             {/* header */}
             <View style={styles.header}>
-                <View style={styles.headerItem}>
-                    <Pressable onPress={backToWeb}>
-                        <FontText style={styles.scanText}>←</FontText>
-                        {/* <Image source={arrow_img} style={styles.scanImg} resizeMode="contain" /> */}
-                    </Pressable>
-                    <FontText style={styles.scanText}>코드스캔</FontText>
-                </View>
+                <Pressable style={styles.headerItem} onPress={backToWeb}>
+                    <BackIcon />
+                    <FontText style={styles.headerText}>뒤로가기</FontText>
+                </Pressable>
             </View>
             {/* camera */}
             <View style={styles.imageContainer}>
                 {type == 'scan' ? (
-                    permission ? (
-                        <Camera
+                    status?.granted ? (
+                        <CameraView
                             style={styles.camera}
-                            type={CameraType.back}
-                            barCodeScannerSettings={{ barCodeRypes: [BarCodeScanner.Constants.BarCodeType.qr] }}
-                            onBarCodeScanned={scanCode}
+                            facing="back"
+                            onBarcodeScanned={scanCode}
+                            barcodeScannerSettings={{
+                                barcodeTypes: ['qr'],
+                            }}
                             zoom={0.0}
                         />
                     ) : (
-                        <Pressable onPress={checkPermission}>
-                            <FontText>카메라 권한을 허용해주세요.</FontText>
-                            {/* <Image source={no_camera} style={styles.noImage} resizeMode="contain" /> */}
+                        <Pressable onPress={requestPermission}>
+                            <FontText style={styles.noImageTxt}>카메라 권한을 허용해주세요.</FontText>
                         </Pressable>
                     )
                 ) : (
-                    // )
                     <Image
                         style={selectedImage != null ? styles.image : styles.noImage}
                         source={selectedImage != null ? { uri: selectedImage } : no_img}
@@ -186,24 +184,24 @@ const styles = StyleSheet.create({
         height: 60,
         paddingHorizontal: 15,
         justifyContent: `center`,
+        backgroundColor: `#ffffff`,
     },
     headerItem: {
         gap: 10,
         flexDirection: `row`,
     },
+    headerText: {
+        fontSize: 18,
+        textAlignVertical: `center`,
+    },
     scanImg: {
         height: 25,
-    },
-    scanText: {
-        fontSize: 18,
-        fontWeight: `bold`,
     },
     tabImg: {
         width: 50,
         height: 50,
     },
     imageContainer: {
-        // height: `60%`,
         alignItems: `center`,
         justifyContent: `center`,
     },
@@ -215,9 +213,10 @@ const styles = StyleSheet.create({
         width: `100%`,
         height: `100%`,
     },
-    noImage: {
-        // width: 100,
-        // height: 100,
+    noImage: {},
+    noImageTxt: {
+        height: `90%`,
+        textAlignVertical: `center`,
     },
     modal: {
         flex: 1,
@@ -272,4 +271,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ScanQR;
+export default Camera;

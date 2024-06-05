@@ -276,10 +276,10 @@ export const checkIn = async (params) => {
 
         /** 체크인 정보 전송
          * @method POST
-         * @param { loginKey : 로그인 key }
+         * @param { loginKey : 로그인 key, educId: 과정 ID, role: 체크인/체크아웃 구분 }
          * @returns { rtnSts : 상태 (S: 성공, E: 실패), rtnMsg : 메시지 }
          */
-        return await ApiFetch.post(`api/common/qrChkIn.do`, JSON.stringify(sendData))
+        return await ApiFetch.post(`api/common/qrChk.do`, JSON.stringify(sendData))
             .then((response) => {
                 const { rtnSts, rtnMsg } = response;
                 return { status: rtnSts == 'S', message: rtnMsg };

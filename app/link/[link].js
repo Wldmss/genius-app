@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
-import store from 'store/store';
 import { useLocalSearchParams } from 'expo-router';
 import { dispatchMultiple, dispatchOne } from 'utils/DispatchUtils';
+
 import { Alert } from 'react-native';
 
 /** 링크 접속 */

@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
     },
     lineFonts: {
         fontFamily: 'NotoSans',
-        lineHeight: 23,
+        lineHeight: 20,
     },
     gray: {
         color: `#4C4C4E`,

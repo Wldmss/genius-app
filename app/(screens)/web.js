@@ -2,16 +2,16 @@ import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Alert, Platform, Linking } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useSelector } from 'react-redux';
-import store from 'store/store';
+import Constants from 'expo-constants';
+import { commonStyles } from 'assets/styles';
 import { dispatchMultiple, dispatchOne } from 'utils/DispatchUtils';
-import * as ScreenOrientation from 'expo-screen-orientation';
 import { backEventHandler } from 'utils/BackUtils';
+import * as ScreenOrientation from 'expo-screen-orientation';
+import * as WebBrowser from 'expo-web-browser';
+import * as Updates from 'expo-updates';
 import Loading from 'components/Loading';
 import ErrorPage from '(utils)/error';
-import Constants from 'expo-constants';
-import ScanQR from '(utils)/camera';
-import { commonStyles } from 'assets/styles';
-import * as WebBrowser from 'expo-web-browser';
+import Camera from '(utils)/camera';
 
 const { profile } = Constants.expoConfig.extra;
 
@@ -29,9 +29,8 @@ const Web = () => {
 
     const [backButtonEnabled, setBackButtonEnabled] = useState(false);
     const [hide, setHide] = useState(false);
-    const [postData, setPostData] = useState({});
     const [init, setInit] = useState(false);
-    const [webUrl, setWebUrl] = useState(process.env.EXPO_PUBLIC_WEB);
+    const [webUrl, setWebUrl] = useState(process.env.WEB_URL);
 
     let timeout = null;
 
@@ -50,6 +49,12 @@ const Web = () => {
                     break;
                 case 'changePin': // PIN 변경
                     store.dispatch(dispatchMultiple({ SET_WEBPIN: true, SET_TAB: 'pin' }));
+                    break;
+                case 'changeBio': // 생체인증 변경
+                    store.dispatch(dispatchMultiple({ SET_WEBBIO: true, SET_TAB: 'bio' }));
+                    break;
+                case 'endSession': // 세션 만료
+                    endSession();
                     break;
                 case 'enterFullscreen':
                     enterFullscreen();
@@ -130,15 +135,6 @@ const Web = () => {
         }
     };
 
-    // Webview navigation state change
-    const onNavigationStateChange = (navState) => {
-        const { url, canGoBack } = navState;
-        if (!url) return;
-
-        let goBack = url.includes('portalMain.do') || url.includes('login.do') ? false : canGoBack;
-        setBackButtonEnabled(goBack);
-    };
-
     // webview 뒤로가기
     const goBack = () => {
         if (backButtonEnabled) {
@@ -170,6 +166,15 @@ const Web = () => {
         Alert.alert('다운로드 기능 준비중입니다.');
     };
 
+    // Webview navigation state change
+    const onNavigationStateChange = (navState) => {
+        const { url, canGoBack } = navState;
+        if (!url) return;
+
+        let goBack = url.includes('portalMain.do') || url.includes('login.do') ? false : canGoBack;
+        setBackButtonEnabled(goBack);
+    };
+
     // onShouldStartLoadWithRequest
     const handleStartLoadWithRequest = (request) => {
         const { url } = request;
@@ -193,6 +198,7 @@ const Web = () => {
 
         return true;
     };
+
     const changeUrl = (url) => {
         if (url != currentLink) store.dispatch(dispatchOne('SET_CURRENTLINK', url));
     };
@@ -212,6 +218,23 @@ const Web = () => {
                 enableBarCollapsing: true, // iOS 옵션
             });
         }
+    };
+
+    // 세션 만료
+    const endSession = () => {
+        Alert.alert(
+            process.env.EXPO_PUBLIC_NAME,
+            `세션이 만료되었습니다.\n로그인 페이지로 이동합니다.`,
+            [
+                {
+                    text: '확인',
+                    onPress: () => {
+                        Updates.reloadAsync();
+                    },
+                },
+            ],
+            { cancelable: false }
+        );
     };
 
     useEffect(() => {
@@ -258,7 +281,7 @@ const Web = () => {
     }, [webLink]);
 
     useEffect(() => {
-        const web_url = profile != 'production' && isDev ? process.env.EXPO_PUBLIC_DEV_SERVER_URL : process.env.EXPO_PUBLIC_WEB;
+        const web_url = profile != 'production' && isDev ? process.env.EXPO_PUBLIC_DEV_SERVER_URL : process.env.WEB_URL;
         setWebUrl(web_url);
 
         // if (profile.includes('test') || profile.includes('development')) Alert.alert(`${profile}\n${webUrl}${webLink}`);
@@ -273,17 +296,16 @@ const Web = () => {
     }, [isDev]);
 
     return camera ? (
-        <ScanQR />
+        <Camera />
     ) : (
         <WebView
             ref={webViewRef}
             style={[styles.webview, hide ? commonStyles.none : commonStyles.container]}
             source={{
-                // uri: 'https://85a4-117-111-17-91.ngrok-free.app/file',
-                // method: 'GET',
-                uri: `${webUrl}${webLink || ''}`,
-                method: 'POST',
-                body: JSON.stringify(postData),
+                uri: 'https://85a4-117-111-17-91.ngrok-free.app/file',
+                method: 'GET',
+                // uri: `${webUrl}${webLink || ''}`,
+                // method: 'POST',
             }}
             javaScriptEnabled={true}
             onLoadStart={() => !init && setHide(true)}

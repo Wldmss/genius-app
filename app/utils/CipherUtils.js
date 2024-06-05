@@ -25,3 +25,18 @@ export const encrypt = (value) => {
 
     return encryptedHex;
 };
+
+// aes256 복호화
+export const decrypt = (value) => {
+    const ciphertext = CryptoJS.enc.Hex.parse(value);
+
+    const decrypt = CryptoJS.AES.decrypt(ciphertext, key, {
+        iv: iv,
+        padding: CryptoJS.pad.Pkcs7,
+        mode: CryptoJS.mode.CBC,
+    });
+
+    const decryptedString = decrypt.toString(CryptoJS.enc.Utf8);
+
+    return JSON.parse(decryptedString);
+};

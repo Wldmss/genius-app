@@ -45,6 +45,12 @@ const commonReducer = (state = initialState, action) => {
                 currentLink: null,
                 splash: true,
             };
+        case 'BACKGROUND':
+            return {
+                ...state,
+                snack: null,
+                exitPressed: false,
+            };
         case 'SET_LINK':
             return {
                 ...state,

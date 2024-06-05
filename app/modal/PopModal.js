@@ -1,7 +1,7 @@
 import React from 'react';
 import { Image, Modal, Pressable, StyleSheet, View } from 'react-native';
 import { useSelector } from 'react-redux';
-import store from '../store/store';
+
 import { commonInputStyles, commonStyles } from 'assets/styles';
 import { FontText } from 'utils/TextUtils';
 

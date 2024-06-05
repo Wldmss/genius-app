@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { ImageBackground, Pressable, StyleSheet, View } from 'react-native';
-import store from 'store/store';
 import { commonInputStyles, commonTextStyles } from 'assets/styles';
 import PagerView from 'react-native-pager-view';
 import * as StorageUtils from 'utils/StorageUtils';

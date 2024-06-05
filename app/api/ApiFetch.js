@@ -11,7 +11,7 @@ const server = null;
 
 const checkDevelopment = () => {
     const isDev = store.getState().commonReducer.isDev;
-    const url = isDev ? process.env.EXPO_PUBLIC_DEV_SERVER_URL : process.env.EXPO_PUBLIC_SERVER_URL;
+    const url = isDev ? process.env.DEV_SERVER_URL : process.env.SERVER_URL;
 
     return { isDev: isDev, url: url };
 };

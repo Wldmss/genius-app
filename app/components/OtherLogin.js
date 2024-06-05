@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import store from 'store/store';
 import { dispatchOne } from 'utils/DispatchUtils';
 import { useSelector } from 'react-redux';
 import { FontTextG } from 'utils/TextUtils';
