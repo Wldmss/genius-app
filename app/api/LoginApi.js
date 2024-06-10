@@ -95,7 +95,7 @@ export const login = async (username, password) => {
                     return true;
                 } else {
                     handleRtnMsg(rtnMsg);
-                    store.dispatch(dispatchLogin(false, null));
+                    store.dispatch(dispatchLogin(false));
 
                     return false;
                 }
@@ -150,7 +150,7 @@ export const checkLogin = async (checkFlag) => {
                     return true;
                 } else {
                     handleRtnMsg(rtnMsg);
-                    if (!checkFlag) store.dispatch(dispatchLogin(false, null));
+                    if (!checkFlag) store.dispatch(dispatchLogin(false));
                     return false;
                 }
             })
@@ -375,7 +375,7 @@ const localLogin = async () => {
         })
         .catch(async (err) => {
             console.log(err);
-            store.dispatch(dispatchLogin(false, null));
+            store.dispatch(dispatchLogin(false));
             return { status: false };
         })
         .finally(() => {
@@ -423,7 +423,7 @@ const localCheckLogin = async () => {
         })
         .catch(async (err) => {
             console.log(err);
-            if (!checkFlag) store.dispatch(dispatchLogin(false, null));
+            if (!checkFlag) store.dispatch(dispatchLogin(false));
             return { status: false };
         })
         .finally(() => {

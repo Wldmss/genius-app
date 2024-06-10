@@ -1,6 +1,7 @@
-import { Alert, BackHandler } from 'react-native';
-import { dispatchMultiple, dispatchOne } from './DispatchUtils';
+import { BackHandler } from 'react-native';
+import { dispatchOne } from './DispatchUtils';
 import PropTypes from 'prop-types';
+import { webLoginChangeAlert } from './AlertUtils';
 
 export const backStore = (_store) => {
     store = _store;
@@ -12,6 +13,7 @@ export const backEventHandler = (timeout, goBack, backButtonEnabled) => {
     const camera = store.getState().commonReducer.camera;
     const exitPressed = store.getState().commonReducer.exitPressed;
     const webPinFlag = store.getState().loginReducer.webPinFlag;
+    const webBioFlag = store.getState().loginReducer.webBioFlag;
 
     // Handle back event
     const backHandler = () => {
@@ -25,21 +27,9 @@ export const backEventHandler = (timeout, goBack, backButtonEnabled) => {
         } else if (tab == 'web' && camera) {
             // 카메라 open 인 경우
             store.dispatch(dispatchOne('SET_CAMERA', false));
-        } else if (webPinFlag) {
+        } else if (webPinFlag || webBioFlag) {
             // pin 변경인 경우
-            Alert.alert(process.env.EXPO_PUBLIC_NAME, `PIN 변경을 취소하시겠습니까?`, [
-                {
-                    text: '아니요',
-                    onPress: () => null,
-                    style: 'cancel',
-                },
-                {
-                    text: '예',
-                    onPress: () => {
-                        store.dispatch(dispatchMultiple({ SET_WEBPIN: false, SET_TAB: 'web' }));
-                    },
-                },
-            ]);
+            webLoginChangeAlert(webPinFlag);
         } else {
             // 앱 종료
             if (exitPressed) {

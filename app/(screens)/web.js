@@ -12,6 +12,7 @@ import * as Updates from 'expo-updates';
 import Loading from 'components/Loading';
 import ErrorPage from '(utils)/error';
 import Camera from '(utils)/camera';
+import Video from '(utils)/video';
 
 const { profile } = Constants.expoConfig.extra;
 
@@ -31,6 +32,7 @@ const Web = () => {
     const [hide, setHide] = useState(false);
     const [init, setInit] = useState(false);
     const [webUrl, setWebUrl] = useState(process.env.WEB_URL);
+    const [video, setVideo] = useState({ show: false, src: null });
 
     let timeout = null;
 
@@ -53,8 +55,11 @@ const Web = () => {
                 case 'changeBio': // 생체인증 변경
                     store.dispatch(dispatchMultiple({ SET_WEBBIO: true, SET_TAB: 'bio' }));
                     break;
-                case 'endSession': // 세션 만료
+                case 'changeMobileLogin': // 세션 만료
                     endSession();
+                    break;
+                case 'videoPlayed':
+                    setVideo({ ...video, show: true, src: sendData.url });
                     break;
                 case 'enterFullscreen':
                     enterFullscreen();
@@ -71,20 +76,20 @@ const Web = () => {
         }
     };
 
-    // 전체 화면 (상태바 숨김) (사용X)
+    // 전체 화면 (상태바 숨김)
     const enterFullscreen = () => {
-        if (Platform.OS === 'android') {
-            store.dispatch({ type: 'HIDE_BAR' });
-        }
+        // if (Platform.OS === 'android') {
+        //     store.dispatch({ type: 'HIDE_BAR' });
+        // }
 
         handleScreen(true);
     };
 
-    // 전체 화면 (상태바 숨김 해제) (사용X)
+    // 전체 화면 (상태바 숨김 해제)
     const exitFullscreen = () => {
-        if (Platform.OS === 'android') {
-            store.dispatch({ type: 'SHOW_BAR' });
-        }
+        // if (Platform.OS === 'android') {
+        //     store.dispatch({ type: 'SHOW_BAR' });
+        // }
 
         handleScreen();
     };
@@ -173,6 +178,43 @@ const Web = () => {
 
         let goBack = url.includes('portalMain.do') || url.includes('login.do') ? false : canGoBack;
         setBackButtonEnabled(goBack);
+
+        // catchVideo(url);
+    };
+
+    const catchVideo = (url) => {
+        const urlObj = new URL(url);
+        const classId = urlObj.searchParams.get('classId');
+        if (classId) {
+            const injectedJavaScript = `
+                (function(event) {
+                    const video = document.getElementById('myvideo');
+
+                    if (video) {
+                        // video.addEventListener('play', function() {
+                        //     const videoSrc = video.src || video.querySelector('source').src;
+                        //     window.ReactNativeWebView.postMessage(JSON.stringify({ type : 'videoPlayed', url : videoSrc }));
+                        // });
+
+                        const fullscreenChangeHandler = () => {
+                            if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement) {
+                                const videoSrc = video.src || video.querySelector('source').src;
+                                // window.ReactNativeWebView.postMessage(JSON.stringify({ type : 'videoPlayed', url : videoSrc }));
+                                event.preventDefault();
+                            }
+                        };
+
+                        document.addEventListener('fullscreenchange', fullscreenChangeHandler);
+                        document.addEventListener('webkitfullscreenchange', fullscreenChangeHandler);
+                        document.addEventListener('mozfullscreenchange', fullscreenChangeHandler);
+                        document.addEventListener('msfullscreenchange', fullscreenChangeHandler);
+                    }
+                })();
+                true;
+            `;
+
+            if (webViewRef.current) webViewRef.current.injectJavaScript(injectedJavaScript);
+        }
     };
 
     // onShouldStartLoadWithRequest
@@ -302,10 +344,10 @@ const Web = () => {
             ref={webViewRef}
             style={[styles.webview, hide ? commonStyles.none : commonStyles.container]}
             source={{
-                uri: 'https://85a4-117-111-17-91.ngrok-free.app/file',
-                method: 'GET',
-                // uri: `${webUrl}${webLink || ''}`,
-                // method: 'POST',
+                // uri: 'https://76f5-117-111-28-195.ngrok-free.app/file',
+                // method: 'GET',
+                uri: `${webUrl}${webLink || ''}`,
+                method: 'POST',
             }}
             javaScriptEnabled={true}
             onLoadStart={() => !init && setHide(true)}
@@ -323,10 +365,42 @@ const Web = () => {
                 };
             `}
             injectedJavaScript={`
+                /* id click */
                 window.addEventListener('click', function (event) {
                     window.ReactNativeWebView.postMessage(JSON.stringify({ type : event.target.id }));
                     // event.preventDefault();
                 });
+
+                /* full screen */
+                (function(event) {
+                    const video = document.getElementById('myvideo');
+
+                    if (video) {
+                        video.setAttribute('webkit-playsinline', ''); // ios
+                        video.setAttribute('playsinline', ''); // android
+
+                        video.play();
+
+                        // video.addEventListener('play', function() {
+                        //     const videoSrc = video.src || video.querySelector('source').src;
+                        //     window.ReactNativeWebView.postMessage(JSON.stringify({ type : 'videoPlayed', url : videoSrc }));
+                        // });
+
+                        const fullscreenChangeHandler = () => {
+                            if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement) {
+                                window.ReactNativeWebView.postMessage(JSON.stringify({ type : 'enterFullscreen' }));
+                                video.play();
+                            }else {
+                                window.ReactNativeWebView.postMessage(JSON.stringify({ type : 'exitFullscreen' }));
+                            }
+                        };
+
+                        document.addEventListener('fullscreenchange', fullscreenChangeHandler);
+                        document.addEventListener('webkitfullscreenchange', fullscreenChangeHandler);
+                        document.addEventListener('mozfullscreenchange', fullscreenChangeHandler);
+                        document.addEventListener('msfullscreenchange', fullscreenChangeHandler);
+                    }
+                })();
             `}
             startInLoadingState={true}
             renderLoading={() => <Loading />}
@@ -351,7 +425,7 @@ const Web = () => {
             allowsBackForwardNavigationGestures={true} // 스와이프 (ios)
             ignoreSilentHardwareSwitch={true} // 무음 스위치 활성화 (ios)
             lackPermissionToDownloadMessage="권한이 거부되어 파일을 다운로드할 수 없습니다"
-            downloadingMessage="다운로드를 시작합니다."
+            downloadingMessage="다운로드중.."
             onFileDownload={handleDownload}
             automaticallyAdjustContentInsets={false}
             allowFileAccess={true}

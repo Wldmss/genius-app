@@ -4,7 +4,6 @@ import { commonInputStyles, commonTextStyles } from 'assets/styles';
 import { useSelector } from 'react-redux';
 import { dispatchLogin, dispatchMultiple, dispatchOne } from 'utils/DispatchUtils';
 import * as StorageUtils from 'utils/StorageUtils';
-import moment from 'moment';
 import { FontText } from 'utils/TextUtils';
 import { checkLogin } from 'api/LoginApi';
 
@@ -23,7 +22,6 @@ const PinLogin = () => {
 
     const [isMod, setIsMod] = useState(false);
     const [value, setValue] = useState({ enter: '', check: '', origin: '' });
-    const [isSame, setIsSame] = useState(null);
     const [message, setMessage] = useState({ alertFlag: true, text: null });
 
     const changePin = (id, input) => {
@@ -91,14 +89,12 @@ const PinLogin = () => {
             isMod &&
             (value.enter.length != pinLength || (pin?.modFlag && value.check.length != pinLength) || (isMod && value.origin.length != pinLength))
         ) {
-            // Alert.alert(`${pinLength}자리를 입력해주세요.`);
             setMessage({ ...message, alertFlag: true, text: `${pinLength}자리를 입력해주세요.` });
             return false;
         }
 
         // pin 수정
         if (isMod && !checkSame(pin?.value, value.origin)) {
-            // Alert.alert('현재 PIN이 일치하지 않습니다.');
             setMessage({ ...message, alertFlag: true, text: '현재 PIN이 일치하지 않습니다.' });
             originRef.current.focus();
             return false;
@@ -106,20 +102,17 @@ const PinLogin = () => {
 
         const sameFlag = !pin?.modFlag || checkSame(value.enter, value.check);
         if (!sameFlag) {
-            // Alert.alert('PIN이 일치하지 않습니다.');
             setMessage({ ...message, alertFlag: true, text: 'PIN이 일치하지 않습니다.' });
             return false;
         }
 
         if (isMod && checkSame(value.enter, value.origin)) {
-            // Alert.alert('PIN이 동일합니다. 다른 PIN으로 설정해주세요.');
             setMessage({ ...message, alertFlag: true, text: 'PIN이 동일합니다. 다른 PIN으로 설정해주세요.' });
             enterRef.current.focus();
             return false;
         }
 
         if (pin?.modFlag && confirmPin()) {
-            // Alert.alert('안전한 PIN을 설정해주세요.');
             setMessage({ ...message, alertFlag: true, text: '안전한 PIN을 설정해주세요.' });
             setValue({ ...value, enter: '', check: '' });
             enterRef.current.focus();
@@ -140,7 +133,7 @@ const PinLogin = () => {
     // PIN 로그인
     const loginPin = () => {
         if (pin.value != null && checkSame(value.enter, pin.value)) {
-            store.dispatch(dispatchLogin(true, moment()));
+            store.dispatch(dispatchLogin(true));
             setMessage({ ...message, alertFlag: true, text: null });
         } else {
             enterRef.current.focus();
@@ -151,7 +144,6 @@ const PinLogin = () => {
                 resetCount.current = pinCount;
             } else {
                 resetCount.current = resetCount.current - 1;
-                // Alert.alert('PIN이 일치하지 않습니다. 다시 시도해주세요.');
                 setMessage({
                     ...message,
                     alertFlag: true,

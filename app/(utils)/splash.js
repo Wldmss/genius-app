@@ -5,8 +5,6 @@ import ProgressBar from 'utils/ProgressBar';
 import { useSelector } from 'react-redux';
 import { GeniusLottie } from 'utils/Lottie';
 
-const { profile } = Constants.expoConfig.extra;
-
 /** splash screen */
 const Splash = ({ isUpdate, updateProgress, version }) => {
     const splash = useSelector((state) => state.commonReducer.splash);
@@ -15,8 +13,8 @@ const Splash = ({ isUpdate, updateProgress, version }) => {
         splash && (
             <View style={styles.container}>
                 <View style={styles.center}>
-                    {/* TODO */}
-                    {profile != 'staging' ? <GeniusLottie /> : <GeniusLogo style={styles.logoBox} />}
+                    <GeniusLottie />
+                    {/* <GeniusLogo style={styles.logoBox} /> */}
                     {isUpdate && <ProgressBar percent={updateProgress} version={version} />}
                     <Text style={styles.versionText}>{version ? `v.${version}` : ''}</Text>
                 </View>

@@ -1,3 +1,5 @@
+import moment from 'moment';
+
 const initialState = {
     loginKey: null, // storage loginKey token
     token: null, // login token (loginKey)
@@ -74,6 +76,7 @@ const loginReducer = (state = initialState, action) => {
             return {
                 ...state,
                 exitFlag: false,
+                expire: moment(),
             };
         case 'SET_EXPIRE':
             return {

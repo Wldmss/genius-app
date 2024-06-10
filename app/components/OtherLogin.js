@@ -17,6 +17,7 @@ const OtherLogin = () => {
     const tab = useSelector((state) => state.loginReducer.tab);
     const loginKey = useSelector((state) => state.loginReducer.loginKey);
     const webPinFlag = useSelector((state) => state.loginReducer.webPinFlag);
+    const webBioFlag = useSelector((state) => state.loginReducer.webBioFlag);
 
     const [type, setType] = useState({ pin: false, ldap: false, bio: false, bioRegister: false, changePin: false });
 
@@ -46,8 +47,8 @@ const OtherLogin = () => {
 
     return (
         (type.pin || type.ldap || type.bio || type.bioRegister || type.changePin) &&
-        !webPinFlag && (
-            // <View style={styles.container}>
+        !webPinFlag &&
+        !webBioFlag && (
             <View style={styles.otherContainer}>
                 <FontTextG style={styles.otherTitle}>다른 방법으로 로그인</FontTextG>
                 <View style={styles.otherLoginBox}>

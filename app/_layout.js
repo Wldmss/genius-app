@@ -29,6 +29,7 @@ import { apiFetchStore } from 'api/ApiFetch';
 import Development from '(utils)/development';
 import Test from '(screens)/test';
 import BackHeader from '(utils)/back';
+import { alertStore } from 'utils/AlertUtils';
 
 const splashTime = 4000;
 const { profile } = Constants.expoConfig.extra;
@@ -61,6 +62,9 @@ const App = () => {
 
     // back handler store
     backStore(store);
+
+    // alert store
+    alertStore(store);
 
     // font load
     const loadFonts = async () => {

@@ -5,12 +5,22 @@ import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import { dispatchMultiple, dispatchOne } from './DispatchUtils';
 import { FontText } from './TextUtils';
+// import * as TaskManager from 'expo-task-manager';
 
 // react-native-firebase/messaging
 
 export const pushFcmStore = (_store) => {
     store = _store;
 };
+
+// const BACKGROUND_NOTIFICATION_TASK = 'BACKGROUND-NOTIFICATION-TASK';
+// TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, ({ data, error, executionInfo }) => {
+//     // console.log('Received a notification in the background!');
+//     console.log(data);
+//     if (error) {
+//         console.log(error);
+//     }
+// });
 
 // foreground alert
 Notifications.setNotificationHandler({

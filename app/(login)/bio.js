@@ -2,11 +2,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, View, Pressable, Alert, TextInput, Keyboard } from 'react-native';
 import { useSelector } from 'react-redux';
 import { commonInputStyles, commonTextStyles } from 'assets/styles';
-import moment from 'moment';
 import * as Authentication from 'expo-local-authentication';
 import * as StorageUtils from 'utils/StorageUtils';
-import { dispatchLogin, dispatchOne } from 'utils/DispatchUtils';
+import * as SecureStore from 'expo-secure-store';
+import { dispatchLogin, dispatchMultiple, dispatchOne } from 'utils/DispatchUtils';
 import { FontText } from 'utils/TextUtils';
+import { okAlert } from 'utils/AlertUtils';
 
 /** 생체 인증 로그인/등록 */
 const BioLogin = () => {
@@ -46,7 +47,7 @@ const BioLogin = () => {
         if (bioRecords && (bio?.isRegistered || bio?.modFlag)) {
             const success = await authenticate();
             if (success) {
-                store.dispatch(dispatchLogin(true, moment()));
+                store.dispatch(dispatchLogin(true));
             }
         } else {
             Alert.alert('생체 인증이 등록되어있지 않습니다.');
@@ -64,7 +65,12 @@ const BioLogin = () => {
                         const bioValue = { ...bio, isRegistered: true, modFlag: false };
                         store.dispatch(dispatchOne('SET_BIO', bioValue));
                         await StorageUtils.setDeviceData('bio', 'true');
-                        setBio(bioValue);
+
+                        if (webBioFlag) {
+                            backToWeb();
+                        } else {
+                            setBio(bioValue);
+                        }
                     },
                 },
             ]);
@@ -115,8 +121,43 @@ const BioLogin = () => {
         }
     };
 
+    // 생체인증 변경 끝
+    const backToWeb = () => {
+        store.dispatch(dispatchMultiple({ SET_TAB: 'web', SET_WEBBIO: false }));
+    };
+
     useEffect(() => {
-        if (bio?.isRegistered) {
+        if (webBioFlag) {
+            if (bio?.isRegistered) {
+                // 등록되어 있는 경우
+                Alert.alert(process.env.EXPO_PUBLIC_NAME, `생체 인증 로그인을 해제하시겠습니까?`, [
+                    {
+                        text: '아니요',
+                        onPress: () => {
+                            backToWeb();
+                        },
+                        style: 'cancel',
+                    },
+                    {
+                        text: '예',
+                        onPress: async () => {
+                            try {
+                                await SecureStore.deleteItemAsync('bio');
+                                store.dispatch(dispatchOne('SET_BIO', { ...bioStore, isRegistered: false, modFlag: false }));
+                            } finally {
+                                okAlert('생체 인증 로그인이 해제되었습니다.', backToWeb());
+                            }
+                        },
+                    },
+                ]);
+            } else {
+                setBio({ ...bio, modFlag: true });
+            }
+        }
+    }, []);
+
+    useEffect(() => {
+        if (!webBioFlag && bio?.isRegistered) {
             tryBio();
         } else {
             setPinValue(null);

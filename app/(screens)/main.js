@@ -5,10 +5,7 @@ import * as SecureStore from 'expo-secure-store';
 import * as Authentication from 'expo-local-authentication';
 import { dispatchMultiple, dispatchOne } from 'utils/DispatchUtils';
 import * as StorageUtils from 'utils/StorageUtils';
-import Constants from 'expo-constants';
 import AsyncStorage from '@react-native-async-storage/async-storage'; // !! staging build 시에는 지워야 한다
-
-const { profile } = Constants.expoConfig.extra;
 
 // secure storage delete
 export const deleteSecureStore = async (isDev) => {
@@ -48,8 +45,6 @@ const Main = () => {
         let pin = { isRegistered: false, value: '', modFlag: true };
 
         // 생체인증 등록 여부
-        console.log(bioData);
-        console.log(bioRecords);
         let hasBio = bioData != null && bioData == 'true';
 
         // 생체 인증 등록 후 단말에서 삭제한 경우
@@ -117,14 +112,11 @@ const Main = () => {
     // 최초 접속 확인 : ios는 키체인에 저장되어 앱 삭제 시 storage reset이 안됨
     const checkFirst = async () => {
         try {
-            // TODO
-            if (profile != 'staging') {
-                const isFirst = await AsyncStorage.getItem('isFirst');
-                if (isFirst == null || isFirst != 'true') {
-                    // 최초 설치
-                    deleteSecureStore();
-                    await AsyncStorage.setItem('isFirst', 'true');
-                }
+            const isFirst = await AsyncStorage.getItem('isFirst');
+            if (isFirst == null || isFirst != 'true') {
+                // 최초 설치
+                deleteSecureStore();
+                await AsyncStorage.setItem('isFirst', 'true');
             }
         } catch (err) {
             return false;
@@ -133,7 +125,6 @@ const Main = () => {
 
     // storage 데이터 확인
     const checkStorage = () => {
-        console.log(`donBio : ${doneBio}`);
         if (doneBio) {
             getStorageData();
         } else {

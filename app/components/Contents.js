@@ -118,12 +118,12 @@ const Contents = () => {
 
         let resetFlag = nextAppState === 'active' && logout;
 
-        // 세션 만료 체크 => 웹에서 전달해주기로
-        // if (!resetFlag && expire != null) {
-        //     const now = moment();
-        //     const diff = now.diff(expire, 'minutes');
-        //     resetFlag = diff > sessionTime;
-        // }
+        // 세션 만료 체크 :: background > active 시 background 시점부터 sessionTime 만큼 유효
+        if (!resetFlag && expire != null) {
+            const now = moment();
+            const diff = now.diff(expire, 'minutes');
+            resetFlag = diff > sessionTime;
+        }
 
         if (resetFlag) {
             Updates.reloadAsync();

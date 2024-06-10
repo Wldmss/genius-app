@@ -1,36 +1,24 @@
-import { Alert, Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { FontText } from 'utils/TextUtils';
 
 import BackIcon from 'assets/icons/icon-back.svg';
 import { useSelector } from 'react-redux';
 
 import Constants from 'expo-constants';
-import { dispatchMultiple } from 'utils/DispatchUtils';
+import { webLoginChangeAlert } from 'utils/AlertUtils';
 
 /** 뒤로 가기 헤더 */
 const BackHeader = () => {
+    const tab = useSelector((state) => state.loginReducer.tab);
     const webPinFlag = useSelector((state) => state.loginReducer.webPinFlag);
+    const webBioFlag = useSelector((state) => state.loginReducer.webBioFlag);
 
     const goBack = () => {
-        if (webPinFlag) {
-            Alert.alert(process.env.EXPO_PUBLIC_NAME, `PIN 변경을 취소하시겠습니까?`, [
-                {
-                    text: '아니요',
-                    onPress: () => null,
-                    style: 'cancel',
-                },
-                {
-                    text: '예',
-                    onPress: () => {
-                        store.dispatch(dispatchMultiple({ SET_WEBPIN: false, SET_TAB: 'web' }));
-                    },
-                },
-            ]);
-        }
+        webLoginChangeAlert(webPinFlag);
     };
 
     return (
-        webPinFlag && (
+        ((tab == 'pin' && webPinFlag) || (tab == 'bio' && webBioFlag)) && (
             <View style={styles.container}>
                 <Pressable style={styles.headerItem} onPress={goBack}>
                     <BackIcon />
@@ -50,8 +38,9 @@ const styles = StyleSheet.create({
         height: 60,
         paddingHorizontal: 15,
         justifyContent: `center`,
-        borderBottomColor: `#ffffff`,
-        borderBottomWidth: 2,
+        // backgroundColor: `#ffffff`,
+        // borderBottomColor: `#ffffff`,
+        // borderBottomWidth: 2,
     },
     headerItem: {
         gap: 10,
