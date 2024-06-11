@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Alert, Linking, Pressable, StyleSheet, View } from 'react-native';
 import { useSelector } from 'react-redux';
 import * as Clipboard from 'expo-clipboard';
 import { FontText } from 'utils/TextUtils';
@@ -9,6 +9,7 @@ import { encrypt } from 'utils/CipherUtils';
 import * as FileSystem from 'expo-file-system';
 import { dispatchOne } from 'utils/DispatchUtils';
 import * as WebBrowser from 'expo-web-browser';
+import Api from 'api/Api';
 
 export default function Test() {
     const test = useSelector((state) => state.commonReducer.test);
@@ -32,8 +33,8 @@ export default function Test() {
 
     const testCipher = async () => {
         console.log('&&&&&&&&&&&&&&&& aes test &&&&&&&&&&&&&&&&&');
-        const valueArr = [82047550, 82047551, 82047552, 82047553, 82047554, 91260490, 91352089, 'new1234!'];
-        // const valueArr = ['82047550', '82047551', '82047552', '82047553', '82047554', '91260490', '91352089'];
+        const valueArr = [82047550, 82047551, 82047552, 82047553, 82047554, 'new1234!'];
+        // const valueArr = ['82047550', '82047551', '82047552', '82047553', '82047554', 'new1234'];
         // const valueArr = ['rlawldms1!', 'rlarla!@#$rla'];
 
         for (let value of valueArr) {
@@ -41,9 +42,36 @@ export default function Test() {
         }
     };
 
+    const testFetch = async () => {
+        // ApiFetch.get(`common/dbCheck.do`)
+        //     .then((response) => {
+        //         console.log(response);
+        //     })
+        //     .catch((error) => {
+        //         console.log('error');
+        //         console.log(error);
+        //     });
+        // Api.mobile
+        //     .get(`common/dbCheck.do`)
+        //     .then((response) => {
+        //         console.log(response.data)
+        //     })
+        //     .catch((error) => {
+        //         console.log('error');
+        //         console.log(error);
+        //     });
+
+        Api.test.get('file/download/test.txt').then((response) => {
+            console.log(response.data);
+            const type = response.headers['content-type'];
+            const blob = new Blob([response.data], { type: type, encoding: 'UTF-8' });
+            Linking.openURL(response.data);
+        });
+    };
+
     const [web, setWeb] = useState(null);
     const [progress, setProgress] = useState(0);
-    const url = 'https://85a4-117-111-17-91.ngrok-free.app/file/download/test.txt';
+    const url = 'https://040d-220-70-19-87.ngrok-free.app/file/download/test.txt';
     // const url = 'https://expo.dev/artifacts/eas/skcuKXwqy65NwwVP7CRyje.apk';
     const fileArr = url.split('/');
     const fileName = fileArr[fileArr.length - 1];
@@ -59,15 +87,15 @@ export default function Test() {
     const downloadResumable = FileSystem.createDownloadResumable(url, downloadPath + fileName, {}, downloadCallback);
 
     const download = async () => {
+        const directoryUri = FileSystem.documentDirectory + 'Download/';
         await downloadResumable
             .downloadAsync()
             .then((result) => {
                 console.log(result);
-
                 if (result.status === 200) {
                     console.log('Download Complete!', `File saved at: ${result.uri}`);
-                    setWeb(result.uri);
-                    moveFile(result.uri);
+                    // saveReportFile(directoryUri, result);
+                    writeFile(result);
                 } else {
                     console.log('Download Failed!', 'Unable to download the file.');
                 }
@@ -75,6 +103,59 @@ export default function Test() {
             .catch((error) => {
                 console.log(error);
             });
+    };
+
+    const ensureDirExists = async () => {
+        const dir = FileSystem.documentDirectory + 'Download/';
+        const dirInfo = await FileSystem.getInfoAsync(dir);
+        if (!dirInfo.exists) {
+            console.log("directory doesn't exist, creating...");
+            await FileSystem.makeDirectoryAsync(dir, { intermediates: true });
+        } else {
+            console.log('directory alreay exists');
+        }
+    };
+
+    const writeFile = (result) => {
+        ensureDirExists()
+            .then(() =>
+                FileSystem.writeAsStringAsync(result.uri, result.md5)
+                    .then((contents) => {
+                        console.log('write Success');
+                        console.log(contents);
+                    })
+                    .catch((e) => console.log(e))
+            )
+            .catch((e) => console.log(e));
+    };
+
+    const getPermission = async () => {
+        const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+        if (!permissions.granted) return null;
+
+        const directoryUri = permissions.directoryUri;
+        console.log(directoryUri);
+
+        return directoryUri;
+    };
+
+    const saveReportFile = async (directoryUri, result) => {
+        try {
+            await FileSystem.StorageAccessFramework.createFileAsync(directoryUri, result.uri, result.headers['content-type'])
+                .then(async (uri) => {
+                    console.log(uri);
+                    await FileSystem.writeAsStringAsync(uri, result.md5); //{ encoding: FileSystem.EncodingType.Base64 }
+                })
+                .then((res) => {
+                    console.log(res);
+                    Alert.alert('Success', `File Saved`);
+                })
+                .catch((e) => {
+                    console.log(e);
+                });
+        } catch (error) {
+            Alert.alert('Error', `Could not Download file ${error.message}`);
+        }
     };
 
     const moveFile = async (downloadUri) => {
@@ -121,7 +202,7 @@ export default function Test() {
                 {test}
             </FontText> */}
 
-            <Pressable style={commonInputStyles.buttonWhite} onPress={download}>
+            <Pressable style={commonInputStyles.buttonWhite} onPress={testFetch}>
                 <FontText>테스트</FontText>
             </Pressable>
         </View>

@@ -7,6 +7,7 @@ import * as StorageUtils from 'utils/StorageUtils';
 import { FontDefault, FontText } from 'utils/TextUtils';
 import { checkSms, login, sendSms } from 'api/LoginApi';
 import LoginInfo from 'modal/LoginInfo';
+import { okAlert } from 'utils/AlertUtils';
 
 /** LDAP 로그인 */
 const LDAPLogin = () => {
@@ -153,7 +154,7 @@ const LDAPLogin = () => {
                 setTime((prevTime) => {
                     if (prevTime == 0) {
                         clearInterval(interval);
-                        Alert.alert('인증 시간이 초과되었습니다.');
+                        okAlert('SMS 인증번호 입력 대기시간이 3분을 초과했습니다.\n인증번호를 다시 요청해 주시기 바랍니다.');
                         return prevTime;
                     }
 

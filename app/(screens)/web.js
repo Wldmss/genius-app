@@ -238,6 +238,11 @@ const Web = () => {
             return false;
         }
 
+        if (url.startsWith('mailto') || url.startsWith('tel') || url.startsWith('sms')) {
+            Linking.openURL(url);
+            return false;
+        }
+
         return true;
     };
 
@@ -323,11 +328,11 @@ const Web = () => {
     }, [webLink]);
 
     useEffect(() => {
-        const web_url = profile != 'production' && isDev ? process.env.EXPO_PUBLIC_DEV_SERVER_URL : process.env.WEB_URL;
+        const web_url = profile != 'production' && isDev ? process.env.DEV_SERVER_URL : process.env.WEB_URL;
         setWebUrl(web_url);
 
         // if (profile.includes('test') || profile.includes('development')) Alert.alert(`${profile}\n${webUrl}${webLink}`);
-        if (profile.includes('staging')) {
+        if (profile.includes('staging') && !isDev) {
             Alert.alert(`${web_url}${webLink} 접속`, `로그인 연동 준비중입니다.\n로그인 페이지 로드 시 다시 로그인 해주세요.`, [
                 {
                     text: '확인',
@@ -344,7 +349,7 @@ const Web = () => {
             ref={webViewRef}
             style={[styles.webview, hide ? commonStyles.none : commonStyles.container]}
             source={{
-                // uri: 'https://76f5-117-111-28-195.ngrok-free.app/file',
+                // uri: 'https://040d-220-70-19-87.ngrok-free.app/file',
                 // method: 'GET',
                 uri: `${webUrl}${webLink || ''}`,
                 method: 'POST',

@@ -28,7 +28,7 @@ const Camera = () => {
     const scanCode = (...args) => {
         if (urlText == '') {
             const data = args[0].data;
-            let result = JSON.stringify(data);
+            let result = typeof data != 'string' ? JSON.stringify(data) : data;
             if (result != '') {
                 setUrlText(result.replace(/^"(.*)"$/, '$1'));
                 setScan(true);

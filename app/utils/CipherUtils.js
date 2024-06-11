@@ -9,7 +9,7 @@ const iv = CryptoJS.enc.Utf8.parse(ivString);
 
 // aes256 암호화
 export const encrypt = (value) => {
-    const stringValue = JSON.stringify(value);
+    const stringValue = typeof value != 'string' ? JSON.stringify(value) : value;
 
     const encrypt = CryptoJS.AES.encrypt(stringValue, key, {
         iv: iv,

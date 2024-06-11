@@ -123,24 +123,19 @@ const Main = () => {
         }
     };
 
-    // storage 데이터 확인
-    const checkStorage = () => {
-        if (doneBio) {
-            getStorageData();
-        } else {
-            checkBioSupported().then(() => {
-                getStorageData();
-            });
-        }
-    };
-
     useEffect(() => {
         // deleteSecureStore();
 
         checkFirst().then(() => {
-            checkStorage();
+            checkBioSupported();
         });
     }, []);
+
+    useEffect(() => {
+        if (doneBio) {
+            getStorageData();
+        }
+    }, [doneBio]);
 
     useEffect(() => {
         if (resetLogin) resetStorageData();

@@ -8,7 +8,7 @@ import { encrypt } from 'utils/CipherUtils';
 import * as Device from 'expo-device';
 import Constants from 'expo-constants';
 
-const { profile, isTest } = Constants.expoConfig.extra;
+const { profile, isTest, androidVersion, iosVersion } = Constants.expoConfig.extra;
 const { version } = Constants.expoConfig;
 
 // const testUrl = 'https://naver.com';
@@ -40,6 +40,7 @@ export const checkVersion = async () => {
         return false;
     } else {
         const osType = await getOsType();
+        const appVersion = getBuildVersion(osType);
 
         /** 앱 버전 체크
          * @method GET
@@ -47,9 +48,11 @@ export const checkVersion = async () => {
          * @param appVersion : 앱 버전
          * @return { rtnSts } : F: 기준정보 버전보다 낮거나 높음, T: 동일, E: 값 없음.
          */
-        return await ApiFetch.get(`api/checkAppVersion.do?osType=${osType}&appVersion=${version}`)
+        // return await ApiFetch.get(`api/checkAppVersion.do?osType=${osType}&appVersion=${version}`)
+        return await Api.mobile
+            .get(`api/checkAppVersion.do?osType=${osType}&appVersion=${appVersion}`)
             .then((response) => {
-                const { rtnSts } = response;
+                const { rtnSts } = response.data;
                 return rtnSts == 'F';
             })
             .catch((error) => {
@@ -85,9 +88,11 @@ export const login = async (username, password) => {
          * @param { userId : 로그인 사번 (AES256), pwd : 비밀번호 (AES256) }
          * @return { rtnSts : 상태 (S: 성공, E: 실패), rtnMsg : 메시지, rtnUrl : 이동 url }
          */
-        return await ApiFetch.post('api/login/loginProc.do', JSON.stringify(sendData))
+        // return await ApiFetch.post('api/login/loginProc.do', JSON.stringify(sendData))
+        return await Api.mobile
+            .post('api/login/loginProc.do', sendData)
             .then((response) => {
-                const { rtnSts, rtnMsg, rtnUrl } = response;
+                const { rtnSts, rtnMsg, rtnUrl } = response.data;
 
                 if (rtnSts == 'S') {
                     store.dispatch(dispatchOne('SET_WEBLINK', rtnUrl));
@@ -119,6 +124,7 @@ export const checkLogin = async (checkFlag) => {
 
     const deviceToken = await getDeviceToken();
     const osType = await getOsType();
+    const appVersion = getBuildVersion(osType);
     const loginKey = store.getState().loginReducer.loginKey;
 
     if (checkIsTest()) {
@@ -131,7 +137,7 @@ export const checkLogin = async (checkFlag) => {
         const sendData = {
             deviceToken: deviceToken,
             osType: osType,
-            appVersion: version,
+            appVersion: appVersion,
             loginKey: loginKey,
         };
 
@@ -140,9 +146,11 @@ export const checkLogin = async (checkFlag) => {
          * @param { deviceToken: push token, osType: os 종류, appVersion: 앱 버전, loginKey: 로그인 키 }
          * @return { rtnSts : 상태 (S: 성공, E: 실패), rtnMsg : 메시지, rtnUrl : 이동 url }
          */
-        return ApiFetch.post('api/login/loginKeyProc.do', JSON.stringify(sendData))
+        // return ApiFetch.post('api/login/loginKeyProc.do', JSON.stringify(sendData))
+        return await Api.mobile
+            .post('api/login/loginKeyProc.do', sendData)
             .then((response) => {
-                const { rtnSts, rtnMsg, rtnUrl } = response;
+                const { rtnSts, rtnMsg, rtnUrl } = response.data;
 
                 if (rtnSts == 'S') {
                     store.dispatch(dispatchMultiple({ SET_WEBLINK: rtnUrl, SET_TOKEN: loginKey || null }));
@@ -155,7 +163,6 @@ export const checkLogin = async (checkFlag) => {
                 }
             })
             .catch(async (err) => {
-                console.log(err);
                 if (isDev) store.dispatch(dispatchMultiple({ SET_WEBLINK: testUrl, SET_TOKEN: '91352089&2024-01-01', SET_LOADING: false }));
                 return isDev;
             })
@@ -173,12 +180,13 @@ export const sendSms = async (username) => {
     const encryptUsername = encrypt(username);
     const deviceToken = await getDeviceToken();
     const osType = await getOsType();
+    const appVersion = getBuildVersion(osType);
 
     const sendData = {
         userId: encryptUsername,
         deviceToken: deviceToken,
         osType: osType,
-        appVersion: version,
+        appVersion: appVersion,
     };
 
     if (checkIsTest()) {
@@ -189,9 +197,11 @@ export const sendSms = async (username) => {
          * @param { userId : 로그인 사번 (AES256), deviceToken: push token, osType: os 종류, appVersion: 앱 버전 }
          * @return { rtnSts : 상태 (S: 성공, E: 실패), rtnMsg : 메시지 }
          */
-        return await ApiFetch.post(`api/login/sendSmsOpt.do`, JSON.stringify(sendData))
+        // return await ApiFetch.post(`api/login/sendSmsOpt.do`, JSON.stringify(sendData))
+        return await Api.mobile
+            .post(`api/login/sendSmsOpt.do`, sendData)
             .then((response) => {
-                const { rtnSts, rtnMsg } = response;
+                const { rtnSts, rtnMsg } = response.data;
 
                 if (rtnSts == 'E') {
                     if (rtnMsg && rtnMsg != '') Alert.alert(JSON.stringify(rtnMsg));
@@ -215,13 +225,14 @@ export const checkSms = async (loginInfo) => {
     const encryptUsername = encrypt(loginInfo.username);
     const deviceToken = await getDeviceToken();
     const osType = await getOsType();
+    const appVersion = getBuildVersion(osType);
 
     const sendData = {
         userId: encryptUsername,
         serial: String(loginInfo.otp) || '',
         deviceToken: deviceToken,
         osType: osType,
-        appVersion: version,
+        appVersion: appVersion,
     };
 
     if (checkIsTest()) {
@@ -233,9 +244,11 @@ export const checkSms = async (loginInfo) => {
          * @param { userId : 로그인 사번 (AES256), serial: otp 인증번호, deviceToken: push token, osType: os 종류, appVersion: 앱 버전 }
          * @return { rtnSts : 상태 (S: 성공, E: 실패), rtnMsg : 메시지, rtnUrl : 이동 url, loginKey : 로그인 키 }
          */
-        return await ApiFetch.post(`api/login/checkSmsAuth.do`, JSON.stringify(sendData))
+        // return await ApiFetch.post(`api/login/checkSmsAuth.do`, JSON.stringify(sendData))
+        return await Api.mobile
+            .post(`api/login/checkSmsAuth.do`, sendData)
             .then((response) => {
-                const { rtnSts, rtnMsg, rtnUrl, loginKey } = response;
+                const { rtnSts, rtnMsg, rtnUrl, loginKey } = response.data;
 
                 if (rtnSts == 'S') {
                     store.dispatch(dispatchOne('SET_WEBLINK', rtnUrl));
@@ -279,9 +292,11 @@ export const checkIn = async (params) => {
          * @param { loginKey : 로그인 key, educId: 과정 ID, role: 체크인/체크아웃 구분 }
          * @returns { rtnSts : 상태 (S: 성공, E: 실패), rtnMsg : 메시지 }
          */
-        return await ApiFetch.post(`api/common/qrChk.do`, JSON.stringify(sendData))
+        // return await ApiFetch.post(`api/common/qrChk.do`, JSON.stringify(sendData))
+        return await Api.mobile
+            .post(`api/common/qrChk.do`, sendData)
             .then((response) => {
-                const { rtnSts, rtnMsg } = response;
+                const { rtnSts, rtnMsg } = response.data;
                 return { status: rtnSts == 'S', message: rtnMsg };
             })
             .catch((error) => {
@@ -327,6 +342,13 @@ const getOsType = () => {
     const brand = Device.brand;
 
     return brand == null ? 'web' : brandType[brand.toLowerCase()];
+};
+
+// 빌드 버전
+const getBuildVersion = (osType) => {
+    if (osType == 'Android') return androidVersion;
+    if (osType == 'ios') return iosVersion;
+    return nul;
 };
 
 // 개발 서버에 token 저장

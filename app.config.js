@@ -29,6 +29,8 @@ module.exports = ({ config }) => {
             ...config.extra,
             profile: profile,
             isTest: profile != 'production',
+            androidVersion: config.android.versionCode,
+            iosVersion: config.ios.buildNumber,
         },
     };
 };

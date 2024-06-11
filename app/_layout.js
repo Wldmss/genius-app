@@ -183,8 +183,8 @@ const App = () => {
                     <SafeAreaView style={styles.container}>
                         <BackHeader />
                         <Development isDev={dev} />
-                        <Contents />
-                        {/* <Test /> */}
+                        {/* <Contents /> */}
+                        <Test />
                         <PopModal />
                         <Snackbar />
                     </SafeAreaView>

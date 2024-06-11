@@ -3,23 +3,33 @@ import * as Clipboard from 'expo-clipboard';
 import * as Updates from 'expo-updates';
 import { setDevelopment } from '(login)/_layout';
 
+let server_url = process.env.SERVER_URL;
+let isDev = false;
+
 export const apiFetchStore = (_store) => {
     store = _store;
+
+    isDev = store.getState().commonReducer.isDev;
+    server_url = isDev ? process.env.DEV_SERVER_URL : process.env.SERVER_URL;
 };
 
-const server = null;
+// let server = null;
 
-const checkDevelopment = () => {
-    const isDev = store.getState().commonReducer.isDev;
-    const url = isDev ? process.env.DEV_SERVER_URL : process.env.SERVER_URL;
-
-    return { isDev: isDev, url: url };
-};
+// const checkDevelopment = async () => {
+//     if (server == null) {
+//         const isDev = store.getState().commonReducer.isDev;
+//         const url = isDev ? process.env.DEV_SERVER_URL : process.env.SERVER_URL;
+//         server = { isDev: isDev, url: url };
+//         return server;
+//     } else {
+//         return server;
+//     }
+// };
 
 export async function postForm(url, body) {
-    const serverInfo = server == null ? checkDevelopment() : server;
+    // const serverInfo = await checkDevelopment();
 
-    const response = await fetch(`${serverInfo.url}/${url}`, {
+    const response = await fetch(`${server_url}/${url}`, {
         method: 'POST',
         headers: {
             Accept: 'application/json',
@@ -27,7 +37,7 @@ export async function postForm(url, body) {
         },
         body: JSON.stringify(body),
     }).catch((error) => {
-        if (serverInfo.isDev) catchError(`${serverInfo.url}/${url}`, error);
+        if (isDev) catchError(`${server_url}/${url}`, error);
     });
 
     if (!response.ok) {
@@ -38,9 +48,9 @@ export async function postForm(url, body) {
 }
 
 export async function post(url, body) {
-    const serverInfo = server == null ? checkDevelopment() : server;
+    // const serverInfo = await checkDevelopment();
 
-    const response = await fetch(`${serverInfo.url}/${url}`, {
+    const response = await fetch(`${server_url}/${url}`, {
         method: 'POST',
         headers: {
             Accept: 'application/json',
@@ -48,7 +58,7 @@ export async function post(url, body) {
         },
         body: JSON.stringify(body),
     }).catch((error) => {
-        if (serverInfo.isDev) catchError(`${serverInfo.url}/${url}`, error);
+        if (isDev) catchError(`${server_url}/${url}`, error);
     });
 
     if (!response.ok) {
@@ -59,12 +69,12 @@ export async function post(url, body) {
 }
 
 export async function get(url) {
-    const serverInfo = server == null ? checkDevelopment() : server;
+    // const serverInfo = await checkDevelopment();
 
-    const response = await fetch(`${serverInfo.url}/${url}`, {
+    const response = await fetch(`${server_url}/${url}`, {
         method: 'GET',
     }).catch((error) => {
-        if (serverInfo.isDev) catchError(`${serverInfo.url}/${url}`, error);
+        if (isDev) catchError(`${server_url}/${url}`, error);
     });
 
     if (!response.ok) {

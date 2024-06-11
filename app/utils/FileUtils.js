@@ -8,7 +8,7 @@ export const handleDownloadRequest = async (url) => {
 
     const fileArr = url.split('/');
     const fileName = fileArr[fileArr.length - 1];
-    const downloadPath = FileSystem.documentDirectory + '/Download/';
+    const downloadPath = FileSystem.documentDirectory + '';
 
     const downloadCallback = (downloadProgress) => {
         const progress = downloadProgress.totalBytesWritten / downloadProgress.totalBytesExpectedToWrite;
@@ -33,6 +33,6 @@ export const handleDownloadRequest = async (url) => {
 };
 
 export const downloadFile = () => {
-    const url = 'https://85a4-117-111-17-91.ngrok-free.app/file/download/test.txt';
+    const url = 'https://040d-220-70-19-87.ngrok-free.app/file/download/test.txt';
     handleDownloadRequest(url);
 };
