@@ -63,9 +63,32 @@ export default function Test() {
 
         Api.test.get('file/download/test.txt').then((response) => {
             console.log(response.data);
-            const type = response.headers['content-type'];
-            const blob = new Blob([response.data], { type: type, encoding: 'UTF-8' });
-            Linking.openURL(response.data);
+            // const type = response.headers['content-type'];
+            // const blob = new Blob([response.data], { type: type, encoding: 'UTF-8' });
+            // Linking.openURL(response.data);
+
+            const blob = response.data;
+
+            // Create a local file path
+            const fileUri = FileSystem.documentDirectory + 'test.txt';
+
+            // Convert the blob to a base64 string
+            const reader = new FileReader();
+            reader.readAsDataURL(blob);
+            reader.onloadend = async () => {
+                const base64data = reader.result.split(',')[1];
+
+                console.log(base64data);
+
+                const directoryUri = getPermission();
+                saveReportFile(directoryUri);
+                // Write the base64 data to a file
+                // await FileSystem.writeAsStringAsync(fileUri, base64data, {
+                //     encoding: FileSystem.EncodingType.Base64,
+                // });
+
+                console.log('File downloaded to', fileUri);
+            };
         });
     };
 
@@ -94,8 +117,8 @@ export default function Test() {
                 console.log(result);
                 if (result.status === 200) {
                     console.log('Download Complete!', `File saved at: ${result.uri}`);
-                    // saveReportFile(directoryUri, result);
-                    writeFile(result);
+                    saveReportFile(directoryUri, result);
+                    // writeFile(result);
                 } else {
                     console.log('Download Failed!', 'Unable to download the file.');
                 }
@@ -144,7 +167,9 @@ export default function Test() {
             await FileSystem.StorageAccessFramework.createFileAsync(directoryUri, result.uri, result.headers['content-type'])
                 .then(async (uri) => {
                     console.log(uri);
-                    await FileSystem.writeAsStringAsync(uri, result.md5); //{ encoding: FileSystem.EncodingType.Base64 }
+                    await FileSystem.writeAsStringAsync(uri, result.md5, {
+                        encoding: FileSystem.EncodingType.Base64,
+                    }); //{ encoding: FileSystem.EncodingType.Base64 }
                 })
                 .then((res) => {
                     console.log(res);
