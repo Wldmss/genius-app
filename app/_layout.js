@@ -33,7 +33,7 @@ import { alertStore } from 'utils/AlertUtils';
 import { fileStore } from 'utils/FileUtils';
 import AlertModal from 'modal/AlertModal';
 
-const splashTime = 4000;
+const splashTime = 3000;
 const { profile, isTest } = Constants.expoConfig.extra;
 
 /** layout (main)
@@ -69,6 +69,7 @@ const App = () => {
     // alert store
     alertStore(store);
 
+    // file store
     fileStore(store);
 
     // font load

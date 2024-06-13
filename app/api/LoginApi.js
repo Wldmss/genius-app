@@ -6,6 +6,7 @@ import { getMessagingToken } from 'utils/PushFcm';
 import { encrypt } from 'utils/CipherUtils';
 import * as Device from 'expo-device';
 import Constants from 'expo-constants';
+import propTypes from 'prop-types';
 
 const { profile, isTest, androidVersion, iosVersion } = Constants.expoConfig.extra;
 const { version } = Constants.expoConfig;
@@ -20,7 +21,7 @@ let isDev = null;
 
 const checkIsTest = () => {
     isDev = isDev || store.getState().commonReducer.isDev;
-    return isTest && !isDev;
+    return false; //isTest && !isDev;
 };
 
 /** server check & app version check
@@ -53,8 +54,6 @@ export const checkVersion = async () => {
 };
 
 /** LDAP login
- * @param username string : 로그인 사번
- * @param password string : 로그인 비번
  * @return boolean
  */
 export const login = async (username, password) => {
@@ -71,8 +70,6 @@ export const login = async (username, password) => {
             userId: encryptUsername,
             pwd: encryptPassword,
         };
-
-        console.log(sendData);
 
         /** 로그인 (LDAP)
          * @method POST
@@ -105,8 +102,12 @@ export const login = async (username, password) => {
     }
 };
 
+login.propTypes = {
+    username: propTypes.string.isRequired, // 로그인 사번
+    password: propTypes.string.isRequired, // 로그인 비번
+};
+
 /** 로그인 key 검증 (pin, bio)
- * @param checkFlag boolean : pin 변경 시 loginKey 체크
  * @return boolean
  *  */
 export const checkLogin = async (checkFlag) => {
@@ -162,8 +163,11 @@ export const checkLogin = async (checkFlag) => {
     }
 };
 
+checkLogin.propTypes = {
+    checkFlag: propTypes.bool, // pin 변경 시 loginKey 체크
+};
+
 /** 인증번호 전송
- * @param username string : 로그인 사번
  * @return boolean
  */
 export const sendSms = async (username) => {
@@ -202,8 +206,11 @@ export const sendSms = async (username) => {
     }
 };
 
+sendSms.propTypes = {
+    username: propTypes.string.isRequired, // 로그인 사번
+};
+
 /** 인증번호 확인
- * @param loginInfo { username: '', password: '', otp: '' }
  * @return { status: boolean, token: string }
  */
 export const checkSms = async (loginInfo) => {
@@ -257,9 +264,11 @@ export const checkSms = async (loginInfo) => {
     }
 };
 
-/** QR 체크인
- * @param params : 전달할 값
- */
+checkSms.propTypes = {
+    loginInfo: propTypes.object.isRequired, // { username: '', password: '', otp: '' }
+};
+
+/** QR 체크인 */
 export const checkIn = async (params) => {
     if (checkIsTest()) {
         return { status: true, message: 'QR 체크인 pass' };
@@ -288,10 +297,18 @@ export const checkIn = async (params) => {
     }
 };
 
+checkIn.propTypes = {
+    params: propTypes.object, // 전달할 값
+};
+
 // rtnMsg 처리
 const handleRtnMsg = (message) => {
     if (message == null || message == '') message = '로그인에 실패했습니다.\n다시 시도해주세요.';
     Alert.alert(message);
+};
+
+handleRtnMsg.propTypes = {
+    message: propTypes.string, // alert 메시지
 };
 
 // push token 값
@@ -330,8 +347,12 @@ const getOsType = () => {
 // 빌드 버전
 const getBuildVersion = (osType) => {
     if (osType == 'Android') return androidVersion;
-    if (osType == 'ios') return iosVersion;
+    if (osType == 'IOS') return iosVersion;
     return null;
+};
+
+getBuildVersion.propTypes = {
+    osType: propTypes.string, // os 타입 (Android, IOS)
 };
 
 // 개발 서버에 token 저장

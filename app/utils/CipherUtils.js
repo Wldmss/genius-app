@@ -1,5 +1,6 @@
 import Api from 'api/Api';
 import CryptoJS from 'react-native-crypto-js';
+import PropTypes from 'prop-types';
 
 const keyString = process.env.AES_KEY;
 const ivString = keyString.substring(0, 16);
@@ -28,6 +29,10 @@ export const encrypt = (value) => {
     return encryptedHex;
 };
 
+encrypt.PropTypes = {
+    value: PropTypes.any.isRequired, // 암호화 값
+};
+
 // aes256 복호화
 export const decrypt = (value) => {
     const ciphertext = CryptoJS.enc.Hex.parse(value);
@@ -41,4 +46,8 @@ export const decrypt = (value) => {
     const decryptedString = decrypt.toString(CryptoJS.enc.Utf8);
 
     return JSON.parse(decryptedString);
+};
+
+decrypt.PropTypes = {
+    value: PropTypes.string.isRequired, // 복호화 값
 };
