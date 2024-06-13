@@ -3,10 +3,10 @@ import { StyleSheet, Text, View } from 'react-native';
 const ProgressBar = ({ percent }) => {
     return (
         <View style={styles.container}>
-            <Text style={styles.progressBarText}>업데이트 중...</Text>
-            <View style={styles.progressBar}>
+            <Text style={styles.progressBarText}>업데이트 중입니다</Text>
+            {/* <View style={styles.progressBar}>
                 <View style={styles.progressBarFill} width={percent * 100 + '%'} />
-            </View>
+            </View> */}
         </View>
     );
 };

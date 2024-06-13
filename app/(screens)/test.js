@@ -1,4 +1,4 @@
-import { Alert, Linking, Pressable, StyleSheet, View } from 'react-native';
+import { Alert, Linking, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { useSelector } from 'react-redux';
 import * as Clipboard from 'expo-clipboard';
 import { FontText } from 'utils/TextUtils';
@@ -10,6 +10,8 @@ import * as FileSystem from 'expo-file-system';
 import { dispatchOne } from 'utils/DispatchUtils';
 import * as WebBrowser from 'expo-web-browser';
 import Api from 'api/Api';
+import RNFetchBlob from 'rn-fetch-blob';
+import { downloadBlobFile, downloadFs } from 'utils/FileUtils';
 
 export default function Test() {
     const test = useSelector((state) => state.commonReducer.test);
@@ -33,13 +35,55 @@ export default function Test() {
 
     const testCipher = async () => {
         console.log('&&&&&&&&&&&&&&&& aes test &&&&&&&&&&&&&&&&&');
-        const valueArr = [82047550, 82047551, 82047552, 82047553, 82047554, 'new1234!'];
+        // const valueArr = [82047550, 82047551, 82047552, 82047553, 82047554, 'new1234!'];
         // const valueArr = ['82047550', '82047551', '82047552', '82047553', '82047554', 'new1234'];
         // const valueArr = ['rlawldms1!', 'rlarla!@#$rla'];
 
-        for (let value of valueArr) {
-            encrypt(value);
-        }
+        // for (let value of valueArr) {
+        //     encrypt(value);
+        // }
+
+        encrypt('91352089&2024-01-01');
+    };
+
+    const blob = () => {
+        const url = 'https://4ded-211-36-136-213.ngrok-free.app/file/download/login.pptx';
+        const fileArr = url.split('/');
+        const fileName = fileArr[fileArr.length - 1];
+
+        let DownloadDir = RNFetchBlob.fs.dirs.DownloadDir; // android 저장경로
+        let DocumentDir = RNFetchBlob.fs.dirs.DocumentDir; // ios 저장경로
+
+        const dir = Platform.OS == 'android' ? DownloadDir : DocumentDir;
+
+        const commonconfig = {
+            useDownloadManager: true,
+            notification: true,
+            mediaScannable: true,
+            title: fileName,
+        };
+
+        const configfb = {
+            fileCache: true,
+            addAndroidDownloads: {
+                ...commonconfig,
+                path: `${dir}/${fileName}`,
+            },
+            ...commonconfig,
+            path: `${dir}/${fileName}`,
+        };
+
+        RNFetchBlob.config(configfb)
+            .fetch('GET', url, {})
+            .then((res) => {
+                if (Platform.OS === 'ios') {
+                    RNFetchBlob.fs.writeFile(configfb.path, res.data, 'base64');
+                    RNFetchBlob.ios.previewDocument(configfb.path);
+                }
+                if (Platform.OS === 'android') {
+                    console.log('file downloaded');
+                }
+            });
     };
 
     const testFetch = async () => {
@@ -94,7 +138,7 @@ export default function Test() {
 
     const [web, setWeb] = useState(null);
     const [progress, setProgress] = useState(0);
-    const url = 'https://040d-220-70-19-87.ngrok-free.app/file/download/test.txt';
+    const url = 'https://4ded-211-36-136-213.ngrok-free.app/file/download/login.pptx';
     // const url = 'https://expo.dev/artifacts/eas/skcuKXwqy65NwwVP7CRyje.apk';
     const fileArr = url.split('/');
     const fileName = fileArr[fileArr.length - 1];
@@ -110,15 +154,17 @@ export default function Test() {
     const downloadResumable = FileSystem.createDownloadResumable(url, downloadPath + fileName, {}, downloadCallback);
 
     const download = async () => {
-        const directoryUri = FileSystem.documentDirectory + 'Download/';
+        // const directoryUri = FileSystem.documentDirectory + 'Download/';
+        // const directoryUri = await getPermission();
+
         await downloadResumable
             .downloadAsync()
             .then((result) => {
                 console.log(result);
                 if (result.status === 200) {
                     console.log('Download Complete!', `File saved at: ${result.uri}`);
-                    saveReportFile(directoryUri, result);
-                    // writeFile(result);
+                    // saveReportFile(directoryUri,result);
+                    writeFile(result);
                 } else {
                     console.log('Download Failed!', 'Unable to download the file.');
                 }
@@ -126,6 +172,40 @@ export default function Test() {
             .catch((error) => {
                 console.log(error);
             });
+    };
+
+    const writeFile = (result) => {
+        const contentType = result.headers['content-type'];
+        const typeArr = contentType.split(';');
+
+        ensureDirExists()
+            .then(async (dir) => {
+                getFile(result.uri).then((contents) => {
+                    if (contents != null) {
+                        FileSystem.writeAsStringAsync(result.uri, contents, { encoding: FileSystem.EncodingType.UTF8 }).then((res) => {
+                            console.log(res);
+                        });
+                        // FileSystem.StorageAccessFramework.createFileAsync(directoryUri, 'login', typeArr[0])
+                        //     .then(async (uri) => {
+                        //         console.log(uri);
+                        //         FileSystem.writeAsStringAsync(uri, contents)
+                        //             .then((content) => {
+                        //                 console.log('write Success');
+                        //                 console.log(content);
+                        //             })
+                        //             .catch((e) => console.log(e));
+                        //     })
+                        //     .then((res) => {
+                        //         console.log(res);
+                        //         Alert.alert('Success', `File Saved`);
+                        //     })
+                        //     .catch((e) => {
+                        //         console.log(e);
+                        //     });
+                    }
+                });
+            })
+            .catch((e) => console.log(e));
     };
 
     const ensureDirExists = async () => {
@@ -137,39 +217,54 @@ export default function Test() {
         } else {
             console.log('directory alreay exists');
         }
+
+        return dir;
     };
 
-    const writeFile = (result) => {
-        ensureDirExists()
-            .then(() =>
-                FileSystem.writeAsStringAsync(result.uri, result.md5)
-                    .then((contents) => {
-                        console.log('write Success');
-                        console.log(contents);
-                    })
-                    .catch((e) => console.log(e))
-            )
-            .catch((e) => console.log(e));
+    const getFile = async (fileUri) => {
+        const result = await FileSystem.getInfoAsync(fileUri);
+        if (result.exists) {
+            return await FileSystem.readAsStringAsync(fileUri, { encoding: FileSystem.EncodingType.UTF8 });
+            // FileSystem.readAsStringAsync(fileUri, { encoding: FileSystem.EncodingType.UTF8 }).then((data) => {
+            //     FileSystem.readAsStringAsync(fileUri, { encoding: FileSystem.EncodingType.Base64 }).then((data_1) => {
+            //         return data_1;
+            //     });
+            // });
+        } else {
+            Alert.alert('파일이 존재하지 않습니다.');
+            return null;
+        }
     };
 
     const getPermission = async () => {
-        const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
-        if (!permissions.granted) return null;
+        const dir = FileSystem.StorageAccessFramework.getUriForDirectoryInRoot('KTedu');
+        console.log(dir);
 
-        const directoryUri = permissions.directoryUri;
-        console.log(directoryUri);
+        FileSystem.StorageAccessFramework.makeDirectoryAsync(dir, 'KTedu').then((result) => {
+            console.log(result);
+        });
+
+        return null;
+
+        // return `${directory}/KTedu`;
+
+        // const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+        // if (!permissions.granted) return null;
+
+        // const directoryUri = permissions.directoryUri;
+        // console.log(directoryUri);
 
         return directoryUri;
     };
 
     const saveReportFile = async (directoryUri, result) => {
         try {
-            await FileSystem.StorageAccessFramework.createFileAsync(directoryUri, result.uri, result.headers['content-type'])
+            await FileSystem.StorageAccessFramework.createFileAsync(directoryUri, 'test.txt', result.headers['content-type'])
                 .then(async (uri) => {
                     console.log(uri);
-                    await FileSystem.writeAsStringAsync(uri, result.md5, {
-                        encoding: FileSystem.EncodingType.Base64,
-                    }); //{ encoding: FileSystem.EncodingType.Base64 }
+                    // await FileSystem.writeAsStringAsync(uri, result.md5, {
+                    //     encoding: FileSystem.EncodingType.Base64,
+                    // }); //{ encoding: FileSystem.EncodingType.Base64 }
                 })
                 .then((res) => {
                     console.log(res);
@@ -213,6 +308,10 @@ export default function Test() {
         });
     };
 
+    const downloadTest = () => {
+        downloadBlobFile('https://dev.ktedu.kt.com:2443/mobile/m/educontents/courseData/courseDataDetail.do?contId=200015892', '개발자용.pptx');
+    };
+
     useEffect(() => {
         store.dispatch(dispatchOne('SET_SPLASH', false));
 
@@ -227,7 +326,7 @@ export default function Test() {
                 {test}
             </FontText> */}
 
-            <Pressable style={commonInputStyles.buttonWhite} onPress={testFetch}>
+            <Pressable style={commonInputStyles.buttonWhite} onPress={() => downloadFs(url)}>
                 <FontText>테스트</FontText>
             </Pressable>
         </View>

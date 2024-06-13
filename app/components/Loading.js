@@ -1,13 +1,16 @@
 import { Modal, StyleSheet, View } from 'react-native';
-import { GeniusLogo } from 'utils/ImageUtils';
+import { ActivityIndicator } from 'react-native-paper';
+import { useSelector } from 'react-redux';
 
 /** 로딩 화면 */
 const Loading = () => {
-    // const loading = useSelector((state) => state.commonReducer.loading);
+    const loading = useSelector((state) => state.commonReducer.loading);
 
     return (
-        <Modal visible={true} transparent={true} animationType="fade">
-            <View style={styles.modalContainer}>{/* <GeniusLogo /> */}</View>
+        <Modal visible={loading} transparent={true} animationType="fade">
+            <View style={styles.modalContainer}>
+                <ActivityIndicator size="large" color={process.env.EXPO_PUBLIC_PUSH_COLOR} />
+            </View>
         </Modal>
     );
 };

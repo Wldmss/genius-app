@@ -30,9 +30,10 @@ import Development from '(utils)/development';
 import Test from '(screens)/test';
 import BackHeader from '(utils)/back';
 import { alertStore } from 'utils/AlertUtils';
+import { fileStore } from 'utils/FileUtils';
 
 const splashTime = 4000;
-const { profile } = Constants.expoConfig.extra;
+const { profile, isTest } = Constants.expoConfig.extra;
 
 /** layout (main)
  * 최초 로드
@@ -44,6 +45,7 @@ const App = () => {
     const [updateProgress, setUpdateProgress] = useState(0);
     const [version, setVersion] = useState(Constants.expoConfig.version);
     const [dev, setDev] = useState(false);
+    const [ready, setReady] = useState(false);
 
     console.log('profile :: ', profile);
 
@@ -66,6 +68,8 @@ const App = () => {
     // alert store
     alertStore(store);
 
+    fileStore(store);
+
     // font load
     const loadFonts = async () => {
         try {
@@ -81,16 +85,19 @@ const App = () => {
 
     // 개발자 모드 체크
     const checkDevelopment = async () => {
-        const isDev = await StorageUtils.getDeviceData('isDev');
-        const devFlag = isDev != null && isDev == 'true';
+        if (isTest) {
+            const isDev = await StorageUtils.getDeviceData('isDev');
+            const devFlag = isDev != null && isDev == 'true';
 
-        setDev(devFlag);
-        store.dispatch(dispatchOne('SET_DEV', devFlag));
+            setDev(devFlag);
+            store.dispatch(dispatchOne('SET_DEV', devFlag));
+        }
     };
 
     // 서버 체크
     const serverCheck = async () => {
         if (profile != 'production') {
+            setReady(true);
             // 테스트 용 앱 업그레이드
             const update = false;
             if (update) {
@@ -98,14 +105,16 @@ const App = () => {
                     {
                         text: '확인',
                         onPress: () => {
-                            Linking.openURL('https://85a4-117-111-17-91.ngrok-free.app/download');
+                            Linking.openURL('https://4ded-211-36-136-213.ngrok-free.app/download');
                         },
                     },
                 ]);
             }
         } else {
             await checkVersion().then((result) => {
-                if (result) {
+                setReady(result.status);
+
+                if (result && result.status && result.update) {
                     Alert.alert(process.env.EXPO_PUBLIC_NAME, '앱을 업데이트 합니다.', [
                         {
                             text: '예',
@@ -179,12 +188,12 @@ const App = () => {
         <Try catch={ErrorBoundary}>
             <Provider store={store}>
                 <Splash isUpdate={isUpdate} updateProgress={updateProgress} version={version} />
-                {splashLoaded && fontsLoaded && (
+                {ready && splashLoaded && fontsLoaded && (
                     <SafeAreaView style={styles.container}>
                         <BackHeader />
                         <Development isDev={dev} />
-                        {/* <Contents /> */}
-                        <Test />
+                        <Contents />
+                        {/* <Test /> */}
                         <PopModal />
                         <Snackbar />
                     </SafeAreaView>

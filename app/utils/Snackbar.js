@@ -16,11 +16,13 @@ const Snackbar = () => {
 
     useEffect(() => {
         if (snack != null) {
-            const timeout = setTimeout(() => {
-                onDismissSnackBar();
-            }, 2000);
+            if (!snack.hold) {
+                const timeout = setTimeout(() => {
+                    onDismissSnackBar();
+                }, snack.time || 2000);
 
-            return () => clearTimeout(timeout);
+                return () => clearTimeout(timeout);
+            }
         } else {
             onDismissSnackBar();
         }
@@ -35,7 +37,7 @@ const Snackbar = () => {
             onTouchEnd={onDismissSnackBar}>
             <View style={styles.textBox}>
                 <Image source={app_icon} style={styles.logo} />
-                <FontText style={styles.text}>{snack}</FontText>
+                <FontText style={styles.text}>{snack != null ? snack.message : ''}</FontText>
             </View>
         </Snack>
     );

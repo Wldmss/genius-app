@@ -33,11 +33,11 @@ const checkIsTest = () => {
 };
 
 /** server check & app version check
- * @return boolean : true = 앱 업데이트 필요
+ * @return { status: 서버 활성화 여부, update: true=앱 업데이트 필요 }
  */
 export const checkVersion = async () => {
     if (checkIsTest()) {
-        return false;
+        return { status: true, update: false };
     } else {
         const osType = await getOsType();
         const appVersion = getBuildVersion(osType);
@@ -53,10 +53,11 @@ export const checkVersion = async () => {
             .get(`api/checkAppVersion.do?osType=${osType}&appVersion=${appVersion}`)
             .then((response) => {
                 const { rtnSts } = response.data;
-                return rtnSts == 'F';
+                return { status: true, update: rtnSts == 'F' };
             })
             .catch((error) => {
-                return false;
+                Alert.alert('잠시 후 다시 시도해주세요.');
+                return { status: false, update: false };
             });
     }
 };
@@ -93,6 +94,7 @@ export const login = async (username, password) => {
             .post('api/login/loginProc.do', sendData)
             .then((response) => {
                 const { rtnSts, rtnMsg, rtnUrl } = response.data;
+                Alert.alert(rtnUrl);
 
                 if (rtnSts == 'S') {
                     store.dispatch(dispatchOne('SET_WEBLINK', rtnUrl));
@@ -153,7 +155,7 @@ export const checkLogin = async (checkFlag) => {
                 const { rtnSts, rtnMsg, rtnUrl } = response.data;
 
                 if (rtnSts == 'S') {
-                    store.dispatch(dispatchMultiple({ SET_WEBLINK: rtnUrl, SET_TOKEN: loginKey || null }));
+                    store.dispatch(dispatchMultiple({ SET_WEBLINK: rtnUrl, SET_TOKEN: loginKey, SET_LOADING: false }));
 
                     return true;
                 } else {
@@ -163,6 +165,7 @@ export const checkLogin = async (checkFlag) => {
                 }
             })
             .catch(async (err) => {
+                Alert.alert('로그인에 실패했습니다.\n다시 시도해주세요.');
                 if (isDev) store.dispatch(dispatchMultiple({ SET_WEBLINK: testUrl, SET_TOKEN: '91352089&2024-01-01', SET_LOADING: false }));
                 return isDev;
             })
@@ -203,12 +206,8 @@ export const sendSms = async (username) => {
             .then((response) => {
                 const { rtnSts, rtnMsg } = response.data;
 
-                if (rtnSts == 'E') {
-                    if (rtnMsg && rtnMsg != '') Alert.alert(JSON.stringify(rtnMsg));
-                    return false;
-                }
-
-                return true;
+                if (rtnMsg && rtnMsg != '') Alert.alert(rtnMsg);
+                return rtnSts == 'S';
             })
             .catch((error) => {
                 Alert.alert(`인증번호 전송에 실패했습니다.\n다시 시도해주세요.`);
@@ -354,7 +353,7 @@ const getBuildVersion = (osType) => {
 // 개발 서버에 token 저장
 const sendDeviceToken = (deviceToken) => {
     try {
-        Api.test.post('push', { deviceToken: deviceToken });
+        Api.test.post(`${process.env.EXPO_PUBLIC_TEST_API_URL}push`, { deviceToken: deviceToken });
     } catch (error) {
         console.log('[개발] device token 전송 오류');
     }

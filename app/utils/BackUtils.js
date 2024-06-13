@@ -39,7 +39,7 @@ export const backEventHandler = (timeout, goBack, backButtonEnabled) => {
             } else {
                 // 뒤로 가기 한 번
                 store.dispatch(dispatchOne('SET_EXIT_PRESSED', true));
-                store.dispatch(dispatchOne('SET_SNACK', '버튼을 한 번 더 누르면 종료됩니다.'));
+                store.dispatch(dispatchOne('SET_SNACK', { message: '버튼을 한 번 더 누르면 종료됩니다.', hold: false }));
 
                 timeout = setTimeout(() => {
                     store.dispatch(dispatchOne('SET_EXIT_PRESSED', false));

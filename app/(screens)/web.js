@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Alert, Platform, Linking } from 'react-native';
+import { StyleSheet, Alert, Linking } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useSelector } from 'react-redux';
 import Constants from 'expo-constants';
@@ -8,11 +8,10 @@ import { dispatchMultiple, dispatchOne } from 'utils/DispatchUtils';
 import { backEventHandler } from 'utils/BackUtils';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import * as WebBrowser from 'expo-web-browser';
-import * as Updates from 'expo-updates';
 import Loading from 'components/Loading';
 import ErrorPage from '(utils)/error';
 import Camera from '(utils)/camera';
-import Video from '(utils)/video';
+import { downloadFs } from 'utils/FileUtils';
 
 const { profile } = Constants.expoConfig.extra;
 
@@ -31,7 +30,7 @@ const Web = () => {
     const [backButtonEnabled, setBackButtonEnabled] = useState(false);
     const [hide, setHide] = useState(false);
     const [init, setInit] = useState(false);
-    const [webUrl, setWebUrl] = useState(process.env.WEB_URL);
+    const [webUrl, setWebUrl] = useState(isDev ? process.env.DEV_SERVER_URL : process.env.WEB_URL);
     const [video, setVideo] = useState({ show: false, src: null });
 
     let timeout = null;
@@ -44,7 +43,7 @@ const Web = () => {
         const sendData = JSON.parse(data);
         console.log(sendData);
 
-        if (sendData.type) {
+        if (sendData?.type) {
             switch (sendData.type) {
                 case 'openCamera': // QR 체크인
                     openCamera();
@@ -57,6 +56,21 @@ const Web = () => {
                     break;
                 case 'changeMobileLogin': // 세션 만료
                     endSession();
+                    break;
+                case 'openUrl': // 외부 브라우저
+                    if (sendData?.url) {
+                        openWindow(sendData.url);
+                    } else {
+                        Alert.alert('올바르지 않은 경로입니다.\n다시 시도해주세요.');
+                    }
+                    break;
+                case 'filedown':
+                    if (sendData?.url && sendData?.data) {
+                        const fileName = sendData.data.fileNm;
+                        downloadFs(`${webUrl}${sendData.url}`, fileName);
+                    } else {
+                        Alert.alert('올바르지 않은 경로입니다.\n다시 시도해주세요.');
+                    }
                     break;
                 case 'videoPlayed':
                     setVideo({ ...video, show: true, src: sendData.url });
@@ -168,7 +182,6 @@ const Web = () => {
     // for ios download
     const handleDownload = ({ nativeEvent }) => {
         const { downloadUrl } = nativeEvent;
-        Alert.alert('다운로드 기능 준비중입니다.');
     };
 
     // Webview navigation state change
@@ -178,43 +191,6 @@ const Web = () => {
 
         let goBack = url.includes('portalMain.do') || url.includes('login.do') ? false : canGoBack;
         setBackButtonEnabled(goBack);
-
-        // catchVideo(url);
-    };
-
-    const catchVideo = (url) => {
-        const urlObj = new URL(url);
-        const classId = urlObj.searchParams.get('classId');
-        if (classId) {
-            const injectedJavaScript = `
-                (function(event) {
-                    const video = document.getElementById('myvideo');
-
-                    if (video) {
-                        // video.addEventListener('play', function() {
-                        //     const videoSrc = video.src || video.querySelector('source').src;
-                        //     window.ReactNativeWebView.postMessage(JSON.stringify({ type : 'videoPlayed', url : videoSrc }));
-                        // });
-
-                        const fullscreenChangeHandler = () => {
-                            if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement) {
-                                const videoSrc = video.src || video.querySelector('source').src;
-                                // window.ReactNativeWebView.postMessage(JSON.stringify({ type : 'videoPlayed', url : videoSrc }));
-                                event.preventDefault();
-                            }
-                        };
-
-                        document.addEventListener('fullscreenchange', fullscreenChangeHandler);
-                        document.addEventListener('webkitfullscreenchange', fullscreenChangeHandler);
-                        document.addEventListener('mozfullscreenchange', fullscreenChangeHandler);
-                        document.addEventListener('msfullscreenchange', fullscreenChangeHandler);
-                    }
-                })();
-                true;
-            `;
-
-            if (webViewRef.current) webViewRef.current.injectJavaScript(injectedJavaScript);
-        }
     };
 
     // onShouldStartLoadWithRequest
@@ -276,7 +252,7 @@ const Web = () => {
                 {
                     text: '확인',
                     onPress: () => {
-                        Updates.reloadAsync();
+                        store.dispatch({ type: 'INIT_APP' });
                     },
                 },
             ],
@@ -324,12 +300,10 @@ const Web = () => {
     }, []);
 
     useEffect(() => {
-        if (!profile.includes('staging') && webLink != null && webLink != '') Alert.alert(webLink);
-    }, [webLink]);
-
-    useEffect(() => {
         const web_url = profile != 'production' && isDev ? process.env.DEV_SERVER_URL : process.env.WEB_URL;
         setWebUrl(web_url);
+
+        // if (!profile.includes('staging') && webLink != null && webLink != '') Alert.alert(`${web_url}${webLink || ''}`);
 
         // if (profile.includes('test') || profile.includes('development')) Alert.alert(`${profile}\n${webUrl}${webLink}`);
         if (profile.includes('staging') && !isDev) {
@@ -340,7 +314,7 @@ const Web = () => {
                 },
             ]);
         }
-    }, [isDev]);
+    }, [isDev, webLink]);
 
     return camera ? (
         <Camera />
@@ -349,10 +323,8 @@ const Web = () => {
             ref={webViewRef}
             style={[styles.webview, hide ? commonStyles.none : commonStyles.container]}
             source={{
-                // uri: 'https://040d-220-70-19-87.ngrok-free.app/file',
-                // method: 'GET',
+                // uri: 'https://4ded-211-36-136-213.ngrok-free.app/file',
                 uri: `${webUrl}${webLink || ''}`,
-                method: 'POST',
             }}
             javaScriptEnabled={true}
             onLoadStart={() => !init && setHide(true)}

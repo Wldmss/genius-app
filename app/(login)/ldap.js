@@ -56,7 +56,7 @@ const LDAPLogin = () => {
         sendSms(value.username).then((response) => {
             if (response) {
                 setValue({ ...value, otp: '' });
-                Alert.alert('인증번호가 전송되었습니다.');
+                // Alert.alert('인증번호가 전송되었습니다.');
 
                 if (otpRef.current) otpRef.current.focus();
                 setTime(maxTime);
@@ -154,7 +154,7 @@ const LDAPLogin = () => {
                 setTime((prevTime) => {
                     if (prevTime == 0) {
                         clearInterval(interval);
-                        okAlert('SMS 인증번호 입력 대기시간이 3분을 초과했습니다.\n인증번호를 다시 요청해 주시기 바랍니다.');
+                        okAlert('SMS 인증번호 입력 대기시간이 3분을 초과했습니다.\n인증번호를 다시 요청해 주시기 바랍니다.', null);
                         return prevTime;
                     }
 
@@ -181,6 +181,7 @@ const LDAPLogin = () => {
                         value={value.username}
                         placeholder="아이디를 입력하세요."
                         placeholderTextColor={`#a9a9a9`}
+                        readOnly={isLogin}
                         style={[commonTextStyles.fonts, commonInputStyles.inputText]}
                         onChangeText={(input) => changeValue('username', input)}
                     />
@@ -189,6 +190,7 @@ const LDAPLogin = () => {
                         value={value.password}
                         placeholder="비밀번호를 입력하세요."
                         placeholderTextColor={`#a9a9a9`}
+                        readOnly={isLogin}
                         secureTextEntry
                         style={[commonTextStyles.fonts, commonInputStyles.inputText]}
                         onChangeText={(input) => changeValue('password', input)}
