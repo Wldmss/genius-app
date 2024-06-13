@@ -1,14 +1,22 @@
 import { Modal, StyleSheet, Text, View } from 'react-native';
+import { dispatchOne } from 'utils/DispatchUtils';
 
 /** alert 창 */
 const AlertModal = () => {
+    const alertData = useSelector((state) => state.modalReducer.alert);
+
+    const close = () => {
+        store.dispatch(dispatchOne('SET_ALERT', null));
+    };
+
     return (
-        <Modal visible={true} transparent={true} animationType="fade">
+        <Modal visible={alertData != null} transparent={true} animationType="fade">
             <View style={styles.modalContainer}>
                 <View style={styles.alertBox}>
-                    <Text style={styles.title}>타이틀</Text>
-                    <Text style={styles.content}>알림</Text>
+                    <Text style={styles.title}>{alertData ? alertData.title || process.env.EXPO_PUBLIC_NAME : ''}</Text>
+                    <Text style={styles.content}>{alertData ? alertData.message : ''}</Text>
                 </View>
+                <View style={styles.buttonBox}></View>
             </View>
         </Modal>
     );
@@ -38,6 +46,10 @@ const styles = StyleSheet.create({
         fontSize: 15,
     },
     content: {},
+    buttonBox: {
+        justifyContent: `flex-end`,
+        gap: 10,
+    },
 });
 
 export default AlertModal;

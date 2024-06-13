@@ -3,6 +3,7 @@ const initialState = {
     title: null,
     hideClose: false, // 닫기 버튼 유무
     element: null,
+    alert: null,
 };
 
 const modalReducer = (state = initialState, action) => {
@@ -22,6 +23,11 @@ const modalReducer = (state = initialState, action) => {
                 title: null,
                 hideClose: false,
                 element: null,
+            };
+        case 'SET_ALERT':
+            return {
+                ...state,
+                alert: action.payload,
             };
         default:
             return state;
