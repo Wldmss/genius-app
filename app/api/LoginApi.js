@@ -21,7 +21,7 @@ let isDev = null;
 
 const checkIsTest = () => {
     isDev = isDev || store.getState().commonReducer.isDev;
-    return false; //isTest && !isDev;
+    return profile == 'test' || profile == 'development'; //isTest && !isDev;
 };
 
 /** server check & app version check

@@ -111,6 +111,10 @@ const Camera = () => {
     };
 
     useEffect(() => {
+        if (!status?.granted) requestPermission();
+    }, []);
+
+    useEffect(() => {
         resetScan();
     }, [type]);
 

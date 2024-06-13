@@ -321,6 +321,7 @@ const Web = () => {
                 // uri: 'https://4ded-211-36-136-213.ngrok-free.app/file',
                 uri: `${webUrl}${webLink || ''}`,
             }}
+            textZoom={100}
             javaScriptEnabled={true}
             onLoadStart={() => !init && setHide(true)}
             onLoad={webViewLoaded}
