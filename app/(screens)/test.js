@@ -11,7 +11,7 @@ import { dispatchOne } from 'utils/DispatchUtils';
 import * as WebBrowser from 'expo-web-browser';
 import Api from 'api/Api';
 import RNFetchBlob from 'rn-fetch-blob';
-import { downloadBlobFile, downloadFs } from 'utils/FileUtils';
+import { downloadBlobFile, downloadFs, openFile } from 'utils/FileUtils';
 
 export default function Test() {
     const test = useSelector((state) => state.commonReducer.test);
@@ -312,6 +312,11 @@ export default function Test() {
         downloadBlobFile('https://dev.ktedu.kt.com:2443/mobile/m/educontents/courseData/courseDataDetail.do?contId=200015892', '개발자용.pptx');
     };
 
+    const open = () => {
+        const filePath = '/storage/emulated/0/Download/login(4).pptx';
+        openFile(filePath);
+    };
+
     useEffect(() => {
         store.dispatch(dispatchOne('SET_SPLASH', false));
 
@@ -326,7 +331,7 @@ export default function Test() {
                 {test}
             </FontText> */}
 
-            <Pressable style={commonInputStyles.buttonWhite} onPress={() => downloadFs(url)}>
+            <Pressable style={commonInputStyles.buttonWhite} onPress={open}>
                 <FontText>테스트</FontText>
             </Pressable>
         </View>

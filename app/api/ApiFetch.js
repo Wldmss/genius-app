@@ -13,22 +13,9 @@ export const apiFetchStore = (_store) => {
     server_url = isDev ? process.env.DEV_SERVER_URL : process.env.SERVER_URL;
 };
 
-// let server = null;
-
-// const checkDevelopment = async () => {
-//     if (server == null) {
-//         const isDev = store.getState().commonReducer.isDev;
-//         const url = isDev ? process.env.DEV_SERVER_URL : process.env.SERVER_URL;
-//         server = { isDev: isDev, url: url };
-//         return server;
-//     } else {
-//         return server;
-//     }
-// };
+/** api fetch : 웹 통신 오류로 사용 x */
 
 export async function postForm(url, body) {
-    // const serverInfo = await checkDevelopment();
-
     const response = await fetch(`${server_url}/${url}`, {
         method: 'POST',
         headers: {
@@ -48,8 +35,6 @@ export async function postForm(url, body) {
 }
 
 export async function post(url, body) {
-    // const serverInfo = await checkDevelopment();
-
     const response = await fetch(`${server_url}/${url}`, {
         method: 'POST',
         headers: {
@@ -69,8 +54,6 @@ export async function post(url, body) {
 }
 
 export async function get(url) {
-    // const serverInfo = await checkDevelopment();
-
     const response = await fetch(`${server_url}/${url}`, {
         method: 'GET',
     }).catch((error) => {

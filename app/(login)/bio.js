@@ -128,30 +128,39 @@ const BioLogin = () => {
 
     useEffect(() => {
         if (webBioFlag) {
-            if (bio?.isRegistered) {
-                // 등록되어 있는 경우
-                Alert.alert(process.env.EXPO_PUBLIC_NAME, `생체 인증 로그인을 해제하시겠습니까?`, [
-                    {
-                        text: '아니요',
-                        onPress: () => {
-                            backToWeb();
+            if (bioSupported && bioRecords) {
+                if (bio?.isRegistered) {
+                    // 등록되어 있는 경우
+                    Alert.alert(process.env.EXPO_PUBLIC_NAME, `생체 인증 로그인을 해제하시겠습니까?`, [
+                        {
+                            text: '아니요',
+                            onPress: () => {
+                                backToWeb();
+                            },
+                            style: 'cancel',
                         },
-                        style: 'cancel',
-                    },
-                    {
-                        text: '예',
-                        onPress: async () => {
-                            try {
-                                await SecureStore.deleteItemAsync('bio');
-                                store.dispatch(dispatchOne('SET_BIO', { ...bioStore, isRegistered: false, modFlag: false }));
-                            } finally {
-                                okAlert('생체 인증 로그인이 해제되었습니다.', backToWeb());
-                            }
+                        {
+                            text: '예',
+                            onPress: async () => {
+                                try {
+                                    await SecureStore.deleteItemAsync('bio');
+                                    store.dispatch(dispatchOne('SET_BIO', { ...bioStore, isRegistered: false, modFlag: false }));
+                                } finally {
+                                    okAlert('생체 인증 로그인이 해제되었습니다.', backToWeb());
+                                }
+                            },
                         },
+                    ]);
+                } else {
+                    setBio({ ...bio, modFlag: true });
+                }
+            } else {
+                Alert.alert(process.env.EXPO_PUBLIC_NAME, '장치에 생체 인증이 등록되어있지 않습니다.', [
+                    {
+                        text: '확인',
+                        onPress: () => backToWeb(),
                     },
                 ]);
-            } else {
-                setBio({ ...bio, modFlag: true });
             }
         }
     }, []);

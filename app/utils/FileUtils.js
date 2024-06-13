@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Alert, Platform } from 'react-native';
+import { useState } from 'react';
+import { Platform } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import RNFetchBlob from 'rn-fetch-blob';
 import * as RNFS from 'react-native-fs';
@@ -39,9 +39,12 @@ export const handleDownloadRequest = async (url) => {
     // ref.current.stopLoading();
 };
 
-export const downloadFile = () => {
-    const url = 'https://4ded-211-36-136-213.ngrok-free.app/file/download/test.txt';
-    handleDownloadRequest(url);
+export const downloadFile = (url, fileName) => {
+    if (Platform.OS == 'ios') {
+        downloadBlobFile(url, fileName);
+    } else {
+        downloadFs(url, fileName);
+    }
 };
 
 // rn-fetch-blob :: android 14 이상 RECEIVER_EXPORTED or RECEIVER_NOT_EXPORTED 설정 해줘야 함
@@ -73,17 +76,23 @@ export const downloadBlobFile = (url, fileName) => {
         path: `${dir}/${fileName}`,
     };
 
+    store.dispatch(dispatchOne('SET_SNACK', { message: '다운로드를 시작합니다.', hold: true }));
     RNFetchBlob.config(configfb)
         .fetch('GET', url, {})
+        .progress((res) => {
+            store.dispatch(dispatchOne('SET_SNACK', { message: `다운로드 중...`, hold: true }));
+        })
         .then((res) => {
             if (Platform.OS === 'ios') {
                 RNFetchBlob.fs.writeFile(configfb.path, res.data, 'base64');
                 RNFetchBlob.ios.previewDocument(configfb.path);
             }
+
             if (Platform.OS === 'android') {
                 console.log('file downloaded');
             }
-            Alert.alert('다운로드 되었습니다.');
+
+            store.dispatch(dispatchOne('SET_SNACK', { message: `다운로드가 완료되었습니다.`, hold: false, time: 5000 }));
         });
 };
 
@@ -101,8 +110,9 @@ export const downloadFs = async (url, fileName) => {
     const uniqueFileName = await getUniqueFileName(dir, fileName);
     const filePath = `${dir}/${uniqueFileName}`;
 
-    store.dispatch(dispatchOne('SET_SNACK', { message: '다운로드를 시작합니다.', hold: true }));
     try {
+        store.dispatch(dispatchOne('SET_SNACK', { message: '다운로드를 시작합니다.', hold: true }));
+
         const downloadResult = await RNFS.downloadFile({
             fromUrl: url,
             toFile: filePath,
@@ -121,6 +131,8 @@ export const downloadFs = async (url, fileName) => {
                 RNFS.readFile(filePath, 'base64').then((contents) => {
                     console.log('File contents (base64):', contents);
                 });
+            } else {
+                // openFile(filePath);
             }
         } else {
             store.dispatch(dispatchOne('SET_SNACK', { message: '다운로드에 실패하였습니다.', hold: false }));
@@ -152,4 +164,19 @@ const getUniqueFileName = async (dir, fileName) => {
     }
 
     return uniqueName;
+};
+
+export const openFile = async (filePath) => {
+    console.log(filePath);
+    const result = await FileSystem.getInfoAsync(filePath);
+    console.log(result);
+    if (result.exists) {
+        FileSystem.getContentUriAsync(result.uri).then((cUri) => {
+            console.log(cUri);
+            IntentLauncher.startActivityAsync('android.intent.action.VIEW', {
+                data: cUri,
+                flags: 1,
+            });
+        });
+    }
 };

@@ -11,7 +11,7 @@ import * as WebBrowser from 'expo-web-browser';
 import Loading from 'components/Loading';
 import ErrorPage from '(utils)/error';
 import Camera from '(utils)/camera';
-import { downloadFs } from 'utils/FileUtils';
+import { downloadFile } from 'utils/FileUtils';
 
 const { profile } = Constants.expoConfig.extra;
 
@@ -64,10 +64,17 @@ const Web = () => {
                         Alert.alert('올바르지 않은 경로입니다.\n다시 시도해주세요.');
                     }
                     break;
+                case 'openBrowser': // 인앱 브라우저
+                    if (sendData?.url) {
+                        openWindow(sendData.url, true);
+                    } else {
+                        Alert.alert('올바르지 않은 경로입니다.\n다시 시도해주세요.');
+                    }
+                    break;
                 case 'filedown':
                     if (sendData?.url && sendData?.data) {
                         const fileName = sendData.data.fileNm;
-                        downloadFs(`${webUrl}${sendData.url}`, fileName);
+                        downloadFile(`${webUrl}${sendData.url}`, fileName);
                     } else {
                         Alert.alert('올바르지 않은 경로입니다.\n다시 시도해주세요.');
                     }
@@ -302,18 +309,6 @@ const Web = () => {
     useEffect(() => {
         const web_url = profile != 'production' && isDev ? process.env.DEV_SERVER_URL : process.env.WEB_URL;
         setWebUrl(web_url);
-
-        // if (!profile.includes('staging') && webLink != null && webLink != '') Alert.alert(`${web_url}${webLink || ''}`);
-
-        // if (profile.includes('test') || profile.includes('development')) Alert.alert(`${profile}\n${webUrl}${webLink}`);
-        if (profile.includes('staging') && !isDev) {
-            Alert.alert(`${web_url}${webLink} 접속`, `로그인 연동 준비중입니다.\n로그인 페이지 로드 시 다시 로그인 해주세요.`, [
-                {
-                    text: '확인',
-                    onPress: () => null,
-                },
-            ]);
-        }
     }, [isDev, webLink]);
 
     return camera ? (

@@ -5,7 +5,7 @@ import * as SecureStore from 'expo-secure-store';
 import * as Authentication from 'expo-local-authentication';
 import { dispatchMultiple, dispatchOne } from 'utils/DispatchUtils';
 import * as StorageUtils from 'utils/StorageUtils';
-import AsyncStorage from '@react-native-async-storage/async-storage'; // !! staging build 시에는 지워야 한다
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // secure storage delete
 export const deleteSecureStore = async (isDev) => {

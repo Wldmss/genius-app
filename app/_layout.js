@@ -31,6 +31,7 @@ import Test from '(screens)/test';
 import BackHeader from '(utils)/back';
 import { alertStore } from 'utils/AlertUtils';
 import { fileStore } from 'utils/FileUtils';
+import AlertModal from 'modal/AlertModal';
 
 const splashTime = 4000;
 const { profile, isTest } = Constants.expoConfig.extra;
@@ -196,6 +197,7 @@ const App = () => {
                         {/* <Test /> */}
                         <PopModal />
                         <Snackbar />
+                        {/* <AlertModal /> */}
                     </SafeAreaView>
                 )}
             </Provider>
