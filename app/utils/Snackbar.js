@@ -46,7 +46,7 @@ const Snackbar = () => {
 const styles = StyleSheet.create({
     snackbar: {
         borderRadius: 25,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        // backgroundColor: 'rgba(0, 0, 0, 0.5)',
         marginBottom: 25,
     },
     textBox: {

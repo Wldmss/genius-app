@@ -47,6 +47,12 @@ export const downloadFile = (url, fileName) => {
     }
 };
 
+export const snack = () => {
+    store.dispatch(
+        dispatchOne('SET_SNACK', { message: '다운로드를 시작합니다.\nhttps://ktedu.kt.com/file/download.do?fileId=100025734', hold: true })
+    );
+};
+
 // rn-fetch-blob :: android 14 이상 RECEIVER_EXPORTED or RECEIVER_NOT_EXPORTED 설정 해줘야 함
 export const downloadBlobFile = (url, fileName) => {
     if (!fileName) {

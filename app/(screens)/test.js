@@ -11,7 +11,7 @@ import { dispatchOne } from 'utils/DispatchUtils';
 import * as WebBrowser from 'expo-web-browser';
 import Api from 'api/Api';
 import RNFetchBlob from 'rn-fetch-blob';
-import { downloadBlobFile, downloadFs, openFile } from 'utils/FileUtils';
+import { downloadBlobFile, downloadFs, openFile, snack } from 'utils/FileUtils';
 
 export default function Test() {
     const test = useSelector((state) => state.commonReducer.test);
@@ -298,8 +298,8 @@ export default function Test() {
         }
     };
 
-    const webTest = async () => {
-        await WebBrowser.openBrowserAsync(url, {
+    const webTest = async (urlPath) => {
+        await WebBrowser.openBrowserAsync(urlPath, {
             toolbarColor: 'white', // 안드로이드 옵션
             controlsColor: 'white', // iOS 옵션
             dismissButtonStyle: 'close', // iOS 옵션
@@ -317,6 +317,14 @@ export default function Test() {
         openFile(filePath);
     };
 
+    const testTest = () => {
+        const filePath = 'https://ktedu.kt.com/file/download.do?fileId=100024328';
+        // const filePath = 'https://9f19-220-70-19-87.ngrok-free.app/file/download/Pipy,%20DEV-SPACE%20Nexus%20%20레포지토리%20설정.zip';
+        const fileName = 'Pipy, DEV-SPACE Nexus  레포지토리 설정.zip';
+        downloadFs(filePath, fileName);
+        // downloadBlobFile(filePath, fileName);
+    };
+
     useEffect(() => {
         store.dispatch(dispatchOne('SET_SPLASH', false));
 
@@ -331,7 +339,7 @@ export default function Test() {
                 {test}
             </FontText> */}
 
-            <Pressable style={commonInputStyles.buttonWhite} onPress={open}>
+            <Pressable style={commonInputStyles.buttonWhite} onPress={testTest}>
                 <FontText>테스트</FontText>
             </Pressable>
         </View>

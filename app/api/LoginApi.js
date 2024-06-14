@@ -200,7 +200,7 @@ export const sendSms = async (username) => {
             .then((response) => {
                 const { rtnSts, rtnMsg } = response.data;
 
-                if (rtnMsg && rtnMsg != '') Alert.alert(rtnMsg);
+                if (rtnMsg && rtnMsg != '') okAlert(rtnMsg);
                 return rtnSts == 'S';
             })
             .catch((error) => {
