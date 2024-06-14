@@ -143,7 +143,7 @@ const Web = () => {
     // webview load
     const webViewLoaded = ({ nativeEvent }) => {
         clearTimeout(timeout);
-        store.dispatch(dispatchOne('SET_LOADING', false));
+        handleLoading(false);
         setBackButtonEnabled(true);
         setHide(false);
         setInit(true);
@@ -156,7 +156,7 @@ const Web = () => {
             console.log('on error :: ');
             console.log(nativeEvent);
             setHide(true);
-            store.dispatch(dispatchOne('SET_LOADING', false));
+            handleLoading(false);
             // store.dispatch(dispatchOne('SET_TAB', 'error'));
         }
     };
@@ -189,10 +189,14 @@ const Web = () => {
     // for ios download
     const handleDownload = ({ nativeEvent }) => {
         const { downloadUrl } = nativeEvent;
+
+        if (profile == 'production') Alert.alert('다운로드 기능 준비중입니다.');
     };
 
     // Webview navigation state change
     const onNavigationStateChange = (navState) => {
+        handleLoading(false);
+
         const { url, canGoBack } = navState;
         if (!url) return;
 
@@ -204,10 +208,13 @@ const Web = () => {
     const handleStartLoadWithRequest = (request) => {
         const { url } = request;
 
+        handleLoading(true);
+
         if (checkUrl(url)) {
             changeUrl(url);
             return true;
         } else {
+            handleLoading(false);
             return false;
         }
     };
@@ -217,7 +224,6 @@ const Web = () => {
         console.log(url);
         if (url.includes('popupKyobo.do')) {
             openWindow(url);
-
             return false;
         }
 
@@ -265,6 +271,11 @@ const Web = () => {
             ],
             { cancelable: false }
         );
+    };
+
+    // 로딩
+    const handleLoading = (load) => {
+        store.dispatch(dispatchOne('SET_LOADING', load));
     };
 
     useEffect(() => {
@@ -318,7 +329,7 @@ const Web = () => {
             ref={webViewRef}
             style={[styles.webview, hide ? commonStyles.none : commonStyles.container]}
             source={{
-                // uri: 'https://4ded-211-36-136-213.ngrok-free.app/file',
+                // uri: `${process.env.TEST_URL}/file`,
                 uri: `${webUrl}${webLink || ''}`,
             }}
             textZoom={100}
@@ -340,8 +351,10 @@ const Web = () => {
             injectedJavaScript={`
                 /* id click */
                 window.addEventListener('click', function (event) {
-                    window.ReactNativeWebView.postMessage(JSON.stringify({ type : event.target.id }));
-                    // event.preventDefault();
+                    if(event.target.id){
+                        window.ReactNativeWebView.postMessage(JSON.stringify({ type : event.target.id }));
+                        // event.preventDefault();
+                    }
                 });
 
                 /* full screen */
@@ -362,7 +375,7 @@ const Web = () => {
                         const fullscreenChangeHandler = () => {
                             if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement) {
                                 window.ReactNativeWebView.postMessage(JSON.stringify({ type : 'enterFullscreen' }));
-                                video.play();
+                                // video.play();
                             }else {
                                 window.ReactNativeWebView.postMessage(JSON.stringify({ type : 'exitFullscreen' }));
                             }

@@ -6,12 +6,14 @@ import { useSelector } from 'react-redux';
 const Loading = () => {
     const loading = useSelector((state) => state.commonReducer.loading);
 
-    return (
+    return loading ? (
         <Modal visible={loading} transparent={true} animationType="fade">
             <View style={styles.modalContainer}>
                 <ActivityIndicator size="large" color={process.env.EXPO_PUBLIC_PUSH_COLOR} />
             </View>
         </Modal>
+    ) : (
+        <View></View>
     );
 };
 

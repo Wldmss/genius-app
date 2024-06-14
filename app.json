@@ -24,7 +24,7 @@
       "**/*"
     ],
     "ios": {
-      "buildNumber": "1.0.17",
+      "buildNumber": "1.0.1",
       "supportsTablet": true,
       "requireFullScreen": true,
       "bundleIdentifier": "com.kt.ktgenius",
@@ -49,7 +49,7 @@
       ]
     },
     "android": {
-      "versionCode": 39,
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon-android.png",
         "backgroundColor": "#FF4F55"

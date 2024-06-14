@@ -47,7 +47,7 @@ export default function Test() {
     };
 
     const blob = () => {
-        const url = 'https://4ded-211-36-136-213.ngrok-free.app/file/download/login.pptx';
+        const url = `${process.env.TEST_URL}/file/download/login.pptx`;
         const fileArr = url.split('/');
         const fileName = fileArr[fileArr.length - 1];
 
@@ -138,7 +138,7 @@ export default function Test() {
 
     const [web, setWeb] = useState(null);
     const [progress, setProgress] = useState(0);
-    const url = 'https://4ded-211-36-136-213.ngrok-free.app/file/download/login.pptx';
+    const url = `${process.env.TEST_URL}/file/download/login.pptx`;
     // const url = 'https://expo.dev/artifacts/eas/skcuKXwqy65NwwVP7CRyje.apk';
     const fileArr = url.split('/');
     const fileName = fileArr[fileArr.length - 1];

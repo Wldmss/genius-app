@@ -7,6 +7,7 @@ import { encrypt } from 'utils/CipherUtils';
 import * as Device from 'expo-device';
 import Constants from 'expo-constants';
 import propTypes from 'prop-types';
+import { okAlert } from 'utils/AlertUtils';
 
 const { profile, isTest, androidVersion, iosVersion } = Constants.expoConfig.extra;
 const { version } = Constants.expoConfig;
@@ -93,7 +94,7 @@ export const login = async (username, password) => {
                 }
             })
             .catch(async (err) => {
-                if (isDev) store.dispatch(dispatchMultiple({ SET_WEBLINK: testUrl, SET_LOADING: false }));
+                if (isDev) store.dispatch(dispatchMultiple({ SET_WEBLINK: testUrl }));
                 return isDev;
             })
             .finally(() => {
@@ -143,7 +144,7 @@ export const checkLogin = async (checkFlag) => {
                 const { rtnSts, rtnMsg, rtnUrl } = response.data;
 
                 if (rtnSts == 'S') {
-                    store.dispatch(dispatchMultiple({ SET_WEBLINK: rtnUrl, SET_TOKEN: loginKey, SET_LOADING: false }));
+                    store.dispatch(dispatchMultiple({ SET_WEBLINK: rtnUrl, SET_TOKEN: loginKey }));
 
                     return true;
                 } else {
@@ -154,7 +155,7 @@ export const checkLogin = async (checkFlag) => {
             })
             .catch(async (err) => {
                 Alert.alert('로그인에 실패했습니다.\n다시 시도해주세요.');
-                if (isDev) store.dispatch(dispatchMultiple({ SET_WEBLINK: testUrl, SET_TOKEN: '91352089&2024-01-01', SET_LOADING: false }));
+                if (isDev) store.dispatch(dispatchMultiple({ SET_WEBLINK: testUrl, SET_TOKEN: '91352089&2024-01-01' }));
                 return isDev;
             })
             .finally(() => {
@@ -171,6 +172,8 @@ checkLogin.propTypes = {
  * @return boolean
  */
 export const sendSms = async (username) => {
+    store.dispatch(dispatchOne('SET_LOADING', true));
+
     const encryptUsername = encrypt(username);
     const deviceToken = await getDeviceToken();
     const osType = await getOsType();
@@ -184,6 +187,7 @@ export const sendSms = async (username) => {
     };
 
     if (checkIsTest()) {
+        store.dispatch(dispatchOne('SET_LOADING', false));
         return true;
     } else {
         /** sms 인증(otp) 요청
@@ -202,6 +206,9 @@ export const sendSms = async (username) => {
             .catch((error) => {
                 Alert.alert(`인증번호 전송에 실패했습니다.\n다시 시도해주세요.`);
                 return isDev;
+            })
+            .finally(() => {
+                store.dispatch(dispatchOne('SET_LOADING', false));
             });
     }
 };
@@ -214,6 +221,8 @@ sendSms.propTypes = {
  * @return { status: boolean, token: string }
  */
 export const checkSms = async (loginInfo) => {
+    store.dispatch(dispatchOne('SET_LOADING', true));
+
     const encryptUsername = encrypt(loginInfo.username);
     const deviceToken = await getDeviceToken();
     const osType = await getOsType();
@@ -228,7 +237,7 @@ export const checkSms = async (loginInfo) => {
     };
 
     if (checkIsTest()) {
-        store.dispatch(dispatchOne('SET_WEBLINK', testUrl));
+        store.dispatch(dispatchMultiple({ SET_WEBLINK: testUrl, SET_LOADING: false }));
         return { status: true, token: '91352089&2024-01-01' };
     } else {
         /** sms 인증(otp) 확인
@@ -260,6 +269,9 @@ export const checkSms = async (loginInfo) => {
                 }
 
                 return { status: false, token: null };
+            })
+            .finally(() => {
+                store.dispatch(dispatchOne('SET_LOADING', false));
             });
     }
 };
@@ -270,6 +282,8 @@ checkSms.propTypes = {
 
 /** QR 체크인 */
 export const checkIn = async (params) => {
+    store.dispatch(dispatchOne('SET_LOADING', true));
+
     if (checkIsTest()) {
         return { status: true, message: 'QR 체크인 pass' };
     } else {
@@ -293,6 +307,9 @@ export const checkIn = async (params) => {
             })
             .catch((error) => {
                 return { status: false, message: null };
+            })
+            .finally(() => {
+                store.dispatch(dispatchOne('SET_LOADING', false));
             });
     }
 };
@@ -304,7 +321,7 @@ checkIn.propTypes = {
 // rtnMsg 처리
 const handleRtnMsg = (message) => {
     if (message == null || message == '') message = '로그인에 실패했습니다.\n다시 시도해주세요.';
-    Alert.alert(message);
+    okAlert(message);
 };
 
 handleRtnMsg.propTypes = {
@@ -404,9 +421,7 @@ const localLogin = async () => {
             store.dispatch(dispatchLogin(false));
             return { status: false };
         })
-        .finally(() => {
-            store.dispatch(dispatchOne('SET_LOADING', false));
-        });
+        .finally(() => {});
 };
 
 // test
@@ -452,9 +467,7 @@ const localCheckLogin = async () => {
             if (!checkFlag) store.dispatch(dispatchLogin(false));
             return { status: false };
         })
-        .finally(() => {
-            store.dispatch(dispatchOne('SET_LOADING', false));
-        });
+        .finally(() => {});
 };
 
 // device 정보 확인 (로그인 시마다 서버에 전송)

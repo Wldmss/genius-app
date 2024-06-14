@@ -50,7 +50,7 @@ AxiosMobile.interceptors.response.use(
 /** test */
 
 const AxiosTest = axios.create({
-    baseURL: 'https://4ded-211-36-136-213.ngrok-free.app',
+    baseURL: `${process.env.TEST_URL}`,
     timeout: 3000,
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     maxRedirects: 0,

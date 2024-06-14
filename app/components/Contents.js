@@ -82,7 +82,7 @@ const Contents = () => {
             store.dispatch(dispatchOne('SET_TAB', 'main'));
         } else {
             if (tab == 'web') {
-                store.dispatch(dispatchOne('SET_LOADING', true));
+                // store.dispatch(dispatchOne('SET_LOADING', true));
 
                 let timeout = setTimeout(() => {
                     store.dispatch(dispatchOne('SET_WEB', true));

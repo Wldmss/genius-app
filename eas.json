@@ -34,7 +34,6 @@
             "channel": "development",
             "developmentClient": true,
             "distribution": "internal",
-            "autoIncrement": true,
             "ios": {
                 "credentialsSource": "local",
                 "enterpriseProvisioning": "universal"
@@ -46,7 +45,6 @@
         "test": {
             "extends": "base",
             "channel": "test",
-            "autoIncrement": true,
             "ios": {
                 "enterpriseProvisioning": "universal"
             },
@@ -57,7 +55,6 @@
         "staging": {
             "extends": "base",
             "channel": "staging",
-            "autoIncrement": true,
             "env": {
                 "EXPO_PUBLIC_PROFILE": "staging"
             }

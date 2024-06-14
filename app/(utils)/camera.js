@@ -10,6 +10,8 @@ import { checkIn } from 'api/LoginApi';
 const cancel_img = require('assets/images/close.png');
 const no_img = require('assets/images/close.png');
 import BackIcon from 'assets/icons/icon-back.svg';
+import CameraIcon from 'assets/icons/icon-camera.svg';
+import { commonInputStyles } from 'assets/styles';
 
 /** QR 스캐너 */
 const Camera = () => {
@@ -146,8 +148,12 @@ const Camera = () => {
                             zoom={0.0}
                         />
                     ) : (
-                        <Pressable onPress={requestPermission}>
-                            <FontText style={styles.noImageTxt}>카메라 권한을 허용해주세요.</FontText>
+                        <Pressable onPress={requestPermission} style={styles.permissionBox}>
+                            <FontText style={styles.permissionTxt}>카메라 권한을 허용해주세요</FontText>
+                            <View style={[commonInputStyles.button, styles.permissionBtn]}>
+                                <CameraIcon />
+                                <FontText style={styles.permissionBtnTxt}>권한 허용</FontText>
+                            </View>
                         </Pressable>
                     )
                 ) : (
@@ -217,11 +223,28 @@ const styles = StyleSheet.create({
         width: `100%`,
         height: `100%`,
     },
-    noImage: {},
-    noImageTxt: {
-        height: `90%`,
+    permissionBox: {
+        alignItems: `center`,
+        gap: 30,
+        top: 80,
+    },
+
+    permissionTxt: {
+        fontSize: 19,
+        lineHeight: 23,
+    },
+    permissionBtn: {
+        flexDirection: `row`,
+        gap: 10,
+        padding: 30,
+        height: 70,
+        width: 210,
+    },
+    permissionBtnTxt: {
+        fontSize: 16,
         textAlignVertical: `center`,
     },
+    noImage: {},
     modal: {
         flex: 1,
         justifyContent: 'flex-end',

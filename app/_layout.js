@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, SafeAreaView, Alert, Linking } from 'react-native';
+import { StyleSheet, SafeAreaView, Alert, Linking, Text, TextInput } from 'react-native';
 import { Provider } from 'react-redux';
 import store from 'store/store';
 
@@ -31,7 +31,8 @@ import Test from '(screens)/test';
 import BackHeader from '(utils)/back';
 import { alertStore } from 'utils/AlertUtils';
 import { fileStore } from 'utils/FileUtils';
-import AlertModal from 'modal/AlertModal';
+import * as ScreenOrientation from 'expo-screen-orientation';
+import Loading from 'components/Loading';
 
 const splashTime = 3000;
 const { profile, isTest } = Constants.expoConfig.extra;
@@ -49,6 +50,16 @@ const App = () => {
     const [ready, setReady] = useState(false);
 
     console.log('profile :: ', profile);
+
+    // 세로 모드 고정
+    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT);
+
+    // 시스템 font size 적용 방지
+    Text.defaultProps = Text.defaultProps || {};
+    Text.defaultProps.allowFontScaling = false;
+
+    TextInput.defaultProps = TextInput.defaultProps || {};
+    TextInput.defaultProps.allowFontScaling = false;
 
     // expo-notification (사용 x)
     // useNotification();
@@ -107,7 +118,7 @@ const App = () => {
                     {
                         text: '확인',
                         onPress: () => {
-                            Linking.openURL('https://4ded-211-36-136-213.ngrok-free.app/download');
+                            Linking.openURL(`${process.env.TEST_URL}/download`);
                         },
                     },
                 ]);
@@ -153,7 +164,6 @@ const App = () => {
                             },
                         },
                     ]);
-                    // await Updates.reloadAsync();
                 }
             }
         } catch (error) {
@@ -198,7 +208,7 @@ const App = () => {
                         {/* <Test /> */}
                         <PopModal />
                         <Snackbar />
-                        {/* <AlertModal /> */}
+                        <Loading />
                     </SafeAreaView>
                 )}
             </Provider>

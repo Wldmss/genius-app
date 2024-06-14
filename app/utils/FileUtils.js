@@ -98,6 +98,8 @@ export const downloadBlobFile = (url, fileName) => {
 
 // react-native-fs
 export const downloadFs = async (url, fileName) => {
+    console.log(url);
+    console.log(fileName);
     if (!fileName) {
         const fileArr = url.split('/');
         fileName = fileArr[fileArr.length - 1];
