@@ -389,7 +389,7 @@ const Web = () => {
                 })();
             `}
             startInLoadingState={true}
-            renderLoading={() => <Loading />}
+            renderLoading={() => <Loading show={true} />}
             renderError={(event) => {
                 console.log('renderError');
                 console.log(event);

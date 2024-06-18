@@ -48,6 +48,8 @@ const styles = StyleSheet.create({
         borderRadius: 25,
         // backgroundColor: 'rgba(0, 0, 0, 0.5)',
         marginBottom: 25,
+        paddingVertical: 0,
+        paddingHorizontal: 0,
     },
     textBox: {
         flexDirection: `row`,
@@ -55,8 +57,8 @@ const styles = StyleSheet.create({
         justifyContent: `center`,
     },
     logo: {
-        width: 25,
-        height: 25,
+        width: 23,
+        height: 23,
         borderRadius: 30,
     },
     text: {

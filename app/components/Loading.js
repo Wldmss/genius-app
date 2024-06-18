@@ -3,8 +3,8 @@ import { ActivityIndicator } from 'react-native-paper';
 import { useSelector } from 'react-redux';
 
 /** 로딩 화면 */
-const Loading = () => {
-    const loading = useSelector((state) => state.commonReducer.loading);
+const Loading = ({ show }) => {
+    const loading = show ? show : useSelector((state) => state.commonReducer.loading);
 
     return loading ? (
         <Modal visible={loading} transparent={true} animationType="fade">
