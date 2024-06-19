@@ -22,7 +22,7 @@ let isDev = null;
 
 const checkIsTest = () => {
     isDev = isDev || store.getState().commonReducer.isDev;
-    return profile == 'test' || profile == 'development'; //isTest && !isDev;
+    return false; // profile == 'development'; //isTest && !isDev;
 };
 
 /** server check & app version check
@@ -338,7 +338,7 @@ const getDeviceToken = async () => {
             console.log(deviceToken);
             store.dispatch(dispatchOne('SET_DEVICETOKEN', deviceToken));
 
-            if (profile == 'development' || profile == 'test') sendDeviceToken(deviceToken);
+            // if (profile == 'development' || profile == 'test') sendDeviceToken(deviceToken);
 
             return deviceToken;
         });

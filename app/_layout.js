@@ -34,7 +34,7 @@ import { fileStore } from 'utils/FileUtils';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import Loading from 'components/Loading';
 
-const splashTime = 3000;
+const splashTime = 2000;
 const { profile, isTest } = Constants.expoConfig.extra;
 
 /** layout (main)
@@ -43,6 +43,8 @@ const { profile, isTest } = Constants.expoConfig.extra;
 const App = () => {
     const [fontsLoaded, setFontsLoaded] = useState(false);
     const [splashLoaded, setSplashLoaded] = useState(false);
+    const [prepareLoaded, setPrepareLoaded] = useState(false);
+    const [loaded, setLoaded] = useState(false);
     const [isUpdate, setIsUpdate] = useState(false);
     const [updateProgress, setUpdateProgress] = useState(0);
     const [version, setVersion] = useState(Constants.expoConfig.version);
@@ -179,8 +181,9 @@ const App = () => {
             await loadFonts();
             await checkDevelopment();
             await serverCheck();
+            setPrepareLoaded(true);
 
-            await new Promise((resolve) => setTimeout(resolve, splashTime)).then(async () => {
+            new Promise((resolve) => setTimeout(resolve, splashTime)).then(async () => {
                 if (profile != 'preview' && profile != 'development') {
                     await onFetchUpdateAsync();
                 } else {
@@ -196,16 +199,20 @@ const App = () => {
         prepare();
     }, []);
 
+    useEffect(() => {
+        if (prepareLoaded && splashLoaded) setLoaded(true);
+    }, [prepareLoaded, splashLoaded]);
+
     return (
         <Try catch={ErrorBoundary}>
             <Provider store={store}>
                 <Splash isUpdate={isUpdate} updateProgress={updateProgress} version={version} />
-                {ready && splashLoaded && fontsLoaded && (
+                {ready && loaded && fontsLoaded && (
                     <SafeAreaView style={styles.container}>
                         <BackHeader />
                         <Development isDev={dev} />
-                        {/* <Contents /> */}
-                        <Test />
+                        <Contents />
+                        {/* <Test /> */}
                         <PopModal />
                         <Snackbar />
                         <Loading show={false} />

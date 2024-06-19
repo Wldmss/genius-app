@@ -145,13 +145,15 @@ function error(err) {
                 message = '알 수 없는 오류입니다.';
                 break;
         }
+    } else {
+        message = '알 수 없는 오류입니다.';
+    }
 
-        if (message != null) {
-            if (isDev) {
-                catchError(`${baseURL}${url}`, `[${status}] ${message}`);
-            } else {
-                Alert.alert(message);
-            }
+    if (message != null) {
+        if (isDev) {
+            catchError(`${baseURL}${url}`, `[${status}] ${message}`);
+        } else {
+            Alert.alert(message);
         }
     }
 

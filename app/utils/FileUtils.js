@@ -1,10 +1,11 @@
-import { Platform } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import RNFetchBlob from 'rn-fetch-blob';
 import * as RNFS from 'react-native-fs';
 import { dispatchOne } from './DispatchUtils';
 import { startActivityAsync } from 'expo-intent-launcher';
 import { shareAsync } from 'expo-sharing';
+import { okAlert } from './AlertUtils';
 
 export const fileStore = (_store) => {
     store = _store;
@@ -24,13 +25,12 @@ export const handleDownloadRequest = async (url, fileName) => {
 
     const downloadCallback = (downloadProgress) => {
         const percentage = (downloadProgress.totalBytesWritten / downloadProgress.totalBytesExpectedToWrite) * 90;
-        store.dispatch(dispatchOne('SET_SNACK', { message: `다운로드 중... (${Math.round(percentage)}%)`, hold: true }));
+        // (${Math.round(percentage)}%)
+        store.dispatch(dispatchOne('SET_SNACK', { message: `다운로드 중...`, hold: true }));
     };
 
     try {
         store.dispatch(dispatchOne('SET_SNACK', { message: '다운로드를 시작합니다.', hold: true }));
-
-        const downloadResumable = FileSystem.createDownloadResumable(url, downloadPath, {}, downloadCallback);
 
         const fileExists = await FileSystem.getInfoAsync(downloadPath);
 
@@ -38,18 +38,25 @@ export const handleDownloadRequest = async (url, fileName) => {
             await FileSystem.deleteAsync(downloadPath);
         }
 
-        await downloadResumable.downloadAsync().then((result) => {
-            if (result.status === 200) {
-                const contentType = result.headers['content-type'];
-                const typeArr = contentType.split(';');
+        const downloadResumable = FileSystem.createDownloadResumable(url, downloadPath, {}, downloadCallback);
 
-                downloadToDevice(result.uri, typeArr[0], fileName);
-                console.log('Download Complete!', `File saved at: ${result.uri}`);
-            } else {
+        await downloadResumable
+            .downloadAsync()
+            .then((result) => {
+                if (result.status == 200) {
+                    const contentType = result.headers['Content-Type'] || result.headers['content-type'];
+                    const mimeType = contentType != null ? contentType.split(';')[0] : null;
+
+                    downloadToDevice(result.uri, mimeType, fileName);
+                    console.log('Download Complete!', `File saved at: ${result.uri}`);
+                } else {
+                    store.dispatch(dispatchOne('SET_SNACK', { message: '다운로드에 실패하였습니다.', hold: false }));
+                    console.error('Failed to download file:', result.status);
+                }
+            })
+            .catch((err) => {
                 store.dispatch(dispatchOne('SET_SNACK', { message: '다운로드에 실패하였습니다.', hold: false }));
-                console.error('Failed to download file:', result.status);
-            }
-        });
+            });
     } catch (error) {
         store.dispatch(dispatchOne('SET_SNACK', { message: '다운로드에 실패하였습니다.', hold: false }));
         console.error('Error downloading file:', error);
@@ -100,14 +107,17 @@ export const downloadToDevice = async (uri, mimeType, fileName) => {
                     await startActivityAsync('android.intent.action.VIEW', launcherParams);
                 });
             } else {
-                await shareAsync(uri, {
-                    UTI: mimeType,
-                    mimeType: mimeType,
-                });
+                if (mimeType) {
+                    await shareAsync(uri, {
+                        UTI: mimeType,
+                        mimeType: mimeType,
+                    });
+                }
             }
         }
     } catch (error) {
-        store.dispatch(dispatchOne('SET_SNACK', { message: '다운로드에 실패하였습니다.', hold: false }));
+        store.dispatch(dispatchOne('SET_SNACK', { message: '3다운로드에 실패하였습니다.', hold: false }));
+        okAlert(JSON.stringify(error));
         console.error(error);
     }
 };

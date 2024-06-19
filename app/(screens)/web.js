@@ -11,7 +11,8 @@ import * as WebBrowser from 'expo-web-browser';
 import Loading from 'components/Loading';
 import ErrorPage from '(utils)/error';
 import Camera from '(utils)/camera';
-import { downloadFile } from 'utils/FileUtils';
+import { downloadFile, handleDownloadRequest } from 'utils/FileUtils';
+import { okAlert } from 'utils/AlertUtils';
 
 const { profile } = Constants.expoConfig.extra;
 
@@ -71,10 +72,19 @@ const Web = () => {
                         Alert.alert('올바르지 않은 경로입니다.\n다시 시도해주세요.');
                     }
                     break;
+                case 'openApp': // 외부 앱 열기
+                    if (sendData?.data) {
+                        const fileData = sendData.data; // JSON.parse(sendData.data);
+                        openApp(fileData);
+                    } else {
+                        Alert.alert('올바르지 않은 경로입니다.\n다시 시도해주세요.');
+                    }
+                    break;
                 case 'filedown':
                     if (sendData?.url && sendData?.data) {
-                        const fileName = sendData.data.fileNm;
-                        downloadFile(`${webUrl}${sendData.url}`, fileName);
+                        const fileData = sendData.data; // JSON.parse(sendData.data);
+                        const fileName = fileData.fileNm;
+                        handleDownloadRequest(`${webUrl}${sendData.url}`, fileName);
                     } else {
                         Alert.alert('올바르지 않은 경로입니다.\n다시 시도해주세요.');
                     }
@@ -253,6 +263,25 @@ const Web = () => {
                 readerMode: false, // iOS 옵션
                 enableBarCollapsing: true, // iOS 옵션
             });
+        }
+    };
+
+    // 앱 열기
+    const openApp = async (data) => {
+        const { web_link, app_link } = data;
+
+        try {
+            const supported = await Linking.canOpenURL(app_link);
+
+            if (supported) {
+                // 설치되어 있으면
+                await Linking.openURL(app_link);
+            } else {
+                // 앱이 없으면
+                openWindow(web_link);
+            }
+        } catch (error) {
+            Alert.alert('앱을 열 수 없습니다.');
         }
     };
 

@@ -8,6 +8,7 @@ import { FontDefault, FontText } from 'utils/TextUtils';
 import { checkSms, login, sendSms } from 'api/LoginApi';
 import LoginInfo from 'modal/LoginInfo';
 import { okAlert } from 'utils/AlertUtils';
+import SmsRetriever from 'react-native-sms-retriever';
 
 /** LDAP 로그인 */
 const LDAPLogin = () => {
@@ -18,6 +19,7 @@ const LDAPLogin = () => {
     const [time, setTime] = useState(0);
     const [value, setValue] = useState({ username: '', password: '', otp: '' });
     const [isLogin, setIsLogin] = useState(false);
+    const [showOtp, setShowOtp] = useState(false);
 
     let interval = null;
 
@@ -55,6 +57,7 @@ const LDAPLogin = () => {
     const sendOTP = () => {
         sendSms(value.username).then((response) => {
             if (response) {
+                setShowOtp(true);
                 setValue({ ...value, otp: '' });
                 // Alert.alert('인증번호가 전송되었습니다.');
 
@@ -147,6 +150,43 @@ const LDAPLogin = () => {
         await StorageUtils.setDeviceData('loginKey', null);
     };
 
+    // otp 6자리 가져오기
+    const extractOtpFromMessage = (message) => {
+        // Assuming the OTP is a 6-digit number in the message
+        const otpMatch = message.match(/\d{6}/);
+        return otpMatch ? otpMatch[0] : null;
+    };
+
+    // OTP 읽기
+    const startSmsListener = async () => {
+        try {
+            const registered = await SmsRetriever.startSmsRetriever();
+            console.log(registered);
+            if (registered) {
+                SmsRetriever.addSmsListener((event) => {
+                    const message = event.message;
+                    console.log(message);
+                    // Extract OTP from message using regex
+                    const otpRegex = /(\d{4,6})/;
+                    const otpMatch = message.match(otpRegex);
+                    if (otpMatch) {
+                        console.log(otpMatch[0]);
+                    }
+                    SmsRetriever.removeSmsListener();
+                });
+            }
+        } catch (error) {
+            console.error('Error starting SMS Retriever', error);
+        }
+    };
+
+    // useEffect(() => {
+    //     startSmsListener(true);
+    //     return () => {
+    //         SmsRetriever.removeSmsListener();
+    //     };
+    // }, []);
+
     // 인증 번호 남은 시간 timer
     useEffect(() => {
         if (time > 0) {
@@ -181,7 +221,7 @@ const LDAPLogin = () => {
                         value={value.username}
                         placeholder="아이디를 입력하세요."
                         placeholderTextColor={`#a9a9a9`}
-                        readOnly={isLogin}
+                        readOnly={showOtp}
                         style={[commonTextStyles.fonts, commonInputStyles.inputText]}
                         onChangeText={(input) => changeValue('username', input)}
                     />
@@ -190,18 +230,18 @@ const LDAPLogin = () => {
                         value={value.password}
                         placeholder="비밀번호를 입력하세요."
                         placeholderTextColor={`#a9a9a9`}
-                        readOnly={isLogin}
+                        readOnly={showOtp}
                         secureTextEntry
                         style={[commonTextStyles.fonts, commonInputStyles.inputText]}
                         onChangeText={(input) => changeValue('password', input)}
                     />
                 </View>
-                <Pressable style={[isLogin ? commonInputStyles.buttonDisable : commonInputStyles.buttonRed]} onPress={doLogin}>
+                <Pressable style={[showOtp ? commonInputStyles.buttonDisable : commonInputStyles.buttonRed]} onPress={doLogin}>
                     <FontText style={commonTextStyles.white}>로그인</FontText>
                 </Pressable>
             </View>
 
-            {isLogin && (
+            {showOtp && (
                 <View style={styles.inputBox}>
                     <Pressable style={[commonInputStyles.buttonGray, styles.otpRetry]} onPress={sendOTP}>
                         <FontText style={commonTextStyles.white}>인증번호 재전송</FontText>

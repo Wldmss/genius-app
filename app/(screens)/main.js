@@ -27,7 +27,7 @@ const Main = () => {
 
     // 로그인 리셋
     const resetStorageData = async () => {
-        await SecureStore.deleteItemAsync('pin');
+        // await SecureStore.deleteItemAsync('pin');
         await SecureStore.deleteItemAsync('bio');
         await SecureStore.deleteItemAsync('loginKey');
 

@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 
 /** 로딩 화면 */
 const Loading = ({ show }) => {
-    const loading = show ? show : useSelector((state) => state.commonReducer.loading);
+    const loading = false; // show ? show : useSelector((state) => state.commonReducer.loading);
 
     return loading ? (
         <Modal visible={loading} transparent={true} animationType="fade">

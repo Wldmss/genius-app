@@ -11,7 +11,7 @@ export const GeniusLottie = () => {
         animation.current?.play();
     }, []);
 
-    return <LottieView loop={false} ref={animation} style={styles.lottie} source={require('assets/images/lottie.json')} />;
+    return <LottieView loop={false} ref={animation} style={styles.lottie} source={require('assets/images/splash.json')} />;
 };
 
 const styles = StyleSheet.create({

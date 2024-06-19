@@ -13,6 +13,8 @@ import Api from 'api/Api';
 import RNFetchBlob from 'rn-fetch-blob';
 import { downloadBlobFile, downloadFs, downloadToDevice, handleDownloadRequest, openFile, snack } from 'utils/FileUtils';
 import { startActivityAsync } from 'expo-intent-launcher';
+import SmsRetriever from 'react-native-sms-retriever';
+import * as SMS from 'expo-sms';
 
 export default function Test() {
     const test = useSelector((state) => state.commonReducer.test);
@@ -333,6 +335,97 @@ export default function Test() {
         // openFile(path);
     };
 
+    const onPhoneNumberPressed = async () => {
+        try {
+            const phoneNumber = await SmsRetriever.requestPhoneNumber();
+        } catch (error) {
+            console.log(JSON.stringify(error));
+        }
+    };
+
+    const startSms = async () => {
+        const isAvailable = await SMS.isAvailableAsync();
+        if (isAvailable) {
+            // new Promise((resolve) => setTimeout(resolve, 2000)).then(async () => {
+            //     const result = SMS.sendSMSAsync(['01089876481'], '인증번호는 123456 입니다');
+            //     // console.log('------sendSMSAsync-------');
+            //     // console.log(result);
+            // });
+
+            try {
+                const registerd = await SmsRetriever.startSmsRetriever();
+                console.log(registerd);
+                if (registerd) {
+                    SmsRetriever.addSmsListener((event) => {
+                        const message = event.message;
+                        console.log(message);
+                        const otp = extractOtpFromMessage(message);
+                        console.log(otp);
+                        SmsRetriever.removeSmsListener();
+                    });
+                }
+            } catch (error) {
+                console.log(error);
+            }
+
+            const result = SMS.sendSMSAsync(['01089876481'], '인증번호는 123456 입니다');
+            // Cleanup listener on unmount
+            // return () => {
+            //     SmsRetriever.removeSmsListener();
+            // };
+        }
+    };
+
+    useEffect(() => {
+        startSmsListener(true);
+        return () => {
+            SmsRetriever.removeSmsListener();
+        };
+    }, []);
+
+    const startSmsListener = async (send) => {
+        try {
+            const registered = await SmsRetriever.startSmsRetriever();
+            console.log(registered);
+            if (registered) {
+                if (!send) {
+                    const { result } = await SMS.sendSMSAsync(['01089876481'], '인증번호는 123456입니다');
+                    console.log(result);
+                }
+
+                SmsRetriever.addSmsListener((event) => {
+                    const message = event.message;
+                    // Extract OTP from message using regex
+                    const otpRegex = /(\d{4,6})/;
+                    const otpMatch = message.match(otpRegex);
+                    if (otpMatch) {
+                        console.log(otpMatch[0]);
+                    }
+                    SmsRetriever.removeSmsListener();
+                });
+            }
+        } catch (error) {
+            console.error('Error starting SMS Retriever', error);
+        }
+    };
+
+    const extractOtpFromMessage = (message) => {
+        // Assuming the OTP is a 6-digit number in the message
+        const otpMatch = message.match(/\d{6}/);
+        return otpMatch ? otpMatch[0] : null;
+    };
+
+    const checkOpen = async () => {
+        const app_link = 'hunetmlc1621://?cSeq=1621&userId=kt_test1001';
+
+        const supported = await Linking.canOpenURL(app_link);
+
+        console.log(supported);
+        if (supported) {
+            await Linking.openURL(app_link);
+        }
+    };
+
     useEffect(() => {
         store.dispatch(dispatchOne('SET_SPLASH', false));
 
@@ -347,7 +440,7 @@ export default function Test() {
                 {test}
             </FontText> */}
 
-            <Pressable style={commonInputStyles.buttonWhite} onPress={testTest}>
+            <Pressable style={commonInputStyles.buttonWhite} onPress={() => startSmsListener(false)}>
                 <FontText>테스트</FontText>
             </Pressable>
         </View>
