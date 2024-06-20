@@ -134,8 +134,8 @@ const App = () => {
                         {
                             text: '예',
                             onPress: async () => {
-                                const updateUrl = process.env.UPDATE_URL;
-                                if (await Linking.canOpenURL(updateUrl)) Linking.openURL(updateUrl);
+                                // const updateUrl = process.env.UPDATE_URL;
+                                // if (await Linking.canOpenURL(updateUrl)) Linking.openURL(updateUrl);
                             },
                         },
                     ]);

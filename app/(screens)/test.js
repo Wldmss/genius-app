@@ -423,20 +423,30 @@ export default function Test() {
         //         console.log(err);
         //     });
 
-        try {
-            await Linking.openURL(app_link)
-                .then((res) => {
-                    console.log('openURL');
-                    console.log(res);
-                })
-                .catch((err) => {
-                    Linking.openURL('https://naver.com');
-                    console.log('error');
-                    console.log(err);
-                });
-        } catch (err) {
-            console.log('try error');
+        const supported = await Linking.canOpenURL(app_link);
+
+        if (supported) {
+            // 설치되어 있으면
+            await Linking.openURL(app_link);
+        } else {
+            // 앱이 없으면
+            await Linking.openURL('https://naver.com');
         }
+
+        // try {
+        //     await Linking.openURL(app_link)
+        //         .then((res) => {
+        //             console.log('openURL');
+        //             console.log(res);
+        //         })
+        //         .catch((err) => {
+        //             Linking.openURL('https://naver.com');
+        //             console.log('error');
+        //             console.log(err);
+        //         });
+        // } catch (err) {
+        //     console.log('try error');
+        // }
         // if (supported) {
         //     await Linking.openURL(app_link);
         // }
@@ -456,7 +466,7 @@ export default function Test() {
                 {test}
             </FontText> */}
 
-            <Pressable style={commonInputStyles.buttonWhite} onPress={checkOpen}>
+            <Pressable style={commonInputStyles.buttonWhite} onPress={testTest}>
                 <FontText>테스트</FontText>
             </Pressable>
         </View>

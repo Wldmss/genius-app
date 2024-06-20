@@ -31,7 +31,9 @@
                 "NSCameraUsageDescription": "Allow $(PRODUCT_NAME) to access camera.",
                 "NSMicrophoneUsageDescription": "Allow $(PRODUCT_NAME) to access your microphone",
                 "LSApplicationQueriesSchemes": ["hunetmlc1621"],
-                "UIBackgroundModes": ["location", "fetch", "remote-notification"]
+                "UIBackgroundModes": ["location", "fetch", "remote-notification"],
+                "LSSupportsOpeningDocumentsInPlace": true,
+                "UIFileSharingEnabled": true
             },
             "config": {
                 "usesNonExemptEncryption": false

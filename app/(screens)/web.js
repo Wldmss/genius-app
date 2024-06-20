@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Alert, Linking } from 'react-native';
+import { StyleSheet, Alert, Linking, Platform } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useSelector } from 'react-redux';
 import Constants from 'expo-constants';
@@ -270,19 +270,22 @@ const Web = () => {
         const { web_link, app_link } = data;
 
         try {
-            await Linking.openURL(app_link).catch((error) => {
-                openWindow(web_link);
-            });
+            if (Platform.OS == 'android') {
+                // android 에서는 canOpenURL 적용이 안됨
+                await Linking.openURL(app_link).catch((error) => {
+                    openWindow(web_link);
+                });
+            } else {
+                const supported = await Linking.canOpenURL(app_link);
 
-            // const supported = await Linking.canOpenURL(app_link);
-
-            // if (supported) {
-            //     // 설치되어 있으면
-            //     await Linking.openURL(app_link);
-            // } else {
-            //     // 앱이 없으면
-            //     openWindow(web_link);
-            // }
+                if (supported) {
+                    // 설치되어 있으면
+                    await Linking.openURL(app_link);
+                } else {
+                    // 앱이 없으면
+                    openWindow(web_link);
+                }
+            }
         } catch (error) {
             Alert.alert('앱을 열 수 없습니다.');
         }

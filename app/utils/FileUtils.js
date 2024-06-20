@@ -1,11 +1,10 @@
-import { Platform } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import RNFetchBlob from 'rn-fetch-blob';
 import * as RNFS from 'react-native-fs';
 import { dispatchOne } from './DispatchUtils';
 import { startActivityAsync } from 'expo-intent-launcher';
-import { shareAsync } from 'expo-sharing';
-import { okAlert } from './AlertUtils';
+import { isAvailableAsync, shareAsync } from 'expo-sharing';
 
 export const fileStore = (_store) => {
     store = _store;
@@ -16,122 +15,164 @@ export const handleDownloadRequest = async (url, fileName) => {
     console.log(url);
     console.log(fileName);
 
+    // 파일명 check
     if (!fileName) {
         const fileArr = url.split('/');
-        fileName = fileArr[fileArr.length - 1];
+        fileName = fileArr.length > 0 ? fileArr[fileArr.length - 1] : null;
+
+        if (fileName == null) {
+            Alert.alert('올바르지 않은 경로입니다.\n다시 시도해주세요.');
+            return;
+        }
     }
 
-    const downloadPath = `${FileSystem.documentDirectory}${fileName}`;
-
+    // 다운로드 progress
     const downloadCallback = (downloadProgress) => {
         const percentage = (downloadProgress.totalBytesWritten / downloadProgress.totalBytesExpectedToWrite) * 90;
-        // (${Math.round(percentage)}%)
-        store.dispatch(dispatchOne('SET_SNACK', { message: `다운로드 중...`, hold: true }));
+        store.dispatch(dispatchOne('SET_SNACK', { message: `다운로드 중... (${Math.round(percentage)}%)`, hold: true }));
     };
 
     try {
         store.dispatch(dispatchOne('SET_SNACK', { message: '다운로드를 시작합니다.', hold: true }));
 
-        const fileExists = await FileSystem.getInfoAsync(downloadPath);
+        // 파일명 중복 처리
+        const dir = FileSystem.documentDirectory;
+        let downloadPath = `${dir}/${fileName}`;
 
-        if (fileExists.exists) {
-            await FileSystem.deleteAsync(downloadPath);
+        if (Platform.OS == 'android') {
+            // 앱 내 저장소에 저장됨
+            const fileExists = await FileSystem.getInfoAsync(downloadPath);
+
+            if (fileExists.exists) {
+                await FileSystem.deleteAsync(downloadPath);
+            }
+        } else {
+            // ios 파일이 덮어진다
+            const uniqueFileName = await getUniqueFileName(dir, fileName);
+            downloadPath = `${dir}/${uniqueFileName}`;
         }
 
         const downloadResumable = FileSystem.createDownloadResumable(url, downloadPath, {}, downloadCallback);
 
+        // 파일 다운로드
         await downloadResumable
             .downloadAsync()
             .then((result) => {
                 if (result.status == 200) {
-                    const contentType = result.headers['Content-Type'] || result.headers['content-type'];
-                    const mimeType = contentType != null ? contentType.split(';')[0] : null;
+                    if (Platform.OS == 'android') {
+                        downloadAndroid(result.uri, fileName);
+                    } else {
+                        const contentType = result.headers['Content-Type'] || result.headers['content-type'];
+                        const mimeType = contentType != null ? contentType.split(';')[0] : null;
 
-                    downloadToDevice(result.uri, mimeType, fileName);
+                        openIos(result.uri, mimeType);
+                    }
+
                     console.log('Download Complete!', `File saved at: ${result.uri}`);
                 } else {
-                    store.dispatch(dispatchOne('SET_SNACK', { message: '다운로드에 실패하였습니다.', hold: false }));
+                    failDownload();
                     console.error('Failed to download file:', result.status);
                 }
             })
             .catch((err) => {
-                store.dispatch(dispatchOne('SET_SNACK', { message: '다운로드에 실패하였습니다.', hold: false }));
+                failDownload();
+                console.log(err);
             });
     } catch (error) {
-        store.dispatch(dispatchOne('SET_SNACK', { message: '다운로드에 실패하였습니다.', hold: false }));
+        failDownload();
         console.error('Error downloading file:', error);
     }
 };
 
-// 단말에 파일 저장
-export const downloadToDevice = async (uri, mimeType, fileName) => {
+// android 파일 저장 : 단말 저장은 따로 해줘야 함
+const downloadAndroid = async (uri, fileName) => {
     try {
         const result = await FileSystem.getInfoAsync(uri);
 
         if (result.exists) {
-            const DownloadDir = RNFS.DownloadDirectoryPath; // android 저장경로
-            const DocumentDir = RNFS.DocumentDirectoryPath; // ios 저장경로
             const isZipFile = uri.match(/\.zip$/i);
 
-            const dir = Platform.OS == 'android' ? DownloadDir : DocumentDir;
-
+            const dir = RNFS.DownloadDirectoryPath; // android 저장경로
             const uniqueFileName = await getUniqueFileName(dir, fileName);
             const filePath = `${dir}/${uniqueFileName}`;
 
             try {
-                const fileExists = await RNFS.exists(filePath);
-
-                if (fileExists) {
-                    await RNFS.unlink(filePath);
-                }
-
+                // 단말에 파일 저장
                 const tempFilePath = `${filePath}.tmp`;
 
-                await RNFS.copyFile(uri, tempFilePath);
+                await FileSystem.copyAsync({
+                    from: uri,
+                    to: tempFilePath,
+                });
 
-                await RNFS.moveFile(tempFilePath, filePath);
-            } catch (err) {
-                console.log(err);
+                await FileSystem.moveAsync({
+                    from: tempFilePath,
+                    to: filePath,
+                });
+                // const fileExists = await RNFS.exists(filePath);
+
+                // if (fileExists) {
+                //     await RNFS.unlink(filePath);
+                // }
+
+                // const tempFilePath = `${filePath}.tmp`;
+
+                // await RNFS.copyFile(uri, tempFilePath);
+
+                // await RNFS.moveFile(tempFilePath, filePath);
+            } catch (error) {
+                console.log(error);
             }
 
-            try {
-                if (Platform.OS == 'android' && isZipFile) {
-                    await FileSystem.getContentUriAsync(uri).then(async (cUri) => {
-                        let launcherParams = {
-                            data: cUri,
-                            flags: 1,
-                        };
+            // 파일 열기
+            await FileSystem.getContentUriAsync(uri).then(async (cUri) => {
+                let launcherParams = {
+                    data: cUri,
+                    flags: 1,
+                };
 
-                        if (isZipFile) {
-                            launcherParams['type'] = 'application/zip';
-                        }
-
-                        finishDownload();
-                        await startActivityAsync('android.intent.action.VIEW', launcherParams);
-                    });
-                } else {
-                    finishDownload();
-                    if (mimeType) {
-                        await shareAsync(uri, {
-                            UTI: mimeType,
-                            mimeType: mimeType,
-                        });
-                    }
+                if (isZipFile) {
+                    launcherParams['type'] = 'application/zip';
                 }
-            } finally {
+
                 finishDownload();
-            }
+                await startActivityAsync('android.intent.action.VIEW', launcherParams);
+            });
+        } else {
+            failDownload();
         }
     } catch (error) {
-        store.dispatch(dispatchOne('SET_SNACK', { message: '다운로드에 실패하였습니다.', hold: false }));
-        okAlert(JSON.stringify(error));
+        failDownload();
         console.error(error);
+    }
+};
+
+// ios 파일 열기 : ios 는 expo-file-system 만으로도 단말에 저장됨
+const openIos = async (uri, mimeType) => {
+    finishDownload();
+
+    try {
+        // 파일 열기
+        RNFetchBlob.ios.openDocument(uri);
+    } catch (err) {
+        // 파일 share
+        if (mimeType && (await isAvailableAsync())) {
+            await shareAsync(uri, {
+                UTI: mimeType,
+                mimeType: mimeType,
+            });
+        }
     }
 };
 
 // 다운로드 완료
 const finishDownload = () => {
     store.dispatch(dispatchOne('SET_SNACK', { message: `다운로드가 완료되었습니다.`, hold: false, time: 2000 })); // \n${filePath}
+};
+
+// 다운로드 실패
+const failDownload = () => {
+    store.dispatch(dispatchOne('SET_SNACK', { message: '다운로드에 실패하였습니다.', hold: false }));
 };
 
 // ios, android 다운로드 분기 처리 (사용 x)
@@ -259,8 +300,15 @@ const getUniqueFileName = async (dir, fileName) => {
 
     while (await RNFS.exists(`${dir}/${uniqueName}`)) {
         uniqueName = `${name}(${counter})${extension}`;
-        counter += 1;
+        counter++;
     }
 
     return uniqueName;
+};
+
+const checkUnique = async (filePath) => {
+    console.log(filePath);
+    const rnExists = await RNFS.exists(filePath);
+    const exists = await FileSystem.getInfoAsync(filePath);
+    return rnExists || exists.exists;
 };
