@@ -133,9 +133,9 @@ const App = () => {
                     Alert.alert(process.env.EXPO_PUBLIC_NAME, '앱을 업데이트 합니다.', [
                         {
                             text: '예',
-                            onPress: () => {
-                                // 앱 자동 업데이트 tODO
-                                Alert.alert('업데이트');
+                            onPress: async () => {
+                                const updateUrl = process.env.UPDATE_URL;
+                                if (await Linking.canOpenURL(updateUrl)) Linking.openURL(updateUrl);
                             },
                         },
                     ]);

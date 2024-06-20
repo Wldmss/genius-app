@@ -69,10 +69,8 @@
                 },
                 {
                     "action": "VIEW",
-                    "autoVerify": true,
                     "data": {
-                        "scheme": "ktgenius",
-                        "host": "link"
+                        "scheme": "ktgenius"
                     },
                     "category": ["BROWSABLE", "DEFAULT"]
                 },
@@ -82,7 +80,7 @@
                     "data": {
                         "scheme": "hunetmlc1621"
                     },
-                    "category": ["DEFAULT"]
+                    "category": ["BROWSABLE", "DEFAULT"]
                 }
             ]
         },

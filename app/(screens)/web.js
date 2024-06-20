@@ -11,8 +11,7 @@ import * as WebBrowser from 'expo-web-browser';
 import Loading from 'components/Loading';
 import ErrorPage from '(utils)/error';
 import Camera from '(utils)/camera';
-import { downloadFile, handleDownloadRequest } from 'utils/FileUtils';
-import { okAlert } from 'utils/AlertUtils';
+import { handleDownloadRequest } from 'utils/FileUtils';
 
 const { profile } = Constants.expoConfig.extra;
 
@@ -251,10 +250,10 @@ const Web = () => {
 
     // window.open intercept
     const openWindow = async (targetUrl, inAppFlag) => {
-        const canOpen = Linking.canOpenURL(targetUrl);
+        const canOpen = await Linking.canOpenURL(targetUrl);
 
         if (!inAppFlag && canOpen) {
-            Linking.openURL(targetUrl);
+            await Linking.openURL(targetUrl);
         } else {
             await WebBrowser.openBrowserAsync(targetUrl, {
                 toolbarColor: 'white', // 안드로이드 옵션

@@ -1,4 +1,4 @@
-import { Alert, Platform } from 'react-native';
+import { Platform } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import RNFetchBlob from 'rn-fetch-blob';
 import * as RNFS from 'react-native-fs';
@@ -78,7 +78,6 @@ export const downloadToDevice = async (uri, mimeType, fileName) => {
             const uniqueFileName = await getUniqueFileName(dir, fileName);
             const filePath = `${dir}/${uniqueFileName}`;
 
-            // TODO
             try {
                 const fileExists = await RNFS.exists(filePath);
 
@@ -86,42 +85,56 @@ export const downloadToDevice = async (uri, mimeType, fileName) => {
                     await RNFS.unlink(filePath);
                 }
 
-                await RNFS.copyFile(result.uri, filePath);
+                const tempFilePath = `${filePath}.tmp`;
+
+                await RNFS.copyFile(uri, tempFilePath);
+
+                await RNFS.moveFile(tempFilePath, filePath);
             } catch (err) {
                 console.log(err);
             }
 
-            store.dispatch(dispatchOne('SET_SNACK', { message: `다운로드가 완료되었습니다.\n${filePath}`, hold: false, time: 5000 }));
+            try {
+                if (Platform.OS == 'android' && isZipFile) {
+                    await FileSystem.getContentUriAsync(uri).then(async (cUri) => {
+                        let launcherParams = {
+                            data: cUri,
+                            flags: 1,
+                        };
 
-            if (Platform.OS == 'android' && isZipFile) {
-                await FileSystem.getContentUriAsync(uri).then(async (cUri) => {
-                    let launcherParams = {
-                        data: cUri,
-                        flags: 1,
-                    };
+                        if (isZipFile) {
+                            launcherParams['type'] = 'application/zip';
+                        }
 
-                    if (isZipFile) {
-                        launcherParams['type'] = 'application/zip';
-                    }
-
-                    await startActivityAsync('android.intent.action.VIEW', launcherParams);
-                });
-            } else {
-                if (mimeType) {
-                    await shareAsync(uri, {
-                        UTI: mimeType,
-                        mimeType: mimeType,
+                        finishDownload();
+                        await startActivityAsync('android.intent.action.VIEW', launcherParams);
                     });
+                } else {
+                    finishDownload();
+                    if (mimeType) {
+                        await shareAsync(uri, {
+                            UTI: mimeType,
+                            mimeType: mimeType,
+                        });
+                    }
                 }
+            } finally {
+                finishDownload();
             }
         }
     } catch (error) {
-        store.dispatch(dispatchOne('SET_SNACK', { message: '3다운로드에 실패하였습니다.', hold: false }));
+        store.dispatch(dispatchOne('SET_SNACK', { message: '다운로드에 실패하였습니다.', hold: false }));
         okAlert(JSON.stringify(error));
         console.error(error);
     }
 };
 
+// 다운로드 완료
+const finishDownload = () => {
+    store.dispatch(dispatchOne('SET_SNACK', { message: `다운로드가 완료되었습니다.`, hold: false, time: 2000 })); // \n${filePath}
+};
+
+// ios, android 다운로드 분기 처리 (사용 x)
 export const downloadFile = (url, fileName) => {
     if (Platform.OS == 'ios') {
         downloadBlobFile(url, fileName);
@@ -130,11 +143,7 @@ export const downloadFile = (url, fileName) => {
     }
 };
 
-export const snack = () => {
-    store.dispatch(dispatchOne('SET_SNACK', { message: '다운로드를 시작합니다.', hold: true }));
-};
-
-// rn-fetch-blob :: android 14 이상 RECEIVER_EXPORTED or RECEIVER_NOT_EXPORTED 설정 해줘야 함
+// rn-fetch-blob :: android 14 이상 RECEIVER_EXPORTED or RECEIVER_NOT_EXPORTED 설정 해줘야 함 (사용 x)
 export const downloadBlobFile = (url, fileName) => {
     if (!fileName) {
         const fileArr = url.split('/');
@@ -183,7 +192,7 @@ export const downloadBlobFile = (url, fileName) => {
         });
 };
 
-// react-native-fs
+// react-native-fs (사용 x)
 export const downloadFs = async (url, fileName) => {
     console.log(url);
     console.log(fileName);
@@ -254,24 +263,4 @@ const getUniqueFileName = async (dir, fileName) => {
     }
 
     return uniqueName;
-};
-
-export const openFile = async (filePath) => {
-    console.log(filePath);
-    // FileSystem.StorageAccessFramework.readAsStringAsync(filePath, { encoding: FileSystem.EncodingType.UTF8 }).then((result) => {
-    //     console.log(result);
-    // });
-
-    await FileSystem.StorageAccessFramework.copyAsync();
-    // const result = await FileSystem.getInfoAsync(filePath);
-    // console.log(result);
-    // if (result.exists) {
-    //     FileSystem.getContentUriAsync(result.uri).then((cUri) => {
-    //         console.log(cUri);
-    //         // IntentLauncher.startActivityAsync('android.intent.action.VIEW', {
-    //         //     data: cUri,
-    //         //     flags: 1,
-    //         // });
-    //     });
-    // }
 };

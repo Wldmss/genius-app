@@ -145,8 +145,6 @@ function error(err) {
                 message = '알 수 없는 오류입니다.';
                 break;
         }
-    } else {
-        message = '알 수 없는 오류입니다.';
     }
 
     if (message != null) {

@@ -1,4 +1,4 @@
-import { Alert, Linking, Platform, Pressable, StyleSheet, View } from 'react-native';
+import { Alert, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { useSelector } from 'react-redux';
 import * as Clipboard from 'expo-clipboard';
 import { FontText } from 'utils/TextUtils';
@@ -11,10 +11,11 @@ import { dispatchOne } from 'utils/DispatchUtils';
 import * as WebBrowser from 'expo-web-browser';
 import Api from 'api/Api';
 import RNFetchBlob from 'rn-fetch-blob';
-import { downloadBlobFile, downloadFs, downloadToDevice, handleDownloadRequest, openFile, snack } from 'utils/FileUtils';
+import { downloadBlobFile, downloadFs, downloadToDevice, handleDownloadRequest } from 'utils/FileUtils';
 import { startActivityAsync } from 'expo-intent-launcher';
 import SmsRetriever from 'react-native-sms-retriever';
 import * as SMS from 'expo-sms';
+import * as Linking from 'expo-linking';
 
 export default function Test() {
     const test = useSelector((state) => state.commonReducer.test);
@@ -315,11 +316,6 @@ export default function Test() {
         downloadBlobFile('https://dev.ktedu.kt.com:2443/mobile/m/educontents/courseData/courseDataDetail.do?contId=200015892', '개발자용.pptx');
     };
 
-    const open = () => {
-        const filePath = '/storage/emulated/0/Download/login(4).pptx';
-        openFile(filePath);
-    };
-
     const testTest = async () => {
         // const filePath = 'https://ktedu.kt.com/file/download.do?fileId=100024328';
         // const filePath = `${process.env.TEST_URL}/file/download/Pipy,%20DEV-SPACE%20Nexus%20%20레포지토리%20설정.zip`;
@@ -440,7 +436,7 @@ export default function Test() {
                 {test}
             </FontText> */}
 
-            <Pressable style={commonInputStyles.buttonWhite} onPress={() => startSmsListener(false)}>
+            <Pressable style={commonInputStyles.buttonWhite} onPress={testTest}>
                 <FontText>테스트</FontText>
             </Pressable>
         </View>
