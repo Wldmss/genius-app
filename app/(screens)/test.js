@@ -1,4 +1,4 @@
-import { Alert, Platform, Pressable, StyleSheet, View } from 'react-native';
+import { Alert, Linking, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { useSelector } from 'react-redux';
 import * as Clipboard from 'expo-clipboard';
 import { FontText } from 'utils/TextUtils';
@@ -15,7 +15,7 @@ import { downloadBlobFile, downloadFs, downloadToDevice, handleDownloadRequest }
 import { startActivityAsync } from 'expo-intent-launcher';
 import SmsRetriever from 'react-native-sms-retriever';
 import * as SMS from 'expo-sms';
-import * as Linking from 'expo-linking';
+// import * as Linking from 'expo-linking';
 
 export default function Test() {
     const test = useSelector((state) => state.commonReducer.test);
@@ -414,12 +414,32 @@ export default function Test() {
     const checkOpen = async () => {
         const app_link = 'hunetmlc1621://?cSeq=1621&userId=kt_test1001';
 
-        const supported = await Linking.canOpenURL(app_link);
+        // await Linking.canOpenURL(app_link)
+        //     .then((res) => {
+        //         console.log('canOpenURL');
+        //         console.log(res);
+        //     })
+        //     .catch((err) => {
+        //         console.log(err);
+        //     });
 
-        console.log(supported);
-        if (supported) {
-            await Linking.openURL(app_link);
+        try {
+            await Linking.openURL(app_link)
+                .then((res) => {
+                    console.log('openURL');
+                    console.log(res);
+                })
+                .catch((err) => {
+                    Linking.openURL('https://naver.com');
+                    console.log('error');
+                    console.log(err);
+                });
+        } catch (err) {
+            console.log('try error');
         }
+        // if (supported) {
+        //     await Linking.openURL(app_link);
+        // }
     };
 
     useEffect(() => {
@@ -436,7 +456,7 @@ export default function Test() {
                 {test}
             </FontText> */}
 
-            <Pressable style={commonInputStyles.buttonWhite} onPress={testTest}>
+            <Pressable style={commonInputStyles.buttonWhite} onPress={checkOpen}>
                 <FontText>테스트</FontText>
             </Pressable>
         </View>

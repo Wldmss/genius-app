@@ -73,14 +73,6 @@
                         "scheme": "ktgenius"
                     },
                     "category": ["BROWSABLE", "DEFAULT"]
-                },
-                {
-                    "action": "VIEW",
-                    "autoVerify": true,
-                    "data": {
-                        "scheme": "hunetmlc1621"
-                    },
-                    "category": ["BROWSABLE", "DEFAULT"]
                 }
             ]
         },

@@ -270,15 +270,19 @@ const Web = () => {
         const { web_link, app_link } = data;
 
         try {
-            const supported = await Linking.canOpenURL(app_link);
-
-            if (supported) {
-                // 설치되어 있으면
-                await Linking.openURL(app_link);
-            } else {
-                // 앱이 없으면
+            await Linking.openURL(app_link).catch((error) => {
                 openWindow(web_link);
-            }
+            });
+
+            // const supported = await Linking.canOpenURL(app_link);
+
+            // if (supported) {
+            //     // 설치되어 있으면
+            //     await Linking.openURL(app_link);
+            // } else {
+            //     // 앱이 없으면
+            //     openWindow(web_link);
+            // }
         } catch (error) {
             Alert.alert('앱을 열 수 없습니다.');
         }
