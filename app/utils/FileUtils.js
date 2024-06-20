@@ -109,6 +109,8 @@ const downloadAndroid = async (uri, fileName) => {
                     from: tempFilePath,
                     to: filePath,
                 });
+
+                // TODO 이거 변경 하다가 맘 >> 파일 다운로드 마무리하고, 로그인 이후 체크하는거 보고
                 // const fileExists = await RNFS.exists(filePath);
 
                 // if (fileExists) {

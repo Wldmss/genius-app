@@ -142,6 +142,7 @@ export const checkLogin = async (checkFlag) => {
             .post('api/login/loginKeyProc.do', sendData)
             .then((response) => {
                 const { rtnSts, rtnMsg, rtnUrl } = response.data;
+                okAlert(JSON.stringify(response.data));
 
                 if (rtnSts == 'S') {
                     store.dispatch(dispatchMultiple({ SET_WEBLINK: rtnUrl, SET_TOKEN: loginKey }));
