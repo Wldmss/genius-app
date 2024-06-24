@@ -35,7 +35,6 @@ export const handleDownloadRequest = async (url, fileName) => {
     try {
         store.dispatch(dispatchOne('SET_SNACK', { message: '다운로드를 시작합니다.', hold: true }));
 
-        // 파일명 중복 처리
         const dir = FileSystem.documentDirectory;
         let downloadPath = `${dir}/${fileName}`;
 
@@ -109,19 +108,6 @@ const downloadAndroid = async (uri, fileName) => {
                     from: tempFilePath,
                     to: filePath,
                 });
-
-                // TODO 이거 변경 하다가 맘 >> 파일 다운로드 마무리하고, 로그인 이후 체크하는거 보고
-                // const fileExists = await RNFS.exists(filePath);
-
-                // if (fileExists) {
-                //     await RNFS.unlink(filePath);
-                // }
-
-                // const tempFilePath = `${filePath}.tmp`;
-
-                // await RNFS.copyFile(uri, tempFilePath);
-
-                // await RNFS.moveFile(tempFilePath, filePath);
             } catch (error) {
                 console.log(error);
             }

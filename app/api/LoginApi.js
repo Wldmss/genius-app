@@ -12,7 +12,7 @@ import { okAlert } from 'utils/AlertUtils';
 const { profile, isTest, androidVersion, iosVersion } = Constants.expoConfig.extra;
 const { version } = Constants.expoConfig;
 
-const testUrl = '';
+const testUrl = ''; // /mobile/m/login.do
 
 export const loginApiStore = (_store) => {
     store = _store;
@@ -22,7 +22,7 @@ let isDev = null;
 
 const checkIsTest = () => {
     isDev = isDev || store.getState().commonReducer.isDev;
-    return false; // profile == 'development'; //isTest && !isDev;
+    return profile == 'development'; //isTest && !isDev;
 };
 
 /** server check & app version check
@@ -133,6 +133,7 @@ export const checkLogin = async (checkFlag) => {
             loginKey: loginKey,
         };
 
+        console.log(sendData);
         /** 로그인 (loginKey)
          * @method POST
          * @param { deviceToken: push token, osType: os 종류, appVersion: 앱 버전, loginKey: 로그인 키 }
@@ -142,13 +143,15 @@ export const checkLogin = async (checkFlag) => {
             .post('api/login/loginKeyProc.do', sendData)
             .then((response) => {
                 const { rtnSts, rtnMsg, rtnUrl } = response.data;
-                okAlert(JSON.stringify(response.data));
+
+                console.log(response.data);
 
                 if (rtnSts == 'S') {
                     store.dispatch(dispatchMultiple({ SET_WEBLINK: rtnUrl, SET_TOKEN: loginKey }));
 
                     return true;
                 } else {
+                    // TODO 계정 만료(비번 변경, 만료 등) 시
                     handleRtnMsg(rtnMsg);
                     if (!checkFlag) store.dispatch(dispatchLogin(false));
                     return false;
@@ -250,6 +253,8 @@ export const checkSms = async (loginInfo) => {
             .post(`api/login/checkSmsAuth.do`, sendData)
             .then((response) => {
                 const { rtnSts, rtnMsg, rtnUrl, loginKey } = response.data;
+
+                console.log(loginKey);
 
                 if (rtnSts == 'S') {
                     store.dispatch(dispatchOne('SET_WEBLINK', rtnUrl));

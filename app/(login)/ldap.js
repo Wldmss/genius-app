@@ -8,7 +8,7 @@ import { FontDefault, FontText } from 'utils/TextUtils';
 import { checkSms, login, sendSms } from 'api/LoginApi';
 import LoginInfo from 'modal/LoginInfo';
 import { okAlert } from 'utils/AlertUtils';
-import SmsRetriever from 'react-native-sms-retriever';
+import * as Clipboard from 'expo-clipboard';
 
 /** LDAP 로그인 */
 const LDAPLogin = () => {
@@ -54,7 +54,7 @@ const LDAPLogin = () => {
     };
 
     // OTP 전송
-    const sendOTP = () => {
+    const sendOTP = async () => {
         sendSms(value.username).then((response) => {
             if (response) {
                 setShowOtp(true);
@@ -63,12 +63,34 @@ const LDAPLogin = () => {
 
                 if (otpRef.current) otpRef.current.focus();
                 setTime(maxTime);
+
+                readOTP();
             }
+        });
+    };
+
+    // OTP 읽기
+    const readOTP = async () => {
+        return new Promise((resolve) => {
+            setTimeout(async () => {
+                const contents = await Clipboard.getStringAsync();
+                if (contents != '') {
+                    const otpRegex = /(\d{4,6})/;
+                    const otpMatch = contents.match(otpRegex);
+                    if (otpMatch) setValue({ ...value, otp: contents });
+                }
+                resolve(contents);
+            }, 3000);
         });
     };
 
     // OTP 검증
     const checkOTP = async () => {
+        if (time <= 0) {
+            okAlert('SMS 인증번호 입력 대기시간이 3분을 초과했습니다.\n인증번호를 다시 요청해 주시기 바랍니다.', null);
+            return;
+        }
+
         if (value.otp == '') {
             Alert.alert('인증번호를 입력해주세요.');
             return;
@@ -150,43 +172,6 @@ const LDAPLogin = () => {
         await StorageUtils.setDeviceData('loginKey', null);
     };
 
-    // otp 6자리 가져오기
-    const extractOtpFromMessage = (message) => {
-        // Assuming the OTP is a 6-digit number in the message
-        const otpMatch = message.match(/\d{6}/);
-        return otpMatch ? otpMatch[0] : null;
-    };
-
-    // OTP 읽기
-    const startSmsListener = async () => {
-        try {
-            const registered = await SmsRetriever.startSmsRetriever();
-            console.log(registered);
-            if (registered) {
-                SmsRetriever.addSmsListener((event) => {
-                    const message = event.message;
-                    console.log(message);
-                    // Extract OTP from message using regex
-                    const otpRegex = /(\d{4,6})/;
-                    const otpMatch = message.match(otpRegex);
-                    if (otpMatch) {
-                        console.log(otpMatch[0]);
-                    }
-                    SmsRetriever.removeSmsListener();
-                });
-            }
-        } catch (error) {
-            console.error('Error starting SMS Retriever', error);
-        }
-    };
-
-    // useEffect(() => {
-    //     startSmsListener(true);
-    //     return () => {
-    //         SmsRetriever.removeSmsListener();
-    //     };
-    // }, []);
-
     // 인증 번호 남은 시간 timer
     useEffect(() => {
         if (time > 0) {
@@ -262,7 +247,7 @@ const LDAPLogin = () => {
                             <FontText>초</FontText>
                         </View>
                     </View>
-                    <Pressable style={commonInputStyles.buttonRed} onPress={checkOTP}>
+                    <Pressable style={[time > 0 ? commonInputStyles.buttonRed : commonInputStyles.buttonDisable]} onPress={checkOTP}>
                         <FontText style={commonTextStyles.white}>인증번호 확인</FontText>
                     </Pressable>
                 </View>

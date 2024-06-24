@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Alert, Linking, Platform } from 'react-native';
+import { StyleSheet, Alert, Linking, Platform, View, Text, Pressable, Image } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useSelector } from 'react-redux';
 import Constants from 'expo-constants';
@@ -12,8 +12,12 @@ import Loading from 'components/Loading';
 import ErrorPage from '(utils)/error';
 import Camera from '(utils)/camera';
 import { handleDownloadRequest } from 'utils/FileUtils';
+import { FontText } from 'utils/TextUtils';
 
 const { profile } = Constants.expoConfig.extra;
+
+const cancel_img = require('assets/images/close.png');
+import BackIcon from 'assets/icons/icon-back.svg';
 
 /** web view */
 const Web = () => {
@@ -32,6 +36,7 @@ const Web = () => {
     const [init, setInit] = useState(false);
     const [webUrl, setWebUrl] = useState(isDev ? process.env.DEV_SERVER_URL : process.env.WEB_URL);
     const [video, setVideo] = useState({ show: false, src: null });
+    const [browser, setBrowser] = useState({ open: false, title: '' });
 
     let timeout = null;
 
@@ -79,7 +84,7 @@ const Web = () => {
                         Alert.alert('올바르지 않은 경로입니다.\n다시 시도해주세요.');
                     }
                     break;
-                case 'filedown':
+                case 'fileDown': // 파일 다운로드
                     if (sendData?.url && sendData?.data) {
                         const fileData = sendData.data; // JSON.parse(sendData.data);
                         const fileName = fileData.fileNm;
@@ -87,6 +92,12 @@ const Web = () => {
                     } else {
                         Alert.alert('올바르지 않은 경로입니다.\n다시 시도해주세요.');
                     }
+                    break;
+                case 'initApp': // 앱 로그아웃
+                    initApp();
+                    break;
+                case 'session':
+                    console.log(sendData.data);
                     break;
                 case 'videoPlayed':
                     setVideo({ ...video, show: true, src: sendData.url });
@@ -137,11 +148,38 @@ const Web = () => {
             {
                 text: '예',
                 onPress: () => {
-                    store.dispatch({ type: 'INIT_APP' });
+                    clearSession();
                 },
             },
         ]);
         return true;
+    };
+
+    // 세션 만료
+    const endSession = () => {
+        Alert.alert(
+            process.env.EXPO_PUBLIC_NAME,
+            `세션이 만료되었습니다.\n로그인 페이지로 이동합니다.`,
+            [
+                {
+                    text: '확인',
+                    onPress: () => {
+                        clearSession();
+                    },
+                },
+            ],
+            { cancelable: false }
+        );
+    };
+
+    // clear web session
+    const clearSession = () => {
+        if (webViewRef.current) webViewRef.current.postMessage('clearSession');
+    };
+
+    // init app
+    const initApp = () => {
+        store.dispatch({ type: 'INIT_APP' });
     };
 
     // 카메라 열기
@@ -211,6 +249,8 @@ const Web = () => {
 
         let goBack = url.includes('portalMain.do') || url.includes('login.do') ? false : canGoBack;
         setBackButtonEnabled(goBack);
+
+        checkBrowser(url);
     };
 
     // onShouldStartLoadWithRequest
@@ -241,7 +281,22 @@ const Web = () => {
             return false;
         }
 
+        // if (url.includes('ktleaders.com')) {
+        //     if (webViewRef.current) webViewRef.current.postMessage('getSession');
+        //     // openWindow('https://ktedu.kt.com/mobile/m/main/portalMain.do', true);
+        //     return false;
+        // }
+
         return true;
+    };
+
+    // browser header 확인
+    const checkBrowser = (url) => {
+        if (url.includes('ktleaders.com')) {
+            setBrowser({ ...browser, open: true, title: '리더스 닷컴' });
+        } else {
+            setBrowser({ ...browser, open: false, title: '' });
+        }
     };
 
     const changeUrl = (url) => {
@@ -255,13 +310,17 @@ const Web = () => {
         if (!inAppFlag && canOpen) {
             await Linking.openURL(targetUrl);
         } else {
-            await WebBrowser.openBrowserAsync(targetUrl, {
-                toolbarColor: 'white', // 안드로이드 옵션
-                controlsColor: 'white', // iOS 옵션
-                dismissButtonStyle: 'close', // iOS 옵션
-                readerMode: false, // iOS 옵션
-                enableBarCollapsing: true, // iOS 옵션
-            });
+            try {
+                await WebBrowser.openAuthSessionAsync(targetUrl, {
+                    toolbarColor: 'white', // 안드로이드 옵션
+                    controlsColor: 'white', // iOS 옵션
+                    dismissButtonStyle: 'close', // iOS 옵션
+                    readerMode: false, // iOS 옵션
+                    enableBarCollapsing: true, // iOS 옵션
+                });
+            } catch (err) {
+                console.log(err);
+            }
         }
     };
 
@@ -291,26 +350,37 @@ const Web = () => {
         }
     };
 
-    // 세션 만료
-    const endSession = () => {
-        Alert.alert(
-            process.env.EXPO_PUBLIC_NAME,
-            `세션이 만료되었습니다.\n로그인 페이지로 이동합니다.`,
-            [
-                {
-                    text: '확인',
-                    onPress: () => {
-                        store.dispatch({ type: 'INIT_APP' });
-                    },
-                },
-            ],
-            { cancelable: false }
-        );
+    // page intercept
+    const interceptPage = (targetUrl) => {
+        console.log('Intercepted OpenWindow for', targetUrl);
+
+        let title = '그룹교육';
+        if (targetUrl.includes('ktleaders.com')) title = '리더스 닷컴';
+
+        setBrowser({ ...browser, open: true, title: title });
+
+        // openWindow(targetUrl, true);
+        if (webViewRef.current) webViewRef.current.injectJavaScript(`window.location.href = '${targetUrl}';`);
+    };
+
+    // main 으로 이동
+    const goToHome = () => {
+        if (webViewRef.current) webViewRef.current.injectJavaScript(`window.location.href = '${webUrl}/main/portalMain.do';`);
     };
 
     // 로딩
     const handleLoading = (load) => {
         store.dispatch(dispatchOne('SET_LOADING', load));
+    };
+
+    // 새로고침
+    const reload = () => {
+        if (webViewRef.current) webViewRef.current.reload();
+    };
+
+    // scroll to top
+    const scrollTop = () => {
+        if (webViewRef.current) webViewRef.current.injectJavaScript(`window.scrollTo(0, 0);`);
     };
 
     useEffect(() => {
@@ -360,30 +430,56 @@ const Web = () => {
     return camera ? (
         <Camera />
     ) : (
-        <WebView
-            ref={webViewRef}
-            style={[styles.webview, hide ? commonStyles.none : commonStyles.container]}
-            source={{
-                // uri: `${process.env.TEST_URL}/file`,
-                uri: `${webUrl}${webLink || ''}`,
-            }}
-            textZoom={100}
-            javaScriptEnabled={true}
-            onLoadStart={() => !init && setHide(true)}
-            onLoad={webViewLoaded}
-            onMessage={handleOnMessage}
-            onError={handleError}
-            onNavigationStateChange={onNavigationStateChange}
-            originWhitelist={['*']}
-            onShouldStartLoadWithRequest={handleStartLoadWithRequest}
-            javaScriptCanOpenWindowsAutomatically={true}
-            injectedJavaScriptBeforeContentLoaded={`
+        <View style={styles.container}>
+            <View style={[styles.header, browser.open ? '' : commonStyles.none]}>
+                <View></View>
+                <FontText style={styles.headerTxt}>{browser.title}</FontText>
+                <Pressable onPress={goToHome} style={styles.icon}>
+                    <Image source={cancel_img} style={styles.cancel}></Image>
+                </Pressable>
+            </View>
+            <WebView
+                ref={webViewRef}
+                style={[styles.webview, hide ? commonStyles.none : commonStyles.container]}
+                source={{
+                    // uri: `${process.env.TEST_URL}/file`,
+                    uri: `${webUrl}${webLink || ''}`,
+                }}
+                textZoom={100}
+                javaScriptEnabled={true}
+                onLoadStart={() => !init && setHide(true)}
+                onLoad={webViewLoaded}
+                onMessage={handleOnMessage}
+                onError={handleError}
+                onNavigationStateChange={onNavigationStateChange}
+                originWhitelist={['*']}
+                onShouldStartLoadWithRequest={handleStartLoadWithRequest}
+                javaScriptCanOpenWindowsAutomatically={true}
+                injectedJavaScriptBeforeContentLoaded={`
                 window.onerror = function(message, sourcefile, lineno, colno, error){
                     // alert("Message: " + message + "\\n\\nError: " + error);
                     return true;
                 };
             `}
-            injectedJavaScript={`
+                injectedJavaScript={`
+                /* app -> web postMessage */
+                function listener(event) {
+                    const type = event.data;
+                    switch (type) {
+                        case 'clearSession': 
+                            // 세션 종료
+                            location.href = 'https://ktedu.kt.com/mobile/m/logout.do';
+                            window.ReactNativeWebView.postMessage(JSON.stringify({ type : 'initApp' }));
+                            break;
+                        case 'getSession':
+                            window.ReactNativeWebView.postMessage(JSON.stringify({ type : 'session', data : document.cookie }));
+                            break;
+                    }
+                }
+
+                document.addEventListener('message', listener); // android
+                window.addEventListener('message', listener);   // ios
+
                 /* id click */
                 window.addEventListener('click', function (event) {
                     if(event.target.id){
@@ -400,7 +496,7 @@ const Web = () => {
                         video.setAttribute('webkit-playsinline', ''); // ios
                         video.setAttribute('playsinline', ''); // android
 
-                        video.play();
+                        // video.play();
 
                         // video.addEventListener('play', function() {
                         //     const videoSrc = video.src || video.querySelector('source').src;
@@ -423,52 +519,96 @@ const Web = () => {
                     }
                 })();
             `}
-            startInLoadingState={true}
-            renderLoading={() => <Loading show={true} />}
-            renderError={(event) => {
-                console.log('renderError');
-                console.log(event);
-                return <ErrorPage goBack={goBack} />;
-            }}
-            cacheEnabled={true}
-            thirdPartyCookiesEnabled={true}
-            sharedCookiesEnabled={true}
-            androidLayerType="hardware"
-            mixedContentMode="always"
-            allowsFullscreenVideo={true} // 영상 전체보기 지원
-            mediaPlaybackRequiresUserAction={false}
-            allowsInlineMediaPlayback={true} // 영상 inline (ios)
-            keyboardDisplayRequiresUserAction={true} // keyboard 프로그래밍 맞춰서 (ios)
-            allowsLinkPreview={true} // 링크 미리보기 (ios)
-            pullToRefreshEnabled={true} // 당겨서 새로고침 (ios)
-            allowsProtectedMedia={true} // drm 미디어 재생 (android)
-            dataDetectorTypes="all" // 클릭 url 변환 (ios)
-            allowsBackForwardNavigationGestures={true} // 스와이프 (ios)
-            ignoreSilentHardwareSwitch={true} // 무음 스위치 활성화 (ios)
-            lackPermissionToDownloadMessage="권한이 거부되어 파일을 다운로드할 수 없습니다"
-            downloadingMessage="다운로드중.."
-            onFileDownload={handleDownload}
-            automaticallyAdjustContentInsets={false}
-            allowFileAccess={true}
-            // setSupportMultipleWindows={false}
-            allowFileAccessFromFileURLs={true}
-            allowUniversalAccessFromFileURLs={true}
-            onOpenWindow={(syntheticEvent) => {
-                const { nativeEvent } = syntheticEvent;
-                const { targetUrl } = nativeEvent;
-                console.log('Intercepted OpenWindow for', targetUrl);
-                openWindow(targetUrl, true);
-            }}
-            onContentProcessDidTerminate={(syntheticEvent) => {
-                const { nativeEvent } = syntheticEvent;
-                console.warn('Content process terminated, reloading', nativeEvent);
-                // webViewRef.current.reload();
-            }}
-        />
+                startInLoadingState={true}
+                renderLoading={() => <Loading show={true} />}
+                renderError={(event) => {
+                    console.log('renderError');
+                    console.log(event);
+                    return <ErrorPage goBack={goBack} />;
+                }}
+                cacheEnabled={true}
+                thirdPartyCookiesEnabled={true}
+                sharedCookiesEnabled={true}
+                androidLayerType="hardware"
+                mixedContentMode="always"
+                allowsFullscreenVideo={true} // 영상 전체보기 지원
+                mediaPlaybackRequiresUserAction={false}
+                allowsInlineMediaPlayback={true} // 영상 inline (ios)
+                keyboardDisplayRequiresUserAction={true} // keyboard 프로그래밍 맞춰서 (ios)
+                allowsLinkPreview={true} // 링크 미리보기 (ios)
+                pullToRefreshEnabled={true} // 당겨서 새로고침 (ios)
+                allowsProtectedMedia={true} // drm 미디어 재생 (android)
+                dataDetectorTypes="all" // 클릭 url 변환 (ios)
+                allowsBackForwardNavigationGestures={true} // 스와이프 (ios)
+                ignoreSilentHardwareSwitch={true} // 무음 스위치 활성화 (ios)
+                lackPermissionToDownloadMessage="권한이 거부되어 파일을 다운로드할 수 없습니다"
+                downloadingMessage="다운로드중.."
+                onFileDownload={handleDownload}
+                automaticallyAdjustContentInsets={false}
+                allowFileAccess={true}
+                // setSupportMultipleWindows={false}
+                allowFileAccessFromFileURLs={true}
+                allowUniversalAccessFromFileURLs={true}
+                onOpenWindow={(syntheticEvent) => {
+                    const { nativeEvent } = syntheticEvent;
+                    const { targetUrl } = nativeEvent;
+                    interceptPage(targetUrl);
+                }}
+                onContentProcessDidTerminate={(syntheticEvent) => {
+                    const { nativeEvent } = syntheticEvent;
+                    console.warn('Content process terminated, reloading', nativeEvent);
+                    // webViewRef.current.reload();
+                }}
+            />
+            <View style={[styles.footer, browser.open ? '' : commonStyles.none]}>
+                <Pressable onPress={goBack} style={styles.icon}>
+                    <BackIcon />
+                </Pressable>
+                <Pressable onPress={goForward} style={styles.icon}>
+                    <BackIcon />
+                </Pressable>
+                <Pressable onPress={reload} style={styles.icon}>
+                    <BackIcon />
+                </Pressable>
+                <Pressable onPress={scrollTop} style={styles.icon}>
+                    <BackIcon />
+                </Pressable>
+            </View>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+    },
+    header: {
+        top: 0,
+        height: 50,
+        backgroundColor: `#eeeeee`,
+        flexDirection: `row`,
+        justifyContent: `space-between`,
+        paddingHorizontal: 20,
+    },
+    headerTxt: {
+        textAlignVertical: `center`,
+        fontSize: 18,
+    },
+    icon: {
+        marginVertical: `auto`,
+    },
+    cancel: {
+        height: 18,
+        width: 18,
+    },
+    footer: {
+        bottom: 0,
+        height: 50,
+        backgroundColor: `#eeeeee`,
+        flexDirection: `row`,
+        justifyContent: `space-between`,
+        paddingHorizontal: 20,
+    },
     webview: {
         backgroundColor: `#ffffff`,
     },

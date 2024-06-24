@@ -12,7 +12,6 @@ import * as WebBrowser from 'expo-web-browser';
 import Api from 'api/Api';
 import RNFetchBlob from 'rn-fetch-blob';
 import { downloadBlobFile, downloadFs, downloadToDevice, handleDownloadRequest } from 'utils/FileUtils';
-import { startActivityAsync } from 'expo-intent-launcher';
 import SmsRetriever from 'react-native-sms-retriever';
 import * as SMS from 'expo-sms';
 // import * as Linking from 'expo-linking';
@@ -22,6 +21,11 @@ export default function Test() {
 
     const copy = async () => {
         await Clipboard.setStringAsync(test);
+    };
+
+    const getCopy = async () => {
+        const content = await Clipboard.getStringAsync();
+        console.log(content);
     };
 
     const click = async () => {
@@ -466,7 +470,7 @@ export default function Test() {
                 {test}
             </FontText> */}
 
-            <Pressable style={commonInputStyles.buttonWhite} onPress={testTest}>
+            <Pressable style={commonInputStyles.buttonWhite} onPress={getCopy}>
                 <FontText>테스트</FontText>
             </Pressable>
         </View>
