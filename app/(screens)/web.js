@@ -18,6 +18,10 @@ const { profile } = Constants.expoConfig.extra;
 
 const cancel_img = require('assets/images/close.png');
 import BackIcon from 'assets/icons/icon-back.svg';
+import RightIcon from 'assets/icons/icon-arrow-right.svg';
+import UpIcon from 'assets/icons/icon-arrow-up.svg';
+import RefreshIcon from 'assets/icons/icon-refresh.svg';
+import CancelIcon from 'assets/icons/icon-cancel.svg';
 
 /** web view */
 const Web = () => {
@@ -432,10 +436,10 @@ const Web = () => {
     ) : (
         <View style={styles.container}>
             <View style={[styles.header, browser.open ? '' : commonStyles.none]}>
-                <View></View>
+                <CancelIcon style={commonStyles.hidden} />
                 <FontText style={styles.headerTxt}>{browser.title}</FontText>
                 <Pressable onPress={goToHome} style={styles.icon}>
-                    <Image source={cancel_img} style={styles.cancel}></Image>
+                    <CancelIcon />
                 </Pressable>
             </View>
             <WebView
@@ -565,13 +569,13 @@ const Web = () => {
                     <BackIcon />
                 </Pressable>
                 <Pressable onPress={goForward} style={styles.icon}>
-                    <BackIcon />
+                    <RightIcon />
                 </Pressable>
                 <Pressable onPress={reload} style={styles.icon}>
-                    <BackIcon />
+                    <RefreshIcon />
                 </Pressable>
                 <Pressable onPress={scrollTop} style={styles.icon}>
-                    <BackIcon />
+                    <UpIcon />
                 </Pressable>
             </View>
         </View>
