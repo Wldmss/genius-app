@@ -63,6 +63,7 @@
         "production": {
             "extends": "base",
             "channel": "production",
+            "autoIncrement": true,
             "env": {
                 "EXPO_PUBLIC_PROFILE": "production"
             }

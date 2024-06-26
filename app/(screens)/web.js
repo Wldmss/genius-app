@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Alert, Linking, Platform, View, Text, Pressable, Image } from 'react-native';
+import { StyleSheet, Alert, Linking, Platform, View, Pressable } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useSelector } from 'react-redux';
 import Constants from 'expo-constants';
@@ -11,17 +11,16 @@ import * as WebBrowser from 'expo-web-browser';
 import Loading from 'components/Loading';
 import ErrorPage from '(utils)/error';
 import Camera from '(utils)/camera';
-import { handleDownloadRequest } from 'utils/FileUtils';
 import { FontText } from 'utils/TextUtils';
 
 const { profile } = Constants.expoConfig.extra;
 
-const cancel_img = require('assets/images/close.png');
 import BackIcon from 'assets/icons/icon-back.svg';
 import RightIcon from 'assets/icons/icon-arrow-right.svg';
 import UpIcon from 'assets/icons/icon-arrow-up.svg';
 import RefreshIcon from 'assets/icons/icon-refresh.svg';
 import CancelIcon from 'assets/icons/icon-cancel.svg';
+import { downloadAttachment } from 'utils/FileUtils';
 
 /** web view */
 const Web = () => {
@@ -43,6 +42,11 @@ const Web = () => {
     const [browser, setBrowser] = useState({ open: false, title: '' });
 
     let timeout = null;
+    const mainUrl = '/mobile/m/main/portalMain.do';
+    const browserList = [
+        { url: 'ktleaders.com', title: '리더스 닷컴' },
+        { url: 'ktcustomerhighway.com', title: '고객 속마음 도로' },
+    ];
 
     // webview 통신
     const handleOnMessage = (event) => {
@@ -92,7 +96,7 @@ const Web = () => {
                     if (sendData?.url && sendData?.data) {
                         const fileData = sendData.data; // JSON.parse(sendData.data);
                         const fileName = fileData.fileNm;
-                        handleDownloadRequest(`${webUrl}${sendData.url}`, fileName);
+                        downloadAttachment(`${webUrl}${sendData.url}`, fileName);
                     } else {
                         Alert.alert('올바르지 않은 경로입니다.\n다시 시도해주세요.');
                     }
@@ -240,8 +244,6 @@ const Web = () => {
     // for ios download
     const handleDownload = ({ nativeEvent }) => {
         const { downloadUrl } = nativeEvent;
-
-        if (profile == 'production') Alert.alert('다운로드 기능 준비중입니다.');
     };
 
     // Webview navigation state change
@@ -285,22 +287,18 @@ const Web = () => {
             return false;
         }
 
-        // if (url.includes('ktleaders.com')) {
-        //     if (webViewRef.current) webViewRef.current.postMessage('getSession');
-        //     // openWindow('https://ktedu.kt.com/mobile/m/main/portalMain.do', true);
-        //     return false;
-        // }
-
         return true;
     };
 
     // browser header 확인
     const checkBrowser = (url) => {
-        if (url.includes('ktleaders.com')) {
-            setBrowser({ ...browser, open: true, title: '리더스 닷컴' });
-        } else {
-            setBrowser({ ...browser, open: false, title: '' });
+        let title = null;
+
+        for (let browser of browserList) {
+            if (url.includes(browser.url)) title = browser.title;
         }
+
+        setBrowser({ ...browser, open: title != null, title: title });
     };
 
     const changeUrl = (url) => {
@@ -359,7 +357,10 @@ const Web = () => {
         console.log('Intercepted OpenWindow for', targetUrl);
 
         let title = '그룹교육';
-        if (targetUrl.includes('ktleaders.com')) title = '리더스 닷컴';
+
+        for (let browser of browserList) {
+            if (targetUrl.includes(browser.url)) title = browser.title;
+        }
 
         setBrowser({ ...browser, open: true, title: title });
 
@@ -369,7 +370,7 @@ const Web = () => {
 
     // main 으로 이동
     const goToHome = () => {
-        if (webViewRef.current) webViewRef.current.injectJavaScript(`window.location.href = '${webUrl}/main/portalMain.do';`);
+        if (webViewRef.current) webViewRef.current.injectJavaScript(`window.location.href = '${webUrl}${mainUrl}';`);
     };
 
     // 로딩
@@ -393,11 +394,11 @@ const Web = () => {
         if (isLink) {
             if (params && Object.keys(params).length > 0) {
                 if (Object.keys(params).includes('url')) {
-                    link = params.url || '/main/portalMain.do';
+                    link = params.url || mainUrl;
                 }
 
                 if (params.link == 'checkIn') {
-                    link = currentLink != null ? currentLink.replace(webUrl, '') || '/main/portalMain.do' : '';
+                    link = currentLink != null ? currentLink.replace(webUrl, '') || mainUrl : '';
                 }
             }
         }
@@ -588,15 +589,16 @@ const styles = StyleSheet.create({
     },
     header: {
         top: 0,
-        height: 50,
+        height: 45,
         backgroundColor: `#eeeeee`,
         flexDirection: `row`,
         justifyContent: `space-between`,
         paddingHorizontal: 20,
+        alignItems: `center`,
     },
     headerTxt: {
-        textAlignVertical: `center`,
         fontSize: 18,
+        lineHeight: 48,
     },
     icon: {
         marginVertical: `auto`,
@@ -607,7 +609,7 @@ const styles = StyleSheet.create({
     },
     footer: {
         bottom: 0,
-        height: 50,
+        height: 45,
         backgroundColor: `#eeeeee`,
         flexDirection: `row`,
         justifyContent: `space-between`,

@@ -11,7 +11,7 @@ import { dispatchOne } from 'utils/DispatchUtils';
 import * as WebBrowser from 'expo-web-browser';
 import Api from 'api/Api';
 import RNFetchBlob from 'rn-fetch-blob';
-import { downloadBlobFile, downloadFs, downloadToDevice, handleDownloadRequest } from 'utils/FileUtils';
+import { downloadAttachment, downloadBlobFile, downloadFs, downloadToDevice, handleDownloadRequest } from 'utils/FileUtils';
 import SmsRetriever from 'react-native-sms-retriever';
 import * as SMS from 'expo-sms';
 // import * as Linking from 'expo-linking';
@@ -321,15 +321,15 @@ export default function Test() {
     };
 
     const testTest = async () => {
-        // const filePath = 'https://ktedu.kt.com/file/download.do?fileId=100024328';
         // const filePath = `${process.env.TEST_URL}/file/download/Pipy,%20DEV-SPACE%20Nexus%20%20레포지토리%20설정.zip`;
+        // const filePath = 'https://ktedu.kt.com/file/download.do?fileId=100024328';
         // const fileName = 'Pipy, DEV-SPACE Nexus  레포지토리 설정.zip';
 
         const fileName = 'login.pptx';
         const filePath = `${process.env.TEST_URL}/file/download/${fileName}`;
         // downloadFs(filePath, fileName);
         // downloadBlobFile(filePath, fileName);
-        handleDownloadRequest(filePath, fileName);
+        downloadAttachment(filePath, fileName);
 
         const path = '/storage/emulated/0/Download/login.pptx';
         // openFile(path);
@@ -466,11 +466,11 @@ export default function Test() {
 
     return (
         <View style={styles.container}>
-            {/* <FontText style={styles.text} onPress={copy}>
+            <FontText style={styles.text} onPress={copy}>
                 {test}
-            </FontText> */}
+            </FontText>
 
-            <Pressable style={commonInputStyles.buttonWhite} onPress={getCopy}>
+            <Pressable style={commonInputStyles.buttonWhite} onPress={testTest}>
                 <FontText>테스트</FontText>
             </Pressable>
         </View>
