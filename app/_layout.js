@@ -211,8 +211,10 @@ const App = () => {
                     <SafeAreaView style={styles.container}>
                         <BackHeader />
                         <Development isDev={dev} />
-                        <Contents />
-                        {/* <Test /> */}
+                        {
+                            profile != 'development' ? <Contents /> : <Contents />
+                            // <Test />
+                        }
                         <PopModal />
                         <Snackbar />
                         <Loading show={false} />

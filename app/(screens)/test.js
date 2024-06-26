@@ -325,8 +325,10 @@ export default function Test() {
         // const filePath = 'https://ktedu.kt.com/file/download.do?fileId=100024328';
         // const fileName = 'Pipy, DEV-SPACE Nexus  레포지토리 설정.zip';
 
-        const fileName = 'login.pptx';
+        // const fileName = 'login.pptx';
+        const fileName = 'logo-png.png';
         const filePath = `${process.env.TEST_URL}/file/download/${fileName}`;
+
         // downloadFs(filePath, fileName);
         // downloadBlobFile(filePath, fileName);
         downloadAttachment(filePath, fileName);

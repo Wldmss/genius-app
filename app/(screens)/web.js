@@ -104,12 +104,6 @@ const Web = () => {
                 case 'initApp': // 앱 로그아웃
                     initApp();
                     break;
-                case 'session':
-                    console.log(sendData.data);
-                    break;
-                case 'videoPlayed':
-                    setVideo({ ...video, show: true, src: sendData.url });
-                    break;
                 case 'enterFullscreen':
                     enterFullscreen();
                     break;
@@ -212,7 +206,6 @@ const Web = () => {
             console.log(nativeEvent);
             setHide(true);
             handleLoading(false);
-            // store.dispatch(dispatchOne('SET_TAB', 'error'));
         }
     };
 
@@ -257,6 +250,7 @@ const Web = () => {
         setBackButtonEnabled(goBack);
 
         checkBrowser(url);
+        checkVideo();
     };
 
     // onShouldStartLoadWithRequest
@@ -276,12 +270,6 @@ const Web = () => {
 
     // url 확인
     const checkUrl = (url) => {
-        console.log(url);
-        if (url.includes('popupKyobo.do')) {
-            openWindow(url);
-            return false;
-        }
-
         if (url.startsWith('mailto') || url.startsWith('tel') || url.startsWith('sms')) {
             Linking.openURL(url);
             return false;
@@ -378,6 +366,11 @@ const Web = () => {
         store.dispatch(dispatchOne('SET_LOADING', load));
     };
 
+    // video 확인 (자동 재생 안하기로 함)
+    const checkVideo = () => {
+        if (webViewRef.current) webViewRef.current.postMessage('checkVideo');
+    };
+
     // 새로고침
     const reload = () => {
         if (webViewRef.current) webViewRef.current.reload();
@@ -470,14 +463,16 @@ const Web = () => {
                 /* app -> web postMessage */
                 function listener(event) {
                     const type = event.data;
+
                     switch (type) {
                         case 'clearSession': 
                             // 세션 종료
                             location.href = 'https://ktedu.kt.com/mobile/m/logout.do';
                             window.ReactNativeWebView.postMessage(JSON.stringify({ type : 'initApp' }));
                             break;
-                        case 'getSession':
-                            window.ReactNativeWebView.postMessage(JSON.stringify({ type : 'session', data : document.cookie }));
+                        case 'checkVideo':
+                            // 비디오 영상 확인
+                            play();
                             break;
                     }
                 }
@@ -493,36 +488,35 @@ const Web = () => {
                     }
                 });
 
-                /* full screen */
-                (function(event) {
-                    const video = document.getElementById('myvideo');
+                /* 영상 자동 재생 (사용 x) */
+                function play(){
+                    let video = document.getElementById('myvideo');
 
                     if (video) {
                         video.setAttribute('webkit-playsinline', ''); // ios
                         video.setAttribute('playsinline', ''); // android
 
                         // video.play();
-
-                        // video.addEventListener('play', function() {
-                        //     const videoSrc = video.src || video.querySelector('source').src;
-                        //     window.ReactNativeWebView.postMessage(JSON.stringify({ type : 'videoPlayed', url : videoSrc }));
-                        // });
-
-                        const fullscreenChangeHandler = () => {
-                            if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement) {
-                                window.ReactNativeWebView.postMessage(JSON.stringify({ type : 'enterFullscreen' }));
-                                // video.play();
-                            }else {
-                                window.ReactNativeWebView.postMessage(JSON.stringify({ type : 'exitFullscreen' }));
-                            }
-                        };
-
-                        document.addEventListener('fullscreenchange', fullscreenChangeHandler);
-                        document.addEventListener('webkitfullscreenchange', fullscreenChangeHandler);
-                        document.addEventListener('mozfullscreenchange', fullscreenChangeHandler);
-                        document.addEventListener('msfullscreenchange', fullscreenChangeHandler);
                     }
+                }
+
+                /* full screen */
+                (function(event) {
+                    // full screen (android)
+                    const fullscreenChangeHandler = () => {
+                        if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement) {
+                            // window.ReactNativeWebView.postMessage(JSON.stringify({ type : 'enterFullscreen' }));
+                        }else {
+                            // window.ReactNativeWebView.postMessage(JSON.stringify({ type : 'exitFullscreen' }));
+                        }
+                    };
+
+                    document.addEventListener('fullscreenchange', fullscreenChangeHandler);
+                    document.addEventListener('webkitfullscreenchange', fullscreenChangeHandler);
+                    document.addEventListener('mozfullscreenchange', fullscreenChangeHandler);
+                    document.addEventListener('msfullscreenchange', fullscreenChangeHandler);
                 })();
+                
             `}
                 startInLoadingState={true}
                 renderLoading={() => <Loading show={true} />}
