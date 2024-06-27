@@ -55,32 +55,33 @@ const LDAPLogin = () => {
 
     // OTP 전송
     const sendOTP = async () => {
+        const restContents = await Clipboard.getStringAsync();
+
         sendSms(value.username).then((response) => {
             if (response) {
                 setShowOtp(true);
                 setValue({ ...value, otp: '' });
-                // Alert.alert('인증번호가 전송되었습니다.');
 
                 if (otpRef.current) otpRef.current.focus();
                 setTime(maxTime);
 
-                readOTP();
+                readOTP(restContents);
             }
         });
     };
 
-    // OTP 읽기
-    const readOTP = async () => {
+    // OTP 읽기 : sms 복사 => ios : 지원, android : 미지원, 클립보드에 복사한 경우 읽어오기 가능
+    const readOTP = async (restContents) => {
         return new Promise((resolve) => {
             setTimeout(async () => {
                 const contents = await Clipboard.getStringAsync();
-                if (contents != '') {
+                if (contents != '' && restContents != contents) {
                     const otpRegex = /(\d{4,6})/;
                     const otpMatch = contents.match(otpRegex);
                     if (otpMatch) setValue({ ...value, otp: contents });
                 }
                 resolve(contents);
-            }, 3000);
+            }, 5000);
         });
     };
 

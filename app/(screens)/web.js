@@ -38,7 +38,6 @@ const Web = () => {
     const [hide, setHide] = useState(false);
     const [init, setInit] = useState(false);
     const [webUrl, setWebUrl] = useState(isDev ? process.env.DEV_SERVER_URL : process.env.WEB_URL);
-    const [video, setVideo] = useState({ show: false, src: null });
     const [browser, setBrowser] = useState({ open: false, title: '' });
 
     let timeout = null;
@@ -58,33 +57,40 @@ const Web = () => {
 
         if (sendData?.type) {
             switch (sendData.type) {
-                case 'openCamera': // QR 체크인
+                case 'openCamera':
+                    // QR 체크인
                     openCamera();
                     break;
-                case 'changePin': // PIN 변경
+                case 'changePin':
+                    // PIN 변경
                     store.dispatch(dispatchMultiple({ SET_WEBPIN: true, SET_TAB: 'pin' }));
                     break;
-                case 'changeBio': // 생체인증 변경
+                case 'changeBio':
+                    // 생체인증 변경
                     store.dispatch(dispatchMultiple({ SET_WEBBIO: true, SET_TAB: 'bio' }));
                     break;
-                case 'changeMobileLogin': // 세션 만료
+                case 'changeMobileLogin':
+                    // 세션 만료
                     endSession();
                     break;
-                case 'openUrl': // 외부 브라우저
+                case 'openUrl':
+                    // 외부 브라우저
                     if (sendData?.url) {
                         openWindow(sendData.url);
                     } else {
                         Alert.alert('올바르지 않은 경로입니다.\n다시 시도해주세요.');
                     }
                     break;
-                case 'openBrowser': // 인앱 브라우저
+                case 'openBrowser':
+                    // 인앱 브라우저
                     if (sendData?.url) {
                         openWindow(sendData.url, true);
                     } else {
                         Alert.alert('올바르지 않은 경로입니다.\n다시 시도해주세요.');
                     }
                     break;
-                case 'openApp': // 외부 앱 열기
+                case 'openApp':
+                    // 외부 앱 열기
                     if (sendData?.data) {
                         const fileData = sendData.data; // JSON.parse(sendData.data);
                         openApp(fileData);
@@ -92,7 +98,8 @@ const Web = () => {
                         Alert.alert('올바르지 않은 경로입니다.\n다시 시도해주세요.');
                     }
                     break;
-                case 'fileDown': // 파일 다운로드
+                case 'fileDown':
+                    // 파일 다운로드
                     if (sendData?.url && sendData?.data) {
                         const fileData = sendData.data; // JSON.parse(sendData.data);
                         const fileName = fileData.fileNm;
@@ -101,13 +108,16 @@ const Web = () => {
                         Alert.alert('올바르지 않은 경로입니다.\n다시 시도해주세요.');
                     }
                     break;
-                case 'initApp': // 앱 로그아웃
+                case 'initApp':
+                    // 앱 로그아웃
                     initApp();
                     break;
                 case 'enterFullscreen':
+                    // 전체화면 > landscape mode
                     enterFullscreen();
                     break;
                 case 'exitFullscreen':
+                    // 전체화면 해제 > protrait mode
                     exitFullscreen();
                     break;
                 case 'logout':
@@ -119,25 +129,17 @@ const Web = () => {
         }
     };
 
-    // 전체 화면 (상태바 숨김)
+    // 전체 화면 (가로모드)
     const enterFullscreen = () => {
-        // if (Platform.OS === 'android') {
-        //     store.dispatch({ type: 'HIDE_BAR' });
-        // }
-
         handleScreen(true);
     };
 
-    // 전체 화면 (상태바 숨김 해제)
+    // 전체 화면 (세로모드)
     const exitFullscreen = () => {
-        // if (Platform.OS === 'android') {
-        //     store.dispatch({ type: 'SHOW_BAR' });
-        // }
-
-        handleScreen();
+        handleScreen(false);
     };
 
-    // screen 가로/세로 모드 처리 (사용X)
+    // screen 가로/세로 모드 처리
     const handleScreen = async (landscape) => {
         const type = landscape ? ScreenOrientation.OrientationLock.LANDSCAPE : ScreenOrientation.OrientationLock.PORTRAIT;
         await ScreenOrientation.lockAsync(type);
@@ -234,7 +236,7 @@ const Web = () => {
         setHide(false);
     };
 
-    // for ios download
+    // for ios download : postMessage로 처리
     const handleDownload = ({ nativeEvent }) => {
         const { downloadUrl } = nativeEvent;
     };
@@ -352,7 +354,6 @@ const Web = () => {
 
         setBrowser({ ...browser, open: true, title: title });
 
-        // openWindow(targetUrl, true);
         if (webViewRef.current) webViewRef.current.injectJavaScript(`window.location.href = '${targetUrl}';`);
     };
 
@@ -361,9 +362,9 @@ const Web = () => {
         if (webViewRef.current) webViewRef.current.injectJavaScript(`window.location.href = '${webUrl}${mainUrl}';`);
     };
 
-    // 로딩
+    // 로딩 : 로딩바 삭제 요청
     const handleLoading = (load) => {
-        store.dispatch(dispatchOne('SET_LOADING', load));
+        store.dispatch(dispatchOne('SET_LOADING', false));
     };
 
     // video 확인 (자동 재생 안하기로 함)
@@ -440,7 +441,6 @@ const Web = () => {
                 ref={webViewRef}
                 style={[styles.webview, hide ? commonStyles.none : commonStyles.container]}
                 source={{
-                    // uri: `${process.env.TEST_URL}/file`,
                     uri: `${webUrl}${webLink || ''}`,
                 }}
                 textZoom={100}
@@ -505,9 +505,9 @@ const Web = () => {
                     // full screen (android)
                     const fullscreenChangeHandler = () => {
                         if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement) {
-                            // window.ReactNativeWebView.postMessage(JSON.stringify({ type : 'enterFullscreen' }));
+                            window.ReactNativeWebView.postMessage(JSON.stringify({ type : 'enterFullscreen' }));
                         }else {
-                            // window.ReactNativeWebView.postMessage(JSON.stringify({ type : 'exitFullscreen' }));
+                            window.ReactNativeWebView.postMessage(JSON.stringify({ type : 'exitFullscreen' }));
                         }
                     };
 
@@ -545,7 +545,6 @@ const Web = () => {
                 onFileDownload={handleDownload}
                 automaticallyAdjustContentInsets={false}
                 allowFileAccess={true}
-                // setSupportMultipleWindows={false}
                 allowFileAccessFromFileURLs={true}
                 allowUniversalAccessFromFileURLs={true}
                 onOpenWindow={(syntheticEvent) => {

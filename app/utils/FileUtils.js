@@ -394,10 +394,3 @@ const getUniqueFileName = async (dir, fileName) => {
 
     return uniqueName;
 };
-
-const checkUnique = async (filePath) => {
-    console.log(filePath);
-    const rnExists = await RNFS.exists(filePath);
-    const exists = await FileSystem.getInfoAsync(filePath);
-    return rnExists || exists.exists;
-};
