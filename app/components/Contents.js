@@ -4,12 +4,13 @@ import { Alert, AppState, BackHandler } from 'react-native';
 import moment from 'moment';
 import { Stack, router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { dispatchOne } from 'utils/DispatchUtils';
+import { dispatchMultiple, dispatchOne } from 'utils/DispatchUtils';
 import { checkLogin } from 'api/LoginApi';
 import { backEventHandler } from 'utils/BackUtils';
 import Web from '(screens)/web';
 import * as Updates from 'expo-updates';
 import Constants from 'expo-constants';
+import * as StorageUtils from 'utils/StorageUtils';
 
 const { profile } = Constants.expoConfig.extra;
 
@@ -66,8 +67,15 @@ const Contents = () => {
             [
                 {
                     text: '확인',
-                    onPress: () => {
-                        store.dispatch(dispatchOne('SET_TAB', 'ldap'));
+                    onPress: async () => {
+                        await StorageUtils.setDeviceData('loginKey', null);
+
+                        store.dispatch(
+                            dispatchMultiple({
+                                SET_LOGINKEY: null,
+                                SET_TAB: 'ldap',
+                            })
+                        );
                     },
                 },
             ]

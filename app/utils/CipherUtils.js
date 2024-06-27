@@ -10,7 +10,6 @@ const iv = CryptoJS.enc.Utf8.parse(ivString);
 
 // aes256 암호화
 export const encrypt = (value) => {
-    console.log(value);
     const stringValue = typeof value != 'string' ? JSON.stringify(value) : value;
 
     const encrypt = CryptoJS.AES.encrypt(stringValue, key, {
@@ -21,7 +20,6 @@ export const encrypt = (value) => {
 
     const encryptedHex = encrypt.ciphertext.toString(CryptoJS.enc.Hex);
 
-    console.log(encryptedHex);
     // Api.test.post('cipher', { encrypt: encryptedHex, key: keyString, iv: ivString }).then((result) => {
     //     console.log('decrypt :: ', result.data);
     // });

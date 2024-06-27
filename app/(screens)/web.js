@@ -50,7 +50,6 @@ const Web = () => {
     // webview 통신
     const handleOnMessage = (event) => {
         const { data } = event.nativeEvent;
-        console.log('handleOnMessage');
 
         const sendData = JSON.parse(data);
         console.log(sendData);

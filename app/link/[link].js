@@ -1,8 +1,6 @@
 import { useEffect } from 'react';
 import { useLocalSearchParams } from 'expo-router';
-import { dispatchMultiple, dispatchOne } from 'utils/DispatchUtils';
-
-import { Alert } from 'react-native';
+import { dispatchMultiple } from 'utils/DispatchUtils';
 
 /** 링크 접속 */
 export default function Link() {
@@ -30,16 +28,5 @@ export default function Link() {
                 })
             );
         }
-
-        // if (link == 'checkIn') {
-        //     store.dispatch(dispatchOne('SET_PARAMS', params));
-        // }
-
-        // if (link == 'push') {
-        //     store.dispatch(dispatchOne('SET_PARAMS', params));
-        //     // console.log(`push!!!\n${params.url}`);
-        //     // // Alert.alert(`push!!!\n${url}`);
-        //     // store.dispatch(dispatchOne('SET_WEBLINK', params.url || '/main/portalMain.do'));
-        // }
     }, [params]);
 }

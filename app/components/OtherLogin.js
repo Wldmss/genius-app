@@ -48,7 +48,8 @@ const OtherLogin = () => {
     return (
         (type.pin || type.ldap || type.bio || type.bioRegister || type.changePin) &&
         !webPinFlag &&
-        !webBioFlag && (
+        !webBioFlag &&
+        loginKey != null && (
             <View style={styles.otherContainer}>
                 <FontTextG style={styles.otherTitle}>다른 방법으로 로그인</FontTextG>
                 <View style={styles.otherLoginBox}>

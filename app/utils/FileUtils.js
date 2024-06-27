@@ -13,9 +13,6 @@ export const fileStore = (_store) => {
 /** 파일 util */
 
 export const downloadAttachment = async (url, fileName) => {
-    console.log(url);
-    console.log(fileName);
-
     // 파일명 check
     if (!fileName) {
         const fileArr = url.split('/');
@@ -86,7 +83,6 @@ export const downloadAttachment = async (url, fileName) => {
         reader.onprogress = (event) => {
             if (event.lengthComputable) {
                 const percent = Math.round((event.loaded / event.total) * 100);
-                console.log(percent);
                 store.dispatch(dispatchOne('SET_SNACK', { message: `다운로드 중... (${percent}%)`, hold: true }));
             } else {
                 store.dispatch(dispatchOne('SET_SNACK', { message: `다운로드 중...`, hold: true }));
@@ -189,9 +185,6 @@ const failDownload = () => {
 
 // 파일 다운로드 (expo-file-system) (사용 x, android 에서 chunked 이슈)
 export const handleDownloadRequest = async (url, fileName) => {
-    console.log(url);
-    console.log(fileName);
-
     // 파일명 check
     if (!fileName) {
         const fileArr = url.split('/');
@@ -205,7 +198,6 @@ export const handleDownloadRequest = async (url, fileName) => {
 
     // 다운로드 progress
     const downloadCallback = (downloadProgress) => {
-        console.log(downloadProgress);
         const percentage = Math.max(downloadProgress.totalBytesWritten / downloadProgress.totalBytesExpectedToWrite, 0) * 90;
         // store.dispatch(dispatchOne('SET_SNACK', { message: `다운로드 중... (${Math.round(percentage)}%)`, hold: true }));
         store.dispatch(dispatchOne('SET_SNACK', { message: `다운로드 중...`, hold: true }));
@@ -321,9 +313,6 @@ export const downloadBlobFile = (url, fileName) => {
 
 // react-native-fs (사용 x)
 export const downloadFs = async (url, fileName) => {
-    console.log(url);
-    console.log(fileName);
-
     if (!fileName) {
         const fileArr = url.split('/');
         fileName = fileArr[fileArr.length - 1];
