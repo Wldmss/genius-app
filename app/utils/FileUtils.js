@@ -13,6 +13,9 @@ export const fileStore = (_store) => {
 /** 파일 util */
 
 export const downloadAttachment = async (url, fileName) => {
+    console.log(url);
+    console.log(fileName);
+
     // 파일명 check
     if (!fileName) {
         const fileArr = url.split('/');
@@ -53,6 +56,7 @@ export const downloadAttachment = async (url, fileName) => {
             },
         });
 
+        console.log(response);
         if (!response.ok) {
             failDownload();
             return;
@@ -106,8 +110,6 @@ const downloadAndroid = async (uri, fileName) => {
         const result = await FileSystem.getInfoAsync(uri);
 
         if (result.exists) {
-            const isZipFile = uri.match(/\.zip$/i);
-
             const dir = RNFS.DownloadDirectoryPath; // android 저장경로
             const uniqueFileName = await getUniqueFileName(dir, fileName);
             const filePath = `${dir}/${uniqueFileName}`;
@@ -130,22 +132,7 @@ const downloadAndroid = async (uri, fileName) => {
             }
 
             finishDownload();
-
-            // 파일 열기
-            new Promise((resolve) => setTimeout(resolve, 500)).then(async () => {
-                await FileSystem.getContentUriAsync(uri).then(async (cUri) => {
-                    let launcherParams = {
-                        data: cUri,
-                        flags: 1,
-                    };
-
-                    if (isZipFile) {
-                        launcherParams['type'] = 'application/zip';
-                    }
-
-                    await startActivityAsync('android.intent.action.VIEW', launcherParams);
-                });
-            });
+            openAndroid(uri);
         } else {
             failDownload();
         }
@@ -153,6 +140,26 @@ const downloadAndroid = async (uri, fileName) => {
         failDownload();
         console.error(error);
     }
+};
+
+// android 파일 열기
+const openAndroid = (uri) => {
+    const isZipFile = uri.match(/\.zip$/i);
+
+    new Promise((resolve) => setTimeout(resolve, 500)).then(async () => {
+        await FileSystem.getContentUriAsync(uri).then(async (cUri) => {
+            let launcherParams = {
+                data: cUri,
+                flags: 1,
+            };
+
+            if (isZipFile) {
+                launcherParams['type'] = 'application/zip';
+            }
+
+            await startActivityAsync('android.intent.action.VIEW', launcherParams);
+        });
+    });
 };
 
 // ios 파일 열기 : ios 는 expo-file-system 만으로도 단말에 저장됨
@@ -198,9 +205,10 @@ export const handleDownloadRequest = async (url, fileName) => {
 
     // 다운로드 progress
     const downloadCallback = (downloadProgress) => {
-        const percentage = Math.max(downloadProgress.totalBytesWritten / downloadProgress.totalBytesExpectedToWrite, 0) * 90;
-        // store.dispatch(dispatchOne('SET_SNACK', { message: `다운로드 중... (${Math.round(percentage)}%)`, hold: true }));
-        store.dispatch(dispatchOne('SET_SNACK', { message: `다운로드 중...`, hold: true }));
+        const percentage = Math.max(downloadProgress.totalBytesWritten / downloadProgress.totalBytesExpectedToWrite, 0) * 100;
+        console.log(percentage);
+        store.dispatch(dispatchOne('SET_SNACK', { message: `다운로드 중... (${Math.round(percentage)}%)`, hold: true }));
+        // store.dispatch(dispatchOne('SET_SNACK', { message: `다운로드 중...`, hold: true }));
     };
 
     try {
@@ -228,8 +236,10 @@ export const handleDownloadRequest = async (url, fileName) => {
             .downloadAsync()
             .then((result) => {
                 if (result.status == 200) {
+                    console.log(result);
                     if (Platform.OS == 'android') {
-                        downloadAndroid(result.uri, fileName);
+                        openAndroid(result.uri);
+                        // downloadAndroid(result.uri, fileName);
                     } else {
                         const contentType = result.headers['Content-Type'] || result.headers['content-type'];
                         const mimeType = contentType != null ? contentType.split(';')[0] : null;

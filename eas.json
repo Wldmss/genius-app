@@ -9,7 +9,8 @@
                 "EXPO_PUBLIC_NAME": "KT 그룹교육",
                 "EXPO_PUBLIC_API_URL": "/",
                 "EXPO_PUBLIC_TEST_API_URL": "/api/v1/",
-                "EXPO_PUBLIC_PUSH_COLOR": "#FF4F55"
+                "EXPO_PUBLIC_PUSH_COLOR": "#FF4F55",
+                "EXPO_PUBLIC_TEST_TOKEN": "91352089&2024-01-01"
             },
             "android": {
                 "image": "latest",

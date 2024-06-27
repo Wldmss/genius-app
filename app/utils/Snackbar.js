@@ -1,60 +1,102 @@
-import React, { useEffect } from 'react';
-import { Image, StyleSheet, View } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Image, StyleSheet, Animated, Easing, Pressable } from 'react-native';
 import { useSelector } from 'react-redux';
-import { Snackbar as Snack } from 'react-native-paper';
 import { dispatchOne } from './DispatchUtils';
 import { FontText } from './TextUtils';
 
 const app_icon = require('assets/icons/app-icon.png');
 
+/** 하단 snackbar */
 const Snackbar = () => {
     const snack = useSelector((state) => state.commonReducer.snack);
+    const slideAnim = useRef(new Animated.Value(100)).current;
+    const fadeAnim = useRef(new Animated.Value(0)).current;
 
     const onDismissSnackBar = () => {
         store.dispatch(dispatchOne('SET_SNACK', null));
     };
 
+    const showSnack = () => {
+        Animated.parallel([
+            Animated.timing(slideAnim, {
+                toValue: 0,
+                duration: 300,
+                easing: Easing.out(Easing.ease),
+                useNativeDriver: true,
+            }),
+            Animated.timing(fadeAnim, {
+                toValue: 1,
+                duration: 300,
+                useNativeDriver: true,
+            }),
+        ]).start();
+    };
+
+    const hideSnack = () => {
+        Animated.parallel([
+            Animated.timing(slideAnim, {
+                toValue: 100,
+                duration: 300,
+                easing: Easing.in(Easing.ease),
+                useNativeDriver: true,
+            }),
+            Animated.timing(fadeAnim, {
+                toValue: 0,
+                duration: 300,
+                useNativeDriver: true,
+            }),
+        ]).start(onDismissSnackBar);
+    };
+
     useEffect(() => {
         if (snack != null) {
-            if (!snack.hold) {
-                const timeout = setTimeout(() => {
-                    onDismissSnackBar();
-                }, snack.time || 2000);
+            showSnack();
 
-                return () => clearTimeout(timeout);
+            if (!snack.hold) {
+                new Promise((resolve) => setTimeout(resolve, 3000)).then(async () => {
+                    hideSnack();
+                });
             }
         } else {
-            onDismissSnackBar();
+            hideSnack();
         }
     }, [snack]);
 
     return (
-        <Snack
-            visible={snack != null}
-            style={styles.snackbar}
-            // wrapperStyle={{ top: Constants.statusBarHeight }}
-            onDismiss={onDismissSnackBar}
-            onTouchEnd={onDismissSnackBar}>
-            <View style={styles.textBox}>
-                <Image source={app_icon} style={styles.logo} />
-                <FontText style={styles.text}>{snack != null ? snack.message : ''}</FontText>
-            </View>
-        </Snack>
+        <Animated.View
+            style={[
+                styles.snackbar,
+                {
+                    transform: [{ translateY: slideAnim }],
+                    opacity: fadeAnim,
+                },
+            ]}>
+            <Pressable onPress={hideSnack}>
+                <View style={styles.textBox}>
+                    <Image source={app_icon} style={styles.logo} />
+                    <FontText style={styles.text}>{snack != null ? snack.message : ''}</FontText>
+                </View>
+            </Pressable>
+        </Animated.View>
     );
 };
 
 const styles = StyleSheet.create({
     snackbar: {
-        borderRadius: 25,
-        // backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        marginBottom: 25,
-        paddingVertical: 0,
-        paddingHorizontal: 0,
+        position: 'absolute',
+        bottom: 25,
+        alignItems: `center`,
+        width: `100%`,
     },
     textBox: {
-        flexDirection: `row`,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
         gap: 10,
-        justifyContent: `center`,
+        borderRadius: 25,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        paddingVertical: 10,
+        paddingHorizontal: 30,
     },
     logo: {
         width: 23,
@@ -62,7 +104,7 @@ const styles = StyleSheet.create({
         borderRadius: 30,
     },
     text: {
-        color: `white`,
+        color: 'white',
     },
 });
 

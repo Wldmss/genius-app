@@ -68,7 +68,7 @@ const Contents = () => {
                 {
                     text: '확인',
                     onPress: async () => {
-                        await StorageUtils.setDeviceData('loginKey', null);
+                        if (!noUserFlag) await StorageUtils.setDeviceData('loginKey', null); // loginKey 오류인 경우 리셋
 
                         store.dispatch(
                             dispatchMultiple({

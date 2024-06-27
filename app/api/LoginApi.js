@@ -88,7 +88,7 @@ export const login = async (username, password) => {
                     return true;
                 } else {
                     handleRtnMsg(rtnMsg);
-                    store.dispatch(dispatchLogin(false));
+                    // store.dispatch(dispatchLogin(false));
 
                     return false;
                 }
@@ -121,7 +121,7 @@ export const checkLogin = async (checkFlag) => {
 
     if (checkIsTest()) {
         if (!checkFlag) {
-            store.dispatch(dispatchMultiple({ SET_WEBLINK: testUrl, SET_TOKEN: '91352089&2024-01-01', SET_LOADING: false }));
+            store.dispatch(dispatchMultiple({ SET_WEBLINK: testUrl, SET_TOKEN: process.env.TEST_TOKEN, SET_LOADING: false }));
         }
 
         return true;
@@ -131,9 +131,9 @@ export const checkLogin = async (checkFlag) => {
             osType: osType,
             appVersion: appVersion,
             loginKey: loginKey,
+            // 'f646e5KhRWef8ufnBNdl8-:APA91bGMI-Xjg2rJfkb_jW0Fs0xwZEpsqrAyS5rXhG1lNpll_YnnlZg27DUxXPvyb5MaVLtNFNsCn48MlcUO38rVtAMVcEA-aa8NiKlbUC2E0RhiXsPLtXnheOG_ojOFuiInl59JQ38k',
         };
 
-        console.log(sendData);
         /** 로그인 (loginKey)
          * @method POST
          * @param { deviceToken: push token, osType: os 종류, appVersion: 앱 버전, loginKey: 로그인 키 }
@@ -144,22 +144,19 @@ export const checkLogin = async (checkFlag) => {
             .then((response) => {
                 const { rtnSts, rtnMsg, rtnUrl } = response.data;
 
-                console.log(response.data);
-
                 if (rtnSts == 'S') {
                     store.dispatch(dispatchMultiple({ SET_WEBLINK: rtnUrl, SET_TOKEN: loginKey }));
 
                     return true;
                 } else {
-                    // TODO 계정 만료(비번 변경, 만료 등) 시
                     handleRtnMsg(rtnMsg);
-                    if (!checkFlag) store.dispatch(dispatchLogin(false));
+                    // if (!checkFlag) store.dispatch(dispatchLogin(false));
                     return false;
                 }
             })
             .catch(async (err) => {
                 Alert.alert('로그인에 실패했습니다.\n다시 시도해주세요.');
-                if (isDev) store.dispatch(dispatchMultiple({ SET_WEBLINK: testUrl, SET_TOKEN: '91352089&2024-01-01' }));
+                if (isDev) store.dispatch(dispatchMultiple({ SET_WEBLINK: testUrl, SET_TOKEN: process.env.TEST_TOKEN }));
                 return isDev;
             })
             .finally(() => {
@@ -242,7 +239,7 @@ export const checkSms = async (loginInfo) => {
 
     if (checkIsTest()) {
         store.dispatch(dispatchMultiple({ SET_WEBLINK: testUrl, SET_LOADING: false }));
-        return { status: true, token: '91352089&2024-01-01' };
+        return { status: true, token: process.env.TEST_TOKEN };
     } else {
         /** sms 인증(otp) 확인
          * @method POST
@@ -271,7 +268,7 @@ export const checkSms = async (loginInfo) => {
 
                 if (isDev) {
                     store.dispatch(dispatchOne('SET_WEBLINK', testUrl));
-                    return { status: true, token: '91352089&2024-01-01' };
+                    return { status: true, token: process.env.TEST_TOKEN };
                 }
 
                 return { status: false, token: null };

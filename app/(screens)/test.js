@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Linking, Pressable, StyleSheet, View } from 'react-native';
 import { useSelector } from 'react-redux';
 import * as Clipboard from 'expo-clipboard';
 import { FontText } from 'utils/TextUtils';
@@ -6,7 +6,7 @@ import { commonInputStyles } from 'assets/styles';
 import { useEffect } from 'react';
 import { encrypt } from 'utils/CipherUtils';
 import { dispatchOne } from 'utils/DispatchUtils';
-import { downloadAttachment } from 'utils/FileUtils';
+import { downloadAttachment, handleDownloadRequest, snackTest } from 'utils/FileUtils';
 
 export default function Test() {
     const test = useSelector((state) => state.commonReducer.test);
@@ -30,7 +30,7 @@ export default function Test() {
         //     encrypt(value);
         // }
 
-        encrypt('91352089&2024-01-01');
+        encrypt(process.env.TEST_TOKEN);
     };
 
     const testTest = async () => {
@@ -39,15 +39,28 @@ export default function Test() {
         // const fileName = 'Pipy, DEV-SPACE Nexus  레포지토리 설정.zip';
 
         // const fileName = 'login.pptx';
-        const fileName = 'logo-png.png';
-        const filePath = `${process.env.TEST_URL}/file/download/${fileName}`;
+        // const fileName = 'logo-png.png';
+        const fileName = 'test.apk';
+        // const filePath = `${process.env.TEST_URL}/file/download/${fileName}`;
+
+        const filePath = 'https://expo.dev/artifacts/eas/po2toeUgD4gEVduxWTR4Df.apk';
 
         // downloadFs(filePath, fileName);
         // downloadBlobFile(filePath, fileName);
-        downloadAttachment(filePath, fileName);
+        // downloadAttachment(filePath, fileName);
+        handleDownloadRequest(filePath, fileName);
 
         const path = '/storage/emulated/0/Download/login.pptx';
         // openFile(path);
+    };
+
+    const iPhoneTest = async () => {
+        const link =
+            'itms-services://?action=download-manifest&url=https://c7dc-211-36-151-238.ngrok-free.app/file/download/plist/manifest-test.plist';
+        const canOpen = await Linking.canOpenURL(link);
+        if (canOpen) {
+            Linking.openURL(link);
+        }
     };
 
     useEffect(() => {
@@ -56,9 +69,9 @@ export default function Test() {
 
     return (
         <View style={styles.container}>
-            <FontText style={styles.text} onPress={copy}>
+            {/* <FontText style={styles.text} onPress={copy}>
                 {test}
-            </FontText>
+            </FontText> */}
 
             <Pressable style={commonInputStyles.buttonWhite} onPress={testTest}>
                 <FontText>테스트</FontText>
