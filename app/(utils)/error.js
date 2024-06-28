@@ -1,6 +1,4 @@
-import { setDevelopment } from '(login)/_layout';
 import { commonInputStyles } from 'assets/styles';
-import { useEffect } from 'react';
 import { Image, Pressable, StyleSheet, View } from 'react-native';
 import { useSelector } from 'react-redux';
 import { FontText } from 'utils/TextUtils';
@@ -17,10 +15,6 @@ const ErrorPage = ({ goBack }) => {
             store.dispatch({ type: 'INIT_APP' });
         }
     };
-
-    useEffect(() => {
-        // if (isDev) setDevelopment();
-    }, []);
 
     return (
         <View style={styles.container}>

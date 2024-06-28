@@ -63,6 +63,20 @@ export default function Test() {
         }
     };
 
+    const servletFileTest = async () => {
+        const data = {
+            p_savefile: '',
+            p_readfile: '',
+        };
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
+    };
+
     useEffect(() => {
         store.dispatch(dispatchOne('SET_SPLASH', false));
     }, []);

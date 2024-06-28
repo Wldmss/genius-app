@@ -8,31 +8,29 @@ import { Try } from 'expo-router/build/views/Try';
 import { ErrorBoundary } from 'utils/ErrorBoundary';
 
 import Constants from 'expo-constants';
+import * as Updates from 'expo-updates';
+import * as ScreenOrientation from 'expo-screen-orientation';
 
-// import { pushStore, useNotification } from 'utils/Push';
 import { pushFcmStore, useFirebase } from 'utils/PushFcm';
 import { backStore } from 'utils/BackUtils';
+import * as StorageUtils from 'utils/StorageUtils';
+import { dispatchOne } from 'utils/DispatchUtils';
+import { alertStore } from 'utils/AlertUtils';
+import { fileStore } from 'utils/FileUtils';
+import Snackbar from 'utils/Snackbar';
 
 import PopModal from 'modal/PopModal';
 import Splash from '(utils)/splash';
-import Snackbar from 'utils/Snackbar';
+import Development from '(utils)/development';
+import BackHeader from '(utils)/back';
+
+import { apiStore } from 'api/Api';
+import { checkVersion, loginApiStore } from 'api/LoginApi';
+import { apiFetchStore } from 'api/ApiFetch';
 
 import Contents from 'components/Contents';
-import { apiStore } from 'api/Api';
-
-import * as Updates from 'expo-updates';
-import { checkVersion, loginApiStore } from 'api/LoginApi';
-
-import * as StorageUtils from 'utils/StorageUtils';
-import { dispatchOne } from 'utils/DispatchUtils';
-import { apiFetchStore } from 'api/ApiFetch';
-import Development from '(utils)/development';
-import Test from '(screens)/test';
-import BackHeader from '(utils)/back';
-import { alertStore } from 'utils/AlertUtils';
-import { fileStore } from 'utils/FileUtils';
-import * as ScreenOrientation from 'expo-screen-orientation';
 import Loading from 'components/Loading';
+import Test from '(screens)/test';
 
 const splashTime = 2000;
 const { profile, isTest } = Constants.expoConfig.extra;
@@ -46,7 +44,6 @@ const App = () => {
     const [prepareLoaded, setPrepareLoaded] = useState(false);
     const [loaded, setLoaded] = useState(false);
     const [isUpdate, setIsUpdate] = useState(false);
-    const [updateProgress, setUpdateProgress] = useState(0);
     const [version, setVersion] = useState(Constants.expoConfig.version);
     const [dev, setDev] = useState(false);
     const [ready, setReady] = useState(false);
@@ -62,10 +59,6 @@ const App = () => {
 
     TextInput.defaultProps = TextInput.defaultProps || {};
     TextInput.defaultProps.allowFontScaling = false;
-
-    // expo-notification (사용 x)
-    // useNotification();
-    // pushStore(store);
 
     // firebase-messaging
     useFirebase();
@@ -206,7 +199,7 @@ const App = () => {
     return (
         <Try catch={ErrorBoundary}>
             <Provider store={store}>
-                <Splash isUpdate={isUpdate} updateProgress={updateProgress} version={version} />
+                <Splash isUpdate={isUpdate} version={version} />
                 {ready && loaded && fontsLoaded && (
                     <SafeAreaView style={styles.container}>
                         <BackHeader />

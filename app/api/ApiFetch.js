@@ -13,7 +13,7 @@ export const apiFetchStore = (_store) => {
     server_url = isDev ? process.env.DEV_SERVER_URL : process.env.SERVER_URL;
 };
 
-/** api fetch : 웹 통신 오류로 사용 x */
+/** api fetch */
 
 export async function postForm(url, body) {
     const response = await fetch(`${server_url}/${url}`, {

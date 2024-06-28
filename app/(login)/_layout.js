@@ -58,7 +58,6 @@ const test = async () => {
             },
         ]);
     }
-    // await WebBrowser.openBrowserAsync('https://www.naver.com');
 };
 
 /** 로그인 페이지 (공통) */

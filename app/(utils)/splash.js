@@ -1,12 +1,11 @@
 import { View, StyleSheet, Text } from 'react-native';
 import Constants from 'expo-constants';
-import { GeniusLogo } from 'utils/ImageUtils';
 import ProgressBar from 'utils/ProgressBar';
 import { useSelector } from 'react-redux';
 import { GeniusLottie } from 'utils/Lottie';
 
 /** splash screen */
-const Splash = ({ isUpdate, updateProgress, version }) => {
+const Splash = ({ isUpdate, version }) => {
     const splash = useSelector((state) => state.commonReducer.splash);
 
     return (
@@ -14,8 +13,7 @@ const Splash = ({ isUpdate, updateProgress, version }) => {
             <View style={styles.container}>
                 <View style={styles.center}>
                     <GeniusLottie />
-                    {/* <GeniusLogo style={styles.logoBox} /> */}
-                    {isUpdate && <ProgressBar percent={updateProgress} version={version} />}
+                    {isUpdate && <ProgressBar />}
                     <Text style={styles.versionText}>{version ? `v.${version}` : ''}</Text>
                 </View>
             </View>

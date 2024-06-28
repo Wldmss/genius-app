@@ -7,7 +7,7 @@ import { dispatchMultiple, dispatchOne } from './DispatchUtils';
 import { FontText } from './TextUtils';
 // import * as TaskManager from 'expo-task-manager';
 
-// react-native-firebase/messaging
+/** react-native-firebase/messaging */
 
 export const pushFcmStore = (_store) => {
     store = _store;

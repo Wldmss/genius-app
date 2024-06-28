@@ -1,6 +1,5 @@
 import { Alert } from 'react-native';
-import axios from 'axios';
-import { dispatchLogin, dispatchMultiple, dispatchOne } from 'utils/DispatchUtils';
+import { dispatchMultiple, dispatchOne } from 'utils/DispatchUtils';
 import Api from './Api';
 import { getMessagingToken } from 'utils/PushFcm';
 import { encrypt } from 'utils/CipherUtils';
