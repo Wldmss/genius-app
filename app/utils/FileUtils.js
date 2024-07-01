@@ -12,25 +12,87 @@ export const fileStore = (_store) => {
 
 /** 파일 util */
 
-export const downloadAttachment = async (url, fileName) => {
+export const downloadAttachment = async (url, fileData) => {
+    let fileName = fileData.fileNm || null;
+    let sendData = null;
+
+    if (Object.keys(fileData).includes('p_savefile') && Object.keys(fileData).includes('p_readfile')) {
+        sendData = {
+            p_savefile: fileData['p_savefile'],
+            p_readfile: fileData['p_readfile'],
+        };
+    }
+
     console.log(url);
     console.log(fileName);
-
-    // 파일명 check
-    if (!fileName) {
-        const fileArr = url.split('/');
-        fileName = fileArr.length > 0 ? fileArr[fileArr.length - 1] : null;
-
-        if (fileName == null) {
-            Alert.alert('올바르지 않은 경로입니다.\n다시 시도해주세요.');
-            return;
-        }
-    }
+    console.log(sendData);
 
     const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
 
     try {
         store.dispatch(dispatchOne('SET_SNACK', { message: '다운로드를 시작합니다.', hold: true }));
+
+        // 파일 다운로드
+        const response =
+            sendData == null
+                ? await fetch(url, {
+                      headers: {
+                          'User-Agent': userAgent,
+                      },
+                  })
+                : await fetch(url, { method: 'POST', body: JSON.stringify(sendData) });
+
+        if (!response.ok) {
+            failDownload();
+            return;
+        } else {
+            store.dispatch(dispatchOne('SET_SNACK', { message: `다운로드 중...`, hold: true }));
+
+            if (!fileName) {
+                const contentDisposition = response.headers.get('Content-Disposition') || response.headers.get('content-disposition');
+
+                if (contentDisposition && contentDisposition.includes('attachment')) {
+                    const filenameMatch = contentDisposition.match(/filename\*=([^;]+)|filename="([^"]+)"/);
+
+                    if (filenameMatch) {
+                        if (filenameMatch[1]) {
+                            // Decode RFC 5987 encoded filename
+                            const encodedFilename = filenameMatch[1].split("''")[1];
+                            fileName = decodeURIComponent(encodedFilename);
+                        } else if (filenameMatch[2]) {
+                            // Handle regular filename with double quotes
+                            fileName = filenameMatch[2];
+                        }
+                    }
+                }
+
+                if (!fileName) {
+                    // Fallback to using the URL to infer the filename
+                    fileName = url.split('/').pop().split('?')[0];
+                }
+
+                if (fileName == null) {
+                    // const extension = fileName.split('.').pop();
+                    Alert.alert('올바르지 않은 경로입니다.\n다시 시도해주세요.');
+                    return;
+                }
+
+                // 파일명 check
+                // if (!fileName) {
+                //     const fileArr = url.split('/');
+                //     fileName = fileArr.length > 0 ? fileArr[fileArr.length - 1] : null;
+
+                //     if (fileName == null) {
+                //         Alert.alert('올바르지 않은 경로입니다.\n다시 시도해주세요.');
+                //         return;
+                //     }
+                // }
+            }
+
+            console.log(`Filename: ${fileName}`);
+        }
+
+        const blob = await response.blob();
 
         const dir = FileSystem.documentDirectory;
         let downloadPath = `${dir}/${fileName}`;
@@ -46,23 +108,6 @@ export const downloadAttachment = async (url, fileName) => {
             const uniqueFileName = await getUniqueFileName(dir, fileName);
             downloadPath = `${dir}/${uniqueFileName}`;
         }
-
-        store.dispatch(dispatchOne('SET_SNACK', { message: `다운로드 중...`, hold: true }));
-
-        // 파일 다운로드
-        const response = await fetch(url, {
-            headers: {
-                'User-Agent': userAgent,
-            },
-        });
-
-        console.log(response);
-        if (!response.ok) {
-            failDownload();
-            return;
-        }
-
-        const blob = await response.blob();
 
         const reader = new FileReader();
 
@@ -190,7 +235,7 @@ const failDownload = () => {
     store.dispatch(dispatchOne('SET_SNACK', { message: '다운로드에 실패하였습니다.', hold: false }));
 };
 
-// 파일 다운로드 (expo-file-system) (사용 x, android 에서 chunked 이슈)
+// 파일 다운로드 (expo-file-system) (사용 x, android 에서 chunked 이슈) :: apk 업데이트 사용 가능
 export const handleDownloadRequest = async (url, fileName) => {
     // 파일명 check
     if (!fileName) {

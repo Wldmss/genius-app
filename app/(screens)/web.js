@@ -101,8 +101,7 @@ const Web = () => {
                     // 파일 다운로드
                     if (sendData?.url && sendData?.data) {
                         const fileData = sendData.data; // JSON.parse(sendData.data);
-                        const fileName = fileData.fileNm;
-                        downloadAttachment(`${webUrl}${sendData.url}`, fileName);
+                        downloadAttachment(`${webUrl}${sendData.url}`, fileData);
                     } else {
                         Alert.alert('올바르지 않은 경로입니다.\n다시 시도해주세요.');
                     }

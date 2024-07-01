@@ -35,20 +35,23 @@ export default function Test() {
 
     const testTest = async () => {
         // const filePath = `${process.env.TEST_URL}/file/download/Pipy,%20DEV-SPACE%20Nexus%20%20레포지토리%20설정.zip`;
-        // const filePath = 'https://ktedu.kt.com/file/download.do?fileId=100024328';
-        // const fileName = 'Pipy, DEV-SPACE Nexus  레포지토리 설정.zip';
+        const filePath = 'https://ktedu.kt.com/file/download.do?fileId=100024328';
+        const fileName = 'Pipy, DEV-SPACE Nexus  레포지토리 설정.zip';
 
         // const fileName = 'login.pptx';
         // const fileName = 'logo-png.png';
-        const fileName = 'test.apk';
+        // const fileName = 'test.apk';
         // const filePath = `${process.env.TEST_URL}/file/download/${fileName}`;
 
-        const filePath = 'https://expo.dev/artifacts/eas/po2toeUgD4gEVduxWTR4Df.apk';
+        // const filePath = 'https://expo.dev/artifacts/eas/po2toeUgD4gEVduxWTR4Df.apk';
+
+        const data = {
+            fileNm: fileName,
+        };
 
         // downloadFs(filePath, fileName);
         // downloadBlobFile(filePath, fileName);
-        // downloadAttachment(filePath, fileName);
-        handleDownloadRequest(filePath, fileName);
+        downloadAttachment(filePath, data);
 
         const path = '/storage/emulated/0/Download/login.pptx';
         // openFile(path);
@@ -65,16 +68,22 @@ export default function Test() {
 
     const servletFileTest = async () => {
         const data = {
-            p_savefile: '',
-            p_readfile: '',
+            p_savefile: 'd9325bdc-5eaf-44d8-b91d-e8424a9a81e0.pdf',
+            p_readfile: '2024 지니어스2.0-사용자 매뉴얼.pdf',
         };
-        const response = await fetch(url, {
+        await fetch('https://', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(data),
-        });
+        })
+            .then((response) => {
+                console.log(response);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
     };
 
     useEffect(() => {
