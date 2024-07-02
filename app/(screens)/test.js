@@ -6,7 +6,9 @@ import { commonInputStyles } from 'assets/styles';
 import { useEffect } from 'react';
 import { encrypt } from 'utils/CipherUtils';
 import { dispatchOne } from 'utils/DispatchUtils';
-import { downloadAttachment, handleDownloadRequest, snackTest } from 'utils/FileUtils';
+import { downloadAttachment, downloadBlobFile, handleDownloadRequest, snackTest } from 'utils/FileUtils';
+import Api from 'api/Api';
+import { okAlert } from 'utils/AlertUtils';
 
 export default function Test() {
     const test = useSelector((state) => state.commonReducer.test);
@@ -35,8 +37,8 @@ export default function Test() {
 
     const testTest = async () => {
         // const filePath = `${process.env.TEST_URL}/file/download/Pipy,%20DEV-SPACE%20Nexus%20%20레포지토리%20설정.zip`;
-        const filePath = 'https://ktedu.kt.com/file/download.do?fileId=100024328';
-        const fileName = 'Pipy, DEV-SPACE Nexus  레포지토리 설정.zip';
+        // const filePath = 'https://ktedu.kt.com/file/download.do?fileId=100024328';
+        // const fileName = 'Pipy, DEV-SPACE Nexus  레포지토리 설정.zip';
 
         // const fileName = 'login.pptx';
         // const fileName = 'logo-png.png';
@@ -45,16 +47,54 @@ export default function Test() {
 
         // const filePath = 'https://expo.dev/artifacts/eas/po2toeUgD4gEVduxWTR4Df.apk';
 
+        // const data = {
+        //     fileNm: fileName,
+        // };
+
+        const filePath = 'https://dev.ktedu.kt.com:2443/file/download2.do';
         const data = {
-            fileNm: fileName,
+            fileNm: '2021002.jpg',
+            p_savefile: '377ec773-1901-4e87-855f-fb85cb56dbea.jpg',
+            p_readfile: '2021002.jpg',
+            dir: '/boards/notice',
+            dwType: 'textbook',
         };
 
+        // const filePath = 'https://ktedu.kt.com/servlet/controller.library.DownloadServlet';
+        // const data = {
+        //     fileNm: '2024 지니어스2.0-사용자 매뉴얼.pdf',
+        //     p_savefile: 'd9325bdc-5eaf-44d8-b91d-e8424a9a81e0.pdf',
+        //     p_realfile: '2024 지니어스2.0-사용자 매뉴얼.pdf',
+        //     dir: '/boards/notice',
+        //     dwType: 'textbook',
+        // };
+
         // downloadFs(filePath, fileName);
-        // downloadBlobFile(filePath, fileName);
-        downloadAttachment(filePath, data);
+        // downloadBlobFile(filePath, data);
+        // downloadAttachment(filePath, data);
+        // handleDownloadRequest(filePath, data);
 
         const path = '/storage/emulated/0/Download/login.pptx';
         // openFile(path);
+
+        // await Api.mobile
+        //     .post('file/download2.do', data)
+        //     .then((response) => {
+        //         okAlert(JSON.stringify(response));
+        //         console.log(response);
+        //     })
+        //     .catch((err) => {
+        //         console.log(err);
+        //     });
+
+        await Api.test
+            .get('api/v1/check')
+            .then((res) => {
+                console.log(res);
+            })
+            .catch((err) => {
+                // console.log(err);
+            });
     };
 
     const iPhoneTest = async () => {

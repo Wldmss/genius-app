@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Alert } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import * as Updates from 'expo-updates';
+import { okAlert } from 'utils/AlertUtils';
 
 let server_url = process.env.SERVER_URL;
 let isDev = false;
@@ -17,12 +18,12 @@ export const apiStore = (_store) => {
 /** ktedu */
 
 const AxiosMobile = axios.create({
-    timeout: 3000,
+    timeout: 5000,
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     maxRedirects: 0,
 });
 
-AxiosMobile.defaults.timeout = 3000;
+AxiosMobile.defaults.timeout = 5000;
 AxiosMobile.defaults.headers.post['Content-Type'] = 'application/json';
 
 // 요청 intercept
@@ -122,9 +123,11 @@ function error(err) {
     let requestConfig = err.config;
     let baseURL = requestConfig.baseURL;
     let url = requestConfig.url;
+    let message = null;
 
-    if (!requestConfig.errCheck) {
-        let message = null;
+    if (err.code == 'ERR_NETWORK') {
+        message = '서버 점검 중입니다.\n잠시 후 다시 시도해주세요.';
+    } else if (!requestConfig.errCheck) {
         switch (status) {
             case 400:
                 message = '입력 값을 확인해주세요.';
@@ -136,13 +139,13 @@ function error(err) {
                 message = `잘못된 경로입니다.`;
                 break;
             case 406:
-                message = '시스템 오류입니다. 관리자에게 문의해주세요.';
+                message = '시스템 오류입니다.\n관리자에게 문의해주세요.';
                 break;
             case 503:
                 message = '서버 재시작 중입니다.';
                 break;
             default:
-                message = '알 수 없는 오류입니다.';
+                message = '다시 시도해주세요.';
                 break;
         }
     }
@@ -151,7 +154,7 @@ function error(err) {
         if (isDev) {
             catchError(`${baseURL}${url}`, `[${status}] ${message}`);
         } else {
-            Alert.alert(message);
+            okAlert(message);
         }
     }
 

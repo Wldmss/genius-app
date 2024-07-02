@@ -5,6 +5,8 @@ import * as RNFS from 'react-native-fs';
 import { dispatchOne } from './DispatchUtils';
 import { startActivityAsync } from 'expo-intent-launcher';
 import { isAvailableAsync, shareAsync } from 'expo-sharing';
+import { okAlert } from './AlertUtils';
+import Api from 'api/Api';
 
 export const fileStore = (_store) => {
     store = _store;
@@ -12,20 +14,28 @@ export const fileStore = (_store) => {
 
 /** 파일 util */
 
+const downloadAxios = async (fileData) => {
+    let fileName = '2021002.jpg';
+
+    await Api.mobile
+        .post('servlet/controller.library.DownloadServlet', fileData, { responseType: 'blob' })
+        .then(async (response) => {
+            // okAlert(JSON.stringify(response.data));
+            console.log(response);
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+};
+
+// 파일 다운로드 (fetch)
 export const downloadAttachment = async (url, fileData) => {
     let fileName = fileData.fileNm || null;
     let sendData = null;
 
     if (Object.keys(fileData).includes('p_savefile') && Object.keys(fileData).includes('p_readfile')) {
-        sendData = {
-            p_savefile: fileData['p_savefile'],
-            p_readfile: fileData['p_readfile'],
-        };
+        sendData = fileData;
     }
-
-    console.log(url);
-    console.log(fileName);
-    console.log(sendData);
 
     const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
 
@@ -40,12 +50,23 @@ export const downloadAttachment = async (url, fileData) => {
                           'User-Agent': userAgent,
                       },
                   })
-                : await fetch(url, { method: 'POST', body: JSON.stringify(sendData) });
+                : await fetch(url, {
+                      method: 'POST',
+                      headers: {
+                          'User-Agent': userAgent,
+                          'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify(sendData),
+                  });
 
         if (!response.ok) {
+            console.log(response);
+            // okAlert(JSON.stringify(response));
             failDownload();
             return;
         } else {
+            console.log(response);
+            // okAlert(JSON.stringify(response));
             store.dispatch(dispatchOne('SET_SNACK', { message: `다운로드 중...`, hold: true }));
 
             if (!fileName) {
@@ -177,7 +198,7 @@ const downloadAndroid = async (uri, fileName) => {
             }
 
             finishDownload();
-            openAndroid(uri);
+            // openAndroid(uri);
         } else {
             failDownload();
         }
@@ -236,7 +257,9 @@ const failDownload = () => {
 };
 
 // 파일 다운로드 (expo-file-system) (사용 x, android 에서 chunked 이슈) :: apk 업데이트 사용 가능
-export const handleDownloadRequest = async (url, fileName) => {
+export const handleDownloadRequest = async (url, fileData) => {
+    let fileName = fileData['fileNm'] || null;
+
     // 파일명 check
     if (!fileName) {
         const fileArr = url.split('/');
@@ -274,14 +297,25 @@ export const handleDownloadRequest = async (url, fileName) => {
             downloadPath = `${dir}/${uniqueFileName}`;
         }
 
-        const downloadResumable = FileSystem.createDownloadResumable(url, downloadPath, {}, downloadCallback);
+        const downloadResumable = FileSystem.createDownloadResumable(
+            url,
+            downloadPath,
+            {
+                headers: {
+                    method: 'POST',
+                },
+                body: JSON.stringify(fileData),
+            },
+            downloadCallback
+        );
 
         // 파일 다운로드
         await downloadResumable
             .downloadAsync()
             .then((result) => {
+                console.log(result);
                 if (result.status == 200) {
-                    console.log(result);
+                    // okAlert(JSON.stringify(result));
                     if (Platform.OS == 'android') {
                         openAndroid(result.uri);
                         // downloadAndroid(result.uri, fileName);
@@ -318,7 +352,9 @@ export const downloadFileMulti = (url, fileName) => {
 };
 
 // rn-fetch-blob :: android 14 이상 RECEIVER_EXPORTED or RECEIVER_NOT_EXPORTED 설정 해줘야 함 (사용 x)
-export const downloadBlobFile = (url, fileName) => {
+export const downloadBlobFile = (url, fileData) => {
+    let fileName = fileData.fileNm || null;
+
     if (!fileName) {
         const fileArr = url.split('/');
         fileName = fileArr[fileArr.length - 1];
@@ -348,11 +384,12 @@ export const downloadBlobFile = (url, fileName) => {
 
     store.dispatch(dispatchOne('SET_SNACK', { message: '다운로드를 시작합니다.', hold: true }));
     RNFetchBlob.config(configfb)
-        .fetch('GET', url, {})
+        .fetch('POST', url, fileData)
         .progress((res) => {
             store.dispatch(dispatchOne('SET_SNACK', { message: `다운로드 중...`, hold: true }));
         })
         .then((res) => {
+            console.log(res);
             if (Platform.OS === 'ios') {
                 RNFetchBlob.fs.writeFile(configfb.path, res.data, 'base64');
                 RNFetchBlob.ios.previewDocument(configfb.path);
@@ -367,7 +404,9 @@ export const downloadBlobFile = (url, fileName) => {
 };
 
 // react-native-fs (사용 x)
-export const downloadFs = async (url, fileName) => {
+export const downloadFs = async (url, fileData) => {
+    let fileName = fileData.fileNm || null;
+
     if (!fileName) {
         const fileArr = url.split('/');
         fileName = fileArr[fileArr.length - 1];
@@ -397,6 +436,8 @@ export const downloadFs = async (url, fileName) => {
                 store.dispatch(dispatchOne('SET_SNACK', { message: `다운로드 중... (${Math.round(percentage)}%)`, hold: true }));
             },
         }).promise;
+
+        console.log(downloadResult);
 
         if (downloadResult.statusCode === 200) {
             store.dispatch(dispatchOne('SET_SNACK', { message: `다운로드가 완료되었습니다.\n${filePath}`, hold: false, time: 5000 }));

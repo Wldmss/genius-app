@@ -439,6 +439,7 @@ const Web = () => {
                 ref={webViewRef}
                 style={[styles.webview, hide ? commonStyles.none : commonStyles.container]}
                 source={{
+                    // uri: 'https://dev.ktedu.kt.com:2443/mobile/m/education/courseContents.do?classId=200015955_2024_0001_01',
                     uri: `${webUrl}${webLink || ''}`,
                 }}
                 textZoom={100}
